@@ -14,11 +14,12 @@ export class NinjaBase implements NinjaApi {
         return paymails[0]
     }
     
+    async setPaymail(paymail: string): Promise<void> {
+        throw new Error("Obsolete API.");
+    }
 
     
-    setPaymail(paymail: string): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
+
     getAvatar(): Promise<{ name: string; photoURL: string; }> {
         throw new Error("Method not implemented.");
     }

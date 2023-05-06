@@ -1,5 +1,5 @@
 import { Chain } from "@cwi/base"
-import { CertificateApi, GetTotalOfAmountsOptions, GetTransactionsOptions, TransactionApi, TransactionStatusApi } from "@cwi/dojo-base"
+import { CertificateApi, DojoApi, GetTotalOfAmountsOptions, GetTransactionsOptions, TransactionApi, TransactionStatusApi } from "@cwi/dojo-base"
 import { EnvelopeApi } from "@cwi/external-services"
 
 export interface AvatarApi {
@@ -292,6 +292,11 @@ export interface TransactionOutputDescriptorApi {
  */
 export interface NinjaApi {
 
+    /**
+     * The dojo user wallet database supporting this api.
+     */
+    dojo: DojoApi
+    
     /**
      * Returns the current Paymail handle
      */

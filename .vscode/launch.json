@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch start",
+            "program": "${workspaceFolder}/src/start.ts",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "cwd": "${workspaceFolder}",
+            "outFiles": [
+                "${workspaceFolder}/out/src/**/*.js",
+                "${workspaceFolder}/../cwi-base/out/src/**/*.js",
+                "${workspaceFolder}/../cwi-external-services/out/src/**/*.js",
+                "${workspaceFolder}/../dojo-base/out/src/**/*.js",
+                "${workspaceFolder}/../dojo-core/out/src/**/*.js",
+                "${workspaceFolder}/../dojo-knex/out/src/**/*.js",
+                "${workspaceFolder}/../dojo-express/out/src/**/*.js",
+            ],
+            "sourceMaps": true
+        }
+    ]
+}

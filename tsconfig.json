@@ -24,6 +24,7 @@
      { "path": "../dojo-base"},
      { "path": "../dojo-core"},
      { "path": "../dojo-knex"},
+     { "path": "../dojo-express"},
      { "path": "../cwi-external-services"}
   ]
 }
