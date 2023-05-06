@@ -19,5 +19,11 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "jest.config.ts"],
-  "references": [ { "path": "../cwi-base" } ]
+  "references": [
+     { "path": "../cwi-base" },
+     { "path": "../dojo-base"},
+     { "path": "../dojo-core"},
+     { "path": "../dojo-knex"},
+     { "path": "../cwi-external-services"}
+  ]
 }

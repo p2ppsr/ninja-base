@@ -324,7 +324,7 @@ export interface NinjaApi {
      * Returns a set of all transactions that need to be signed and submitted, or canceled
      * @returns {Promise<GetPendingTransactionsTx[]>} The array of pending transactions
      */
-    getPendingTransactions(referenceNumber?: string): Promise<TransactionApi[]>
+    getPendingTransactions(referenceNumber?: string): Promise<GetPendingTransactionsTxApi[]>
 
     /**
      * Returns the sum of transaction amounts belonging to authenticated user,
@@ -369,7 +369,7 @@ export interface NinjaApi {
         recipient: string,
         autoProcess?: boolean, // default true
         feePerKb?: number // default 110
-    ): Promise<void>
+    ): Promise<GetTxWithOutputsResultApi>
 
     /**
      * Creates a new transaction that must be processed with `processTransaction`
@@ -442,7 +442,7 @@ export interface NinjaApi {
         labels,
         note,
         recipient
-    }): Promise<void>
+    }): Promise<TransactionTemplateApi>
 
     /**
      * Returns which BSV network we are using (mainnet or testnet)
@@ -452,9 +452,7 @@ export interface NinjaApi {
     getNetwork(format?: 'default'): string
 
     /**
-     * Returns which BSV network we are using (mainnet or testnet)
-     * @param {String} format for the returned string. Either with or without a 'net' suffix.
-     * @returns {String} The current BSV network formatted as requested.
+     * Returns which BSV network we are using (main or test)
      */
     getChain(): Chain
 
@@ -500,7 +498,7 @@ export interface NinjaApi {
         type,
         limit = 25,
         offset = 0
-    }): Promise<void>
+    }): Promise<TransactionOutputDescriptorApi>
 
     /**
      * Use this endpoint to update the status of a transaction. This is useful for flagging incomplete transactions as aborted or reverting a completed transaction back into a pending status if it never got confirmed. Setting the status to "completed" or "waitingForSenderToSend" will make any selected UTXOs unavailable for spending, while any other status value will free up the UTXOs for use in other transactions.
@@ -549,7 +547,7 @@ export interface NinjaApi {
         referenceNumber,
         description,
         amount
-    }): Promise<void>
+    }): Promise<boolean>
 
     /**
      * Use this endpoint to update the status of one of your outputs, given as the TXID of a transaction and the vout (output index) in that transaction. This is useful for flagging transaction outpoints as spent if they were inadvertantly broadcasted or used without properly submitting them to the Dojo, or to undo the spending of an output if it was never actually spent.
