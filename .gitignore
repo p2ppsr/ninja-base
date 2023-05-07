@@ -1,7 +1,8 @@
 node_modules
 out
 .DS_Store
-test/data
+test/data/
+data/
 tsconfig.tsbuildinfo
 *.tgz
 .env

@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Chain } from "@cwi/base";
-import { GetTransactionsOptions, TransactionApi, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, DojoApi } from "@cwi/dojo-base";
+import { Chain, ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER } from "@cwi/base";
+import { GetTransactionsOptions, TransactionApi, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, DojoApi, DojoUserStateApi } from "@cwi/dojo-base";
 import { EnvelopeApi } from "@cwi/external-services";
-import { GetPendingTransactionsTxApi, GetTxWithOutputsResultApi, NinjaApi, TransactionOutputDescriptorApi, TransactionTemplateApi } from "../Api/NinjaApi";
+import { GetPendingTransactionsTxApi, GetTxWithOutputsResultApi, TransactionOutputDescriptorApi, TransactionTemplateApi } from "../Api/NinjaEntitiesApi";
+import { NinjaApi } from "../Api/NinjaApi";
 
 export class NinjaBase implements NinjaApi {
+    chain?: Chain
+
     constructor(public dojo: DojoApi) {
     }
 
@@ -18,7 +21,45 @@ export class NinjaBase implements NinjaApi {
         throw new Error("Obsolete API.");
     }
 
-    
+    async getChain(): Promise<Chain> {
+        if (!this.chain) {
+            this.chain = await this.dojo.getChain()
+        }
+        return this.chain
+    }
+
+    async getNetwork(format?: 'default' | 'nonet'): Promise<string> {
+        let chain: string = await this.getChain()
+        if (format !== 'nonet') chain += 'net'
+        return chain
+    }
+
+    async findCertificates(certifiers?: string[] | object, types?: string[]): Promise<CertificateApi[]> {
+        if (certifiers && !Array.isArray(certifiers) && certifiers['certifiers']) {
+            // Named Object Parameter Destructuring pattern conversion...
+            types = certifiers['types']
+            if (types && !Array.isArray(types)) types = Object.keys(types)
+            certifiers = certifiers['certifiers']
+        }
+        if (certifiers && !Array.isArray(certifiers)) throw new ERR_INVALID_PARAMETER('certifiers')
+        if (types && !Array.isArray(types)) throw new ERR_INVALID_PARAMETER('types')
+        const certs = await this.dojo.findCertificates(certifiers, types)
+        return certs
+    }
+
+    async saveCertificate(certificate: CertificateApi | object): Promise<void> {
+        if (certificate && typeof certificate === 'object' && certificate['certificate']) {
+            certificate = certificate['certificate']
+        }
+        const cert = certificate as CertificateApi
+        await this.dojo.saveCertificate(cert)
+    }
+
+    async getTotalValue(basket?: string): Promise<number> {
+        const total = await this.dojo.getTotalOfUnspentOutputs(basket || 'default')
+        if (total === undefined) throw new ERR_MISSING_PARAMETER('basket', 'existing basket name')
+        return total
+    }
 
     getAvatar(): Promise<{ name: string; photoURL: string; }> {
         throw new Error("Method not implemented.");
@@ -38,19 +79,10 @@ export class NinjaBase implements NinjaApi {
     getNetOfAmounts(options?: GetTotalOfAmountsOptions | undefined): Promise<number> {
         throw new Error("Method not implemented.");
     }
-    getTotalValue(): Promise<number> {
-        throw new Error("Method not implemented.");
-    }
     getTransactionWithOutputs(outputs: { script: string; satoshis: number; }[], labels: string[], inputs: Record<string, EnvelopeApi>, note: string, recipient: string, autoProcess?: boolean | undefined, feePerKb?: number | undefined): Promise<GetTxWithOutputsResultApi> {
         throw new Error("Method not implemented.");
     }
     createTransaction({ inputs, inputSelection, outputs, outputGeneration, fee, labels, note, recipient }: { inputs: any; inputSelection: any; outputs: any; outputGeneration: any; fee: any; labels: any; note: any; recipient: any; }): Promise<TransactionTemplateApi> {
-        throw new Error("Method not implemented.");
-    }
-    getNetwork(format?: "default" | undefined): string {
-        throw new Error("Method not implemented.");
-    }
-    getChain(): Chain {
         throw new Error("Method not implemented.");
     }
     processTransaction({ inputs, submittedTransaction, reference, outputMap }: { inputs: any; submittedTransaction: any; reference: any; outputMap: any; }): Promise<void> {
@@ -72,12 +104,6 @@ export class NinjaBase implements NinjaApi {
         throw new Error("Method not implemented.");
     }
     updateOutpointStatus(txid: string, vout: number, spendable: boolean): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    saveCertificate(certificate: CertificateApi): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    findCertificates(certifiers?: string[] | undefined, types?: string[] | undefined): Promise<CertificateApi[]> {
         throw new Error("Method not implemented.");
     }
 

@@ -49,7 +49,7 @@ describe('NinjaStagingDojoReadOnly', () => {
         return options
     }
 
-    const deleteLocalTestSqliteFile = true
+    const deleteLocalTestSqliteFile = false
 
     beforeAll(async () => {
         await fsp.mkdir(dataFolder, { recursive: true })
