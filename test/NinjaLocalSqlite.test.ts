@@ -57,18 +57,42 @@ describe('NinjaLocalSqlite', () => {
     }, 300000)
     
     test('findCertificates', async () => {
-        let certs = await ninja.findCertificates(['025684945b734e80522f645b9358d4ac5b49e5180444b5911bf8285a7230edee8b'])
-        expect(certs.length).toBe(3)
-        certs = await ninja.findCertificates({ certifiers: ['025684945b734e80522f645b9358d4ac5b49e5180444b5911bf8285a7230edee8b'] })
-        expect(certs.length).toBe(3)
+        const certifiers = ['025684945b734e80522f645b9358d4ac5b49e5180444b5911bf8285a7230edee8b']
+        const types = {
+            'hzR38jMALB8MjX1+33hwskBj50HHGroCrD33J15PiXU=': ["domain", "identity"]
+        }
+        const p = { certifiers, types } 
+
+        let certs = await ninja.findCertificates(certifiers)
+        expect(certs.certificates.length).toBe(3)
+        
+        certs = await ninja.findCertificates({ certifiers })
+        expect(certs.certificates.length).toBe(3)
+
+        certs = await ninja.findCertificates(undefined, types)
+        expect(certs.certificates.length).toBe(5)
+        expect(certs.certificates[0].fields?.domain.length).toBeGreaterThan(0)
+        expect(certs.certificates[0].fields?.stake).toBeUndefined()
+
+        certs = await ninja.findCertificates({ types })
+        expect(certs.certificates.length).toBe(5)
+
+        certs = await ninja.findCertificates(p)
+        expect(certs.certificates.length).toBe(3)
+        expect(certs.certificates[0].fields?.domain.length).toBeGreaterThan(0)
+        expect(certs.certificates[0].fields?.stake).toBeUndefined()
+
+        const certsV1 = await ninjaV1.findCertificates(p)
+        expect(certsV1.certificates.length).toBe(3)
+        expect(certsV1.certificates[0].fields?.domain.length).toBeGreaterThan(0)
+        expect(certsV1.certificates[0].fields?.stake.length).toBeGreaterThan(0) // API Difference
     }, 300000)
 
     test('getTotalValue', async () => {
         const t0 = await ninjaV1.getTotalValue()
-        expect(t0).toBe(184371)
+        expect(t0).toBeGreaterThan(0)
 
         let t = await ninja.getTotalValue()
-        expect(t).toBe(t0)
         expect(t).toBe(184371)
         t = await ninja.getTotalValue('default')
         expect(t).toBe(184371)

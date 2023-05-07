@@ -44,7 +44,7 @@ export interface NinjaApi {
      * @param {Object} obj.types The certificate types to filter certificates by
      * @returns {Promise<Object>} A success object with `status: "success"` and any found certificates
      */
-    findCertificates(certifiers?: string[] | object, types?: string[]): Promise<CertificateApi[]>
+    findCertificates(certifiers?: string[] | object, types?: Record<string, string[]>): Promise<{ status: 'success', certificates: CertificateApi[] }>
 
     /**
      * Use this endpoint to store an incoming certificate.

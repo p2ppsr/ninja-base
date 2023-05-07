@@ -34,17 +34,16 @@ export class NinjaBase implements NinjaApi {
         return chain
     }
 
-    async findCertificates(certifiers?: string[] | object, types?: string[]): Promise<CertificateApi[]> {
-        if (certifiers && !Array.isArray(certifiers) && certifiers['certifiers']) {
+    async findCertificates(certifiers?: string[] | object, types?: Record<string, string[]>): Promise<{ status: 'success', certificates: CertificateApi[] }> {
+        if (certifiers && !Array.isArray(certifiers)) {
             // Named Object Parameter Destructuring pattern conversion...
             types = certifiers['types']
-            if (types && !Array.isArray(types)) types = Object.keys(types)
             certifiers = certifiers['certifiers']
         }
         if (certifiers && !Array.isArray(certifiers)) throw new ERR_INVALID_PARAMETER('certifiers')
-        if (types && !Array.isArray(types)) throw new ERR_INVALID_PARAMETER('types')
+        if (types && typeof types !== 'object') throw new ERR_INVALID_PARAMETER('types')
         const certs = await this.dojo.findCertificates(certifiers, types)
-        return certs
+        return { status: 'success', certificates: certs }
     }
 
     async saveCertificate(certificate: CertificateApi | object): Promise<void> {
