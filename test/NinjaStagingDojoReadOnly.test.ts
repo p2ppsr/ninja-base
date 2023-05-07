@@ -18,7 +18,8 @@ describe('NinjaStagingDojoReadOnly', () => {
     let ninja: NinjaApi
     const mainDojoConnection = process.env.MAIN_DOJO_CONNECTION || ''
     const testDojoConnection = process.env.TEST_DOJO_CONNECTION || ''
-    const identityKey = '02a1c81d78f5c404fd34c418525ba4a3b52be35328c30e67234bfcf30eb8a064d8'
+    // const identityKey = '02bc91718b3572462a471de6193f357b6e85ee0f8636cb87db456cb1590f913bea' // Ty
+    const identityKey = '02a1c81d78f5c404fd34c418525ba4a3b52be35328c30e67234bfcf30eb8a064d8' // Tone
     const chain: Chain = 'test'
     const dataFolder = './test/data/'
     const localTestSqlite = `${dataFolder}${chain}Net_dojo.sqlite`
@@ -48,7 +49,7 @@ describe('NinjaStagingDojoReadOnly', () => {
         return options
     }
 
-    const deleteLocalTestSqliteFile = false
+    const deleteLocalTestSqliteFile = true
 
     beforeAll(async () => {
         await fsp.mkdir(dataFolder, { recursive: true })
