@@ -7,7 +7,7 @@ import { NinjaBase } from '../src/Base/NinjaBase'
 import { default as NinjaV1 } from 'utxoninja'
 
 import { promises as fsp } from 'fs'
-import { GetTotalOfAmountsOptions } from '@cwi/dojo-base'
+import { GetTotalOfAmountsOptions, GetTransactionsOptions } from '@cwi/dojo-base'
 
 describe('NinjaLocalSqlite', () => {
     let ninja: NinjaApi
@@ -134,5 +134,32 @@ describe('NinjaLocalSqlite', () => {
         const t2 = await ninja.getAvatar()
         expect(t2.name).toBe(t0.name)
         expect(t2.photoURL).toBe(t0.photoURL)
+    }, 300000)
+
+    test('getTransactions', async () => {
+        const a0 = await ninjaV1.getTransactions()
+        expect(a0.totalTransactions).toBeGreaterThan(0)
+        expect(a0.transactions.length).toBe(25)
+
+        const b0 = await ninja.getTransactions()
+        expect(b0.totalTransactions).toBeGreaterThan(0)
+        expect(b0.transactions.length).toBe(25)
+        
+        const options: GetTransactionsOptions = {
+           limit: 30,
+           offset: 0,
+           referenceNumber: '3f7bdbdd00b96d'
+        }
+
+        const a1 = await ninjaV1.getTransactions(options)
+        expect(a1.totalTransactions).toBe(1)
+        expect(a1.transactions.length).toBe(1)
+        expect(a1.transactions[0].referenceNumber).toBe('3f7bdbdd00b96d')
+
+        const b1 = await ninja.getTransactions(options)
+        expect(b1.totalTransactions).toBe(1)
+        expect(b1.transactions.length).toBe(1)
+        expect(b1.transactions[0].referenceNumber).toBe('3f7bdbdd00b96d')
+
     }, 300000)
 })

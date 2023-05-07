@@ -1,7 +1,7 @@
 import { Chain } from "@cwi/base"
 import { AvatarApi, CertificateApi, DojoApi, GetTotalOfAmountsOptions, GetTransactionsOptions, TransactionApi, TransactionStatusApi } from "@cwi/dojo-base"
 import { EnvelopeApi } from "@cwi/external-services"
-import { GetPendingTransactionsTxApi, GetTxWithOutputsResultApi, TransactionOutputDescriptorApi, TransactionTemplateApi } from "./NinjaEntitiesApi"
+import { GetPendingTransactionsTxApi, GetTransactionsResultApi, GetTxWithOutputsResultApi, TransactionOutputDescriptorApi, TransactionTemplateApi } from "./NinjaEntitiesApi"
 
 /**
  * A client for creating, signing, and delivering Bitcoin transactions
@@ -88,16 +88,19 @@ export interface NinjaApi {
      */
     setAvatar(name: string, photoURL: string): Promise<void>
 
-    
-
-
-
-
-    
     /**
      * Returns a set of transactions that match the criteria
+     *
+     * limit defaults to 25
+     * offset defaults to 0
      */
-    getTransactions(options?: GetTransactionsOptions): Promise<{ txs: TransactionApi[], total: number }>
+    getTransactions(options?: GetTransactionsOptions): Promise<GetTransactionsResultApi>
+    
+
+
+
+
+    
 
     /**
      * Returns a set of all transactions that need to be signed and submitted, or canceled
@@ -256,7 +259,17 @@ export interface NinjaApi {
      * @param {String} obj.status The new status of the transaction
      * @returns {Promise<Object>} A success object with `status: "success"`
      */
-    updateTransactionStatus(reference: string, status: TransactionStatusApi): Promise<void>
+    updateTransactionStatus(params: { reference: string, status : TransactionStatusApi }): Promise<void>
+
+    /**
+     * Use this endpoint to update the status of one of your outputs, given as the TXID of a transaction and the vout (output index) in that transaction. This is useful for flagging transaction outpoints as spent if they were inadvertantly broadcasted or used without properly submitting them to the Dojo, or to undo the spending of an output if it was never actually spent.
+     * @param {Object} obj All parameters are given in an object
+     * @param {String} obj.txid The TXID of the transaction that created the output
+     * @param {Number} obj.vout The index of the output in the transaction
+     * @param {Boolean} obj.spendable The true spendability status of this outpoint
+     * @returns {Promise<Object>} A success object with `status: "success"`
+     */
+    updateOutpointStatus(params: { txid: string, vout: number, spendable: boolean }): Promise<void>
 
     /**
      * This endpoint allows a recipient to submit a transactions that was directly given to them by a sender. Saves the inputs and key derivation information, allowing the UTXOs to be redeemed in the future. Sets the transaction to completed and marks the outputs as spendable.
@@ -297,15 +310,5 @@ export interface NinjaApi {
         description,
         amount
     }): Promise<boolean>
-
-    /**
-     * Use this endpoint to update the status of one of your outputs, given as the TXID of a transaction and the vout (output index) in that transaction. This is useful for flagging transaction outpoints as spent if they were inadvertantly broadcasted or used without properly submitting them to the Dojo, or to undo the spending of an output if it was never actually spent.
-     * @param {Object} obj All parameters are given in an object
-     * @param {String} obj.txid The TXID of the transaction that created the output
-     * @param {Number} obj.vout The index of the output in the transaction
-     * @param {Boolean} obj.spendable The true spendability status of this outpoint
-     * @returns {Promise<Object>} A success object with `status: "success"`
-     */
-    updateOutpointStatus(txid: string, vout: number, spendable: boolean): Promise<void>
 
 }

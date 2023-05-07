@@ -3,7 +3,7 @@
 import { Chain, ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER } from "@cwi/base";
 import { GetTransactionsOptions, TransactionApi, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, DojoApi, DojoUserStateApi, AvatarApi } from "@cwi/dojo-base";
 import { EnvelopeApi } from "@cwi/external-services";
-import { GetPendingTransactionsTxApi, GetTxWithOutputsResultApi, TransactionOutputDescriptorApi, TransactionTemplateApi } from "../Api/NinjaEntitiesApi";
+import { GetPendingTransactionsTxApi, GetTransactionsResultApi, GetTxWithOutputsResultApi, TransactionOutputDescriptorApi, TransactionTemplateApi } from "../Api/NinjaEntitiesApi";
 import { NinjaApi } from "../Api/NinjaApi";
 
 export class NinjaBase implements NinjaApi {
@@ -82,12 +82,39 @@ export class NinjaBase implements NinjaApi {
         await this.dojo.setAvatar({ name, photoURL })
     }
 
-
-
-
-    getTransactions(options?: GetTransactionsOptions | undefined): Promise<{ txs: TransactionApi[]; total: number; }> {
-        throw new Error("Method not implemented.");
+    async updateTransactionStatus(params: { reference: string, status: TransactionStatusApi }): Promise<void> {
+        await this.dojo.updateTransactionStatus(params.reference, params.status)
     }
+    
+    async updateOutpointStatus(params: { txid: string, vout: number, spendable: boolean }): Promise<void> {
+        await this.dojo.updateOutpointStatus(params.txid, params.vout, params.spendable)
+    }
+
+    async getTransactions(options?: GetTransactionsOptions): Promise<GetTransactionsResultApi> {
+        options ||= {}
+        options.addLabels = true
+        options.limit ||= 25
+        options.offset ||= 0
+        options.order ||= 'descending'
+        const r = await this.dojo.getTransactions(options)
+        const rr: GetTransactionsResultApi = {
+            totalTransactions: r.total,
+            transactions: r.txs.map(t => ({
+                txid: t.txid,
+                amount: t.amount,
+                status: t.status,
+                senderPaymail: t.senderPaymail,
+                recipientPaymail: t.recipientPaymail,
+                isOutgoing: t.isOutgoing,
+                note: t.note,
+                created_at: t.created_at || '',
+                referenceNumber: t.referenceNumber,
+                labels: t.labels || []
+            }))
+        }
+        return rr
+    }
+
     getPendingTransactions(referenceNumber?: string | undefined): Promise<GetPendingTransactionsTxApi[]> {
         throw new Error("Method not implemented.");
     }
@@ -106,16 +133,10 @@ export class NinjaBase implements NinjaApi {
     getTransactionOutputs({ basket, tracked, includeEnvelope, spendable, type, limit, offset }: { basket: any; tracked: any; includeEnvelope?: boolean | undefined; spendable: any; type: any; limit?: number | undefined; offset?: number | undefined; }): Promise<TransactionOutputDescriptorApi> {
         throw new Error("Method not implemented.");
     }
-    updateTransactionStatus(reference: string, status: TransactionStatusApi): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
     submitDirectTransaction({ protocol, transaction, senderIdentityKey, note, amount, labels, derivationPrefix }: { protocol: any; transaction: any; senderIdentityKey: any; note: any; amount: any; labels: any; derivationPrefix: any; }): Promise<string> {
         throw new Error("Method not implemented.");
     }
     verifyIncomingTransaction({ senderPaymail, senderIdentityKey, referenceNumber, description, amount }: { senderPaymail: any; senderIdentityKey: any; referenceNumber: any; description: any; amount: any; }): Promise<boolean> {
-        throw new Error("Method not implemented.");
-    }
-    updateOutpointStatus(txid: string, vout: number, spendable: boolean): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
