@@ -7,6 +7,7 @@ import { NinjaBase } from '../src/Base/NinjaBase'
 import { default as NinjaV1 } from 'utxoninja'
 
 import { promises as fsp } from 'fs'
+import { GetTotalOfAmountsOptions } from '@cwi/dojo-base'
 
 describe('NinjaLocalSqlite', () => {
     let ninja: NinjaApi
@@ -100,5 +101,38 @@ describe('NinjaLocalSqlite', () => {
         expect(t).toBe(1000)
 
 
+    }, 300000)
+
+    test('getTotalOfAmounts', async () => {
+        const o: GetTotalOfAmountsOptions = { direction: 'incoming' }
+        const t0 = await ninjaV1.getTotalOfAmounts(o)
+        expect(t0.total).toBeGreaterThan(0)
+
+        const t = await ninja.getTotalOfAmounts(o)
+        expect(t).toBeGreaterThan(0)
+
+        const n = await ninja.getNetOfAmounts()
+        expect(n).toBeGreaterThan(0)
+
+    }, 300000)
+
+    test('getAvatar', async () => {
+        const t0 = await ninjaV1.getAvatar()
+        expect(t0.name).toBe('TonesNotes')
+        expect(t0.photoURL).toBe('uhrp:XUTED5T3rtNwrnh4m2inPALayvJ8CJP1v2pcMnDWKwYs5WdZbi3M')
+        
+        const t = await ninja.getAvatar()
+        expect(t.name).toBe(t0.name)
+        expect(t.photoURL).toBe(t0.photoURL)
+
+        await ninja.setAvatar('bob', 'foobar')
+        const t1 = await ninja.getAvatar()
+        expect(t1.name).toBe('bob')
+        expect(t1.photoURL).toBe('foobar')
+
+        await ninja.setAvatar(t0.name, t0.photoURL)
+        const t2 = await ninja.getAvatar()
+        expect(t2.name).toBe(t0.name)
+        expect(t2.photoURL).toBe(t0.photoURL)
     }, 300000)
 })

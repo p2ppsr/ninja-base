@@ -1,14 +1,3 @@
-export interface AvatarApi {
-    /**
-     * The name of the user
-     */
-    name: string
-    /**
-     * An HTTPS or UHRP URL to a photo of the user
-     */
-    photoURL: string
-}
-
 export interface GetTransactionsTxApi {
     /**
      * The transaction ID

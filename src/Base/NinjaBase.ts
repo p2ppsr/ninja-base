@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Chain, ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER } from "@cwi/base";
-import { GetTransactionsOptions, TransactionApi, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, DojoApi, DojoUserStateApi } from "@cwi/dojo-base";
+import { GetTransactionsOptions, TransactionApi, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, DojoApi, DojoUserStateApi, AvatarApi } from "@cwi/dojo-base";
 import { EnvelopeApi } from "@cwi/external-services";
 import { GetPendingTransactionsTxApi, GetTxWithOutputsResultApi, TransactionOutputDescriptorApi, TransactionTemplateApi } from "../Api/NinjaEntitiesApi";
 import { NinjaApi } from "../Api/NinjaApi";
@@ -60,22 +60,35 @@ export class NinjaBase implements NinjaApi {
         return total
     }
 
-    getAvatar(): Promise<{ name: string; photoURL: string; }> {
-        throw new Error("Method not implemented.");
+    async getTotalOfAmounts(options: GetTotalOfAmountsOptions): Promise<number> {
+        const direction = options.direction
+        if (!direction) throw new ERR_MISSING_PARAMETER('direction', 'incoming or outgoing')
+        delete options.direction
+        const total = await this.dojo.getTotalOfAmounts(direction, options)
+        return total
     }
-    setAvatar(name: string, photoURL: string): Promise<void> {
-        throw new Error("Method not implemented.");
+
+    async getNetOfAmounts(options?: GetTotalOfAmountsOptions | undefined): Promise<number> {
+        const total = await this.dojo.getNetOfAmounts(options)
+        return total
     }
+    
+    async getAvatar(): Promise<AvatarApi> {
+        const a = await this.dojo.getAvatar()
+        return a
+    }
+
+    async setAvatar(name: string, photoURL: string): Promise<void> {
+        await this.dojo.setAvatar({ name, photoURL })
+    }
+
+
+
+
     getTransactions(options?: GetTransactionsOptions | undefined): Promise<{ txs: TransactionApi[]; total: number; }> {
         throw new Error("Method not implemented.");
     }
     getPendingTransactions(referenceNumber?: string | undefined): Promise<GetPendingTransactionsTxApi[]> {
-        throw new Error("Method not implemented.");
-    }
-    getTotalOfAmounts(direction: "incoming" | "outgoing", options?: GetTotalOfAmountsOptions | undefined): Promise<number> {
-        throw new Error("Method not implemented.");
-    }
-    getNetOfAmounts(options?: GetTotalOfAmountsOptions | undefined): Promise<number> {
         throw new Error("Method not implemented.");
     }
     getTransactionWithOutputs(outputs: { script: string; satoshis: number; }[], labels: string[], inputs: Record<string, EnvelopeApi>, note: string, recipient: string, autoProcess?: boolean | undefined, feePerKb?: number | undefined): Promise<GetTxWithOutputsResultApi> {

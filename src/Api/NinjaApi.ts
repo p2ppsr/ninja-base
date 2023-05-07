@@ -1,5 +1,5 @@
 import { Chain } from "@cwi/base"
-import { CertificateApi, DojoApi, GetTotalOfAmountsOptions, GetTransactionsOptions, TransactionApi, TransactionStatusApi } from "@cwi/dojo-base"
+import { AvatarApi, CertificateApi, DojoApi, GetTotalOfAmountsOptions, GetTransactionsOptions, TransactionApi, TransactionStatusApi } from "@cwi/dojo-base"
 import { EnvelopeApi } from "@cwi/external-services"
 import { GetPendingTransactionsTxApi, GetTxWithOutputsResultApi, TransactionOutputDescriptorApi, TransactionTemplateApi } from "./NinjaEntitiesApi"
 
@@ -63,10 +63,10 @@ export interface NinjaApi {
 
     /**
      * Returns the sum of transaction amounts belonging to authenticated user,
-     * matching the given direction,
-     * and optionally matching conditions in `options`.
+     * matching the given direction (which must be specified),
+     * and optionally matching remaining conditions in `options`.
      */
-    getTotalOfAmounts(direction: 'incoming' | 'outgoing', options?: GetTotalOfAmountsOptions): Promise<number>
+    getTotalOfAmounts(options: GetTotalOfAmountsOptions): Promise<number>
 
     /**
      * Returns the net sum of transaction amounts belonging to authenticated user,
@@ -75,17 +75,11 @@ export interface NinjaApi {
      */
     getNetOfAmounts(options?: GetTotalOfAmountsOptions): Promise<number>
 
-    
-
-
-
-
-
     /**
      * Returns the name and photo URL of the user
      * @returns {Promise<Avatar>} The avatar of the user
      */
-    getAvatar(): Promise<{ name: string, photoURL: string }>
+    getAvatar(): Promise<AvatarApi>
 
     /**
      * Sets a new name and photo URL
@@ -94,6 +88,12 @@ export interface NinjaApi {
      */
     setAvatar(name: string, photoURL: string): Promise<void>
 
+    
+
+
+
+
+    
     /**
      * Returns a set of transactions that match the criteria
      */
