@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Chain, ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER } from "@cwi/base";
+import { Chain, ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER } from "cwi-base";
 import { GetTransactionsOptions, TransactionApi, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, DojoApi, DojoUserStateApi, AvatarApi } from "@cwi/dojo-base";
-import { EnvelopeApi } from "@cwi/external-services";
+import { EnvelopeApi } from "cwi-external-services";
 import { GetPendingTransactionsTxApi, GetTransactionsResultApi, GetTxWithOutputsResultApi, TransactionOutputDescriptorApi, TransactionTemplateApi } from "../Api/NinjaEntitiesApi";
 import { NinjaApi } from "../Api/NinjaApi";
 
@@ -91,11 +91,6 @@ export class NinjaBase implements NinjaApi {
     }
 
     async getTransactions(options?: GetTransactionsOptions): Promise<GetTransactionsResultApi> {
-        options ||= {}
-        options.addLabels = true
-        options.limit ||= 25
-        options.offset ||= 0
-        options.order ||= 'descending'
         const r = await this.dojo.getTransactions(options)
         const rr: GetTransactionsResultApi = {
             totalTransactions: r.total,

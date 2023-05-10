@@ -1,6 +1,6 @@
-import { Chain } from "@cwi/base"
+import { Chain } from "cwi-base"
 import { AvatarApi, CertificateApi, DojoApi, GetTotalOfAmountsOptions, GetTransactionsOptions, TransactionApi, TransactionStatusApi } from "@cwi/dojo-base"
-import { EnvelopeApi } from "@cwi/external-services"
+import { EnvelopeApi } from "cwi-external-services"
 import { GetPendingTransactionsTxApi, GetTransactionsResultApi, GetTxWithOutputsResultApi, TransactionOutputDescriptorApi, TransactionTemplateApi } from "./NinjaEntitiesApi"
 
 /**
@@ -91,11 +91,32 @@ export interface NinjaApi {
     /**
      * Returns a set of transactions that match the criteria
      *
-     * limit defaults to 25
-     * offset defaults to 0
+     * @param options limit defaults to 25, offset defaults to 0, addLabels defaults to true, order defaults to 'descending'
      */
     getTransactions(options?: GetTransactionsOptions): Promise<GetTransactionsResultApi>
     
+    /**
+     * Returns a set of transaction outputs that Dojo has tracked
+     * @param {Object} obj All parameters are given in an object
+     * @param {String} [obj.basket] If provided, indicates which basket the outputs should be selected from.
+     * @param {Boolean} [obj.tracked] If provided, only outputs with the corresponding tracked value will be returned (true/false).
+     * @param {Boolean} [obj.includeEnvelope] If provided, returns a structure with the SPV envelopes for the UTXOS that have not been spent.
+     * @param {Boolean} [obj.spendable] If given as true or false, only outputs that have or have not (respectively) been spent will be returned. If not given, both spent and unspent outputs will be returned.
+     * @param {String} [obj.type] If provided, only outputs of the specified type will be returned. If not provided, outputs of all types will be returned.
+     * @param {Number} [obj.limit] Provide a limit on the number of outputs that will be returned.
+     * @param {Number} [obj.offset] Provide an offset into the list of outputs.
+     * @returns {Promise<Array<TransactionOutputDescriptor>>} A set of outputs that match the criteria
+     */
+    getTransactionOutputs({
+        basket,
+        tracked,
+        includeEnvelope = false,
+        spendable,
+        type,
+        limit = 25,
+        offset = 0
+    }): Promise<TransactionOutputDescriptorApi>
+
 
 
 
@@ -229,28 +250,6 @@ export interface NinjaApi {
    * @returns {Promise} Resolves once the operation is complete
    */
     processPendingTransactions(onTransactionProcessed?: () => void, onTransactionFailed?: () => void): Promise<void>
-
-    /**
-     * Returns a set of transaction outputs that Dojo has tracked
-     * @param {Object} obj All parameters are given in an object
-     * @param {String} [obj.basket] If provided, indicates which basket the outputs should be selected from.
-     * @param {Boolean} [obj.tracked] If provided, only outputs with the corresponding tracked value will be returned (true/false).
-     * @param {Boolean} [obj.includeEnvelope] If provided, returns a structure with the SPV envelopes for the UTXOS that have not been spent.
-     * @param {Boolean} [obj.spendable] If given as true or false, only outputs that have or have not (respectively) been spent will be returned. If not given, both spent and unspent outputs will be returned.
-     * @param {String} [obj.type] If provided, only outputs of the specified type will be returned. If not provided, outputs of all types will be returned.
-     * @param {Number} [obj.limit] Provide a limit on the number of outputs that will be returned.
-     * @param {Number} [obj.offset] Provide an offset into the list of outputs.
-     * @returns {Promise<Array<TransactionOutputDescriptor>>} A set of outputs that match the criteria
-     */
-    getTransactionOutputs({
-        basket,
-        tracked,
-        includeEnvelope = false,
-        spendable,
-        type,
-        limit = 25,
-        offset = 0
-    }): Promise<TransactionOutputDescriptorApi>
 
     /**
      * Use this endpoint to update the status of a transaction. This is useful for flagging incomplete transactions as aborted or reverting a completed transaction back into a pending status if it never got confirmed. Setting the status to "completed" or "waitingForSenderToSend" will make any selected UTXOs unavailable for spending, while any other status value will free up the UTXOs for use in other transactions.

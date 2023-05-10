@@ -17,7 +17,8 @@
                 "${workspaceFolder}/../dojo-knex/out/src/**/*.js",
                 "${workspaceFolder}/../dojo-express/out/src/**/*.js",
             ],
-            "sourceMaps": true
+            "sourceMaps": true,
+            "runtimeArgs": ["--preserve-symlinks"]
         }
     ]
 }

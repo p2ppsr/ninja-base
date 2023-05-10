@@ -12,9 +12,6 @@
     "type": "git",
     "url": "git+https://github.com/p2ppsr/ninja-base.git"
   },
-  "publishConfig": {
-    "registry": "https://npm-registry.babbage.systems/"
-  },
   "keywords": [
     "BSV",
     "Bitcoin"
@@ -33,11 +30,10 @@
     "test:coverage": "jest --coverage",
     "lint": "standard --fix src/**/*.js",
     "tolocal": "npm i ../cwi-base --silent && npm i ../cwi-external-services --silent && npm i ../chaintracks-spv --silent",
-    "tonpm": "npm run tonone && npm i @cwi/base --silent && npm i @cwi/external-services --silent && npm i @cwi/chaintracks-spv --silent",
-    "tonone": "npm remove @cwi/base --silent && npm remove @cwi/external-services --silent && npm remove @cwi/chaintracks-spv --silent"
+    "tonpm": "npm run tonone && npm i cwi-base --silent && npm i cwi-external-services --silent && npm i @cwi/chaintracks-spv --silent",
+    "tonone": "npm remove cwi-base --silent && npm remove cwi-external-services --silent && npm remove @cwi/chaintracks-spv --silent"
   },
   "devDependencies": {
-    "@cwi/chaintracks-base": "^0.4.9",
     "@types/bn.js": "^5.1.1",
     "@types/jest": "^29.4.0",
     "@types/node": "^18.13.0",
@@ -56,12 +52,13 @@
     "utxoninja": "^0.2.49"
   },
   "dependencies": {
-    "@cwi/base": "file:../cwi-base",
-    "@cwi/chaintracks-core": "^0.4.12",
+    "cwi-base": "file:../cwi-base",
+    "@cwi/chaintracks-base": "file:../chaintracks-base",
+    "@cwi/chaintracks-core": "file:../chaintracks-core",
     "@cwi/dojo-base": "file:../dojo-base",
     "@cwi/dojo-core": "file:../dojo-core",
     "@cwi/dojo-knex": "file:../dojo-knex",
-    "@cwi/external-services": "file:../cwi-external-services",
+    "cwi-external-services": "file:../cwi-external-services",
     "authrite-utils": "^0.1.15",
     "babbage-bsv": "^0.1.1",
     "bsv-is-final-tx": "^0.1.1",

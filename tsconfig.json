@@ -21,10 +21,15 @@
   "exclude": ["node_modules", "jest.config.ts"],
   "references": [
      { "path": "../cwi-base" },
+     { "path": "../cwi-external-services"},
+     { "path": "../chaintracks-base"},
+     { "path": "../chaintracks-knex"},
+     { "path": "../chaintracks-whatsonchain"},
+     { "path": "../chaintracks-core"},
+     { "path": "../chaintracks-spv"},
      { "path": "../dojo-base"},
      { "path": "../dojo-core"},
      { "path": "../dojo-knex"},
-     { "path": "../dojo-express"},
-     { "path": "../cwi-external-services"}
+     { "path": "../dojo-express"}
   ]
 }
