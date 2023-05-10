@@ -10,7 +10,7 @@ import { default as NinjaV1 } from 'utxoninja'
 import { promises as fsp } from 'fs'
 import { DojoWatchman, validateProvenTxs } from '@cwi/dojo-base'
 
-describe('LocalValidProofs', () => {
+describe('DojoWatchman.test', () => {
     let dojo: Dojo
     let ninja: NinjaApi
     let ninjaV1: NinjaV1
@@ -18,7 +18,7 @@ describe('LocalValidProofs', () => {
     const chain: Chain = 'test'
     const dataFolder = './test/data/brayden/'
     const localTestSqlite = `${dataFolder}${chain}Net_dojo.sqlite`
-    const useLocalChaintracks = false
+    const useLocalChaintracks = true
     
     beforeAll(async () => {
         // Replace the default ChaintracksServiceClient with a local ChaintracksSingletonClient for speed of multiple merkleroot lookups.
@@ -54,8 +54,11 @@ describe('LocalValidProofs', () => {
         }
     })
 
-    test('migrate only', async () => {
-        /* */
+    test('initialDatabaseReview', async () => {
+        console.time('initialDatabaseReview')
+        const dwm = new DojoWatchman(dojo)
+        await dwm.initialDatabaseReview()
+        console.timeLog('initialDatabaseReview')
     })
 
     test('process unknown ProvenTxReqs', async () => {
