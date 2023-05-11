@@ -58,6 +58,7 @@
     "@cwi/dojo-base": "file:../dojo-base",
     "@cwi/dojo-core": "file:../dojo-core",
     "@cwi/dojo-knex": "file:../dojo-knex",
+    "@cwi/dojo-watchman": "file:../dojo-watchman",
     "cwi-external-services": "file:../cwi-external-services",
     "authrite-utils": "^0.1.15",
     "babbage-bsv": "^0.1.1",

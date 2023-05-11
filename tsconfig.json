@@ -30,6 +30,7 @@
      { "path": "../dojo-base"},
      { "path": "../dojo-core"},
      { "path": "../dojo-knex"},
+     { "path": "../dojo-watchman"},
      { "path": "../dojo-express"}
   ]
 }

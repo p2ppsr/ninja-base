@@ -8,7 +8,7 @@ import { NinjaBase } from '../src/Base/NinjaBase'
 import { default as NinjaV1 } from 'utxoninja'
 
 import { promises as fsp } from 'fs'
-import { DojoWatchman, validateProvenTxs } from '@cwi/dojo-base'
+import { DojoWatchman, validateProvenTxs } from '@cwi/dojo-watchman'
 
 describe('DojoWatchman.test', () => {
     let dojo: Dojo
