@@ -1,15 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Chain, ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER } from "cwi-base";
-import { GetTransactionsOptions, TransactionApi, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, DojoApi, DojoUserStateApi, AvatarApi } from "@cwi/dojo-base";
+import { Chain, ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString } from "cwi-base";
+import { GetTransactionsOptions, TransactionApi, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, DojoApi, DojoUserStateApi, AvatarApi, PendingTxApi, GetTransactionOutputsOptions } from "@cwi/dojo-base";
 import { EnvelopeApi } from "cwi-external-services";
-import { GetPendingTransactionsTxApi, GetTransactionsResultApi, GetTxWithOutputsResultApi, TransactionOutputDescriptorApi, TransactionTemplateApi } from "../Api/NinjaEntitiesApi";
-import { NinjaApi } from "../Api/NinjaApi";
+import { GetPendingTransactionsTxApi, GetTransactionsResultApi, GetTxWithOutputsResultApi, GetTransactionOutputsResultApi, TransactionTemplateApi } from "@cwi/dojo-base";
+import { NinjaApi, NinjaTransactionFailedHandler, NinjaTransactionProcessedHandler } from "../Api/NinjaApi";
+import { processPendingTransactions } from "./processPendingTransactions";
+import { Authrite } from "authrite-js"
 
 export class NinjaBase implements NinjaApi {
     chain?: Chain
+    authriteClient: Authrite
 
-    constructor(public dojo: DojoApi) {
+    constructor(public dojo: DojoApi, authriteClient: Authrite) {
+        this.authriteClient = authriteClient
     }
 
     async getPaymail(): Promise<string> {
@@ -98,21 +102,46 @@ export class NinjaBase implements NinjaApi {
                 txid: t.txid,
                 amount: t.amount,
                 status: t.status,
-                senderPaymail: t.senderPaymail,
-                recipientPaymail: t.recipientPaymail,
+                senderPaymail: t.senderPaymail || '',
+                recipientPaymail: t.recipientPaymail || '',
                 isOutgoing: t.isOutgoing,
-                note: t.note,
-                created_at: t.created_at || '',
-                referenceNumber: t.referenceNumber,
+                note: t.note || '',
+                created_at: t.created_at?.toISOString() || '',
+                referenceNumber: t.referenceNumber || '',
                 labels: t.labels || []
             }))
         }
         return rr
     }
 
-    getPendingTransactions(referenceNumber?: string | undefined): Promise<GetPendingTransactionsTxApi[]> {
-        throw new Error("Method not implemented.");
+    async getPendingTransactions(referenceNumber?: string): Promise<PendingTxApi[]> {
+        const r = await this.dojo.getPendingTransactions(referenceNumber)
+        return r
     }
+
+    async processPendingTransactions(onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler): Promise<void> {
+        await processPendingTransactions(this.dojo, this.authriteClient, onTransactionProcessed, onTransactionFailed)
+    }
+
+    async getTransactionOutputs(options?: GetTransactionOutputsOptions): Promise<GetTransactionOutputsResultApi[]> {
+        const r = await this.dojo.getTransactionOutputs(options)
+        const gtors: GetTransactionOutputsResultApi[] = r.outputs
+            .filter(x => x.txid && typeof x.vout === 'number' && typeof x.amount === 'number' && x.outputScript)
+            .map(x => ({
+            txid: x.txid || '',
+            vout: x.vout || 0,
+            amount: x.amount || 0,
+            outputScript: asString(x.outputScript || ''),
+            type: x.type,
+            spendable: x.spendable
+        }))
+        return gtors
+    }
+
+    
+
+
+    
     getTransactionWithOutputs(outputs: { script: string; satoshis: number; }[], labels: string[], inputs: Record<string, EnvelopeApi>, note: string, recipient: string, autoProcess?: boolean | undefined, feePerKb?: number | undefined): Promise<GetTxWithOutputsResultApi> {
         throw new Error("Method not implemented.");
     }
@@ -120,12 +149,6 @@ export class NinjaBase implements NinjaApi {
         throw new Error("Method not implemented.");
     }
     processTransaction({ inputs, submittedTransaction, reference, outputMap }: { inputs: any; submittedTransaction: any; reference: any; outputMap: any; }): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    processPendingTransactions(onTransactionProcessed?: (() => void) | undefined, onTransactionFailed?: (() => void) | undefined): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    getTransactionOutputs({ basket, tracked, includeEnvelope, spendable, type, limit, offset }: { basket: any; tracked: any; includeEnvelope?: boolean | undefined; spendable: any; type: any; limit?: number | undefined; offset?: number | undefined; }): Promise<TransactionOutputDescriptorApi> {
         throw new Error("Method not implemented.");
     }
     submitDirectTransaction({ protocol, transaction, senderIdentityKey, note, amount, labels, derivationPrefix }: { protocol: any; transaction: any; senderIdentityKey: any; note: any; amount: any; labels: any; derivationPrefix: any; }): Promise<string> {

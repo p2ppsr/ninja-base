@@ -52,23 +52,24 @@
     "utxoninja": "^0.2.49"
   },
   "dependencies": {
-    "cwi-base": "file:../cwi-base",
     "@cwi/chaintracks-base": "file:../chaintracks-base",
     "@cwi/chaintracks-core": "file:../chaintracks-core",
     "@cwi/dojo-base": "file:../dojo-base",
     "@cwi/dojo-core": "file:../dojo-core",
     "@cwi/dojo-knex": "file:../dojo-knex",
     "@cwi/dojo-watchman": "file:../dojo-watchman",
-    "cwi-external-services": "file:../cwi-external-services",
     "authrite-utils": "^0.1.15",
     "babbage-bsv": "^0.1.1",
     "bsv-is-final-tx": "^0.1.1",
     "crypto": "^1.0.1",
+    "cwi-base": "file:../cwi-base",
+    "cwi-external-services": "file:../cwi-external-services",
     "dotenv": "^8.2.0",
     "ejs": "^3.1.3",
     "hash-wrap": "^1.0.10",
     "knex": "^2.4.2",
     "mysql": "^2.18.1",
+    "sendover": "file:../sendover",
     "sqlite3": "^5.1.4"
   }
 }
