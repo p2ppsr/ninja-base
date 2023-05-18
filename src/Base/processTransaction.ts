@@ -27,7 +27,7 @@ export async function processTransaction(
     dojo: DojoApi,
     authriteClient: Authrite,
     ) : Promise<void> {
-
+/*
     try {
         const result = await dojo.processTransaction()
         const result = await this.createAuthriteRequest('processTransaction', {
@@ -44,7 +44,8 @@ export async function processTransaction(
                     reference,
                     status: 'failed'
                 })
-            } catch (e) { /* ignore, we still need the code below */ }
+            } catch (e) { // ignore, we still need the code below
+            }
         }
         // Check if we need to handle a double spend attempt
         if (error.message.toLowerCase().includes('missing inputs')) {
@@ -84,7 +85,7 @@ export async function processTransaction(
                                 // Set spendable to false for the UTXO that was spent by the tx given as inputTxId
                                 await this.updateOutpointStatus({ txid: inputTxId, vout: inputVout, spendable: false })
                             } catch (error) {
-                                /* "Tried to update the outpoint status, nothing we can do" (Ty) :/ */
+                                // "Tried to update the outpoint status, nothing we can do" (Ty) :/ 
                             }
                         }
                     }
@@ -97,7 +98,7 @@ export async function processTransaction(
                     const env = await hashwrap(txid, { network: await this.getNetwork(), taalApiKey: this.taalApiKeys[await this.getNetwork('nonet')] })
                     spendingTransactions[txid] = env
                 } catch (error) {
-                    /* nothing we can do! */
+                    // nothing we can do! 
                 }
             }
 
@@ -109,4 +110,5 @@ export async function processTransaction(
         }
         throw error
     }
+    */
 }

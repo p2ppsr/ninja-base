@@ -23,7 +23,7 @@ describe('NinjaLocalSqlite', () => {
 
         const dojo = new Dojo(chain, dataFolder)
         await dojo.authenticate(identityKey, true)
-        ninja = new NinjaBase(dojo)
+        ninja = new NinjaBase(dojo, null)
         
         ninjaV1 = new NinjaV1({ config: { dojoURL: 'https://staging-dojo.babbage.systems' } })
     }, 300000)
