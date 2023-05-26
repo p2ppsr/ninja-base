@@ -25,7 +25,7 @@ export async function processIncomingTransaction(
         let senderIdentityKey: string | null = null
         let derivationPrefix: string | null = null
 
-        if (protocol === '3241645161d8') {
+        if (protocol === '3241645161d8') { // SABPPP peer-to-peer payment protocol
             // Derive and check output scripts
             for (const out of ptx.outputs) {
                 const derivationSuffix = out.derivationSuffix
