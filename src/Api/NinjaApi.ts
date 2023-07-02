@@ -1,7 +1,7 @@
 import { Chain } from "cwi-base"
-import { AvatarApi, CertificateApi, DojoApi, GetTotalOfAmountsOptions, GetTransactionOutputsOptions, GetTransactionsOptions, PendingTxApi, PendingTxInputsApi, PendingTxOutputApi, TransactionStatusApi } from "@cwi/dojo-base"
-import { EnvelopeApi } from "cwi-external-services"
-import { GetPendingTransactionsTxApi, GetTransactionsResultApi, GetTxWithOutputsResultApi, GetTransactionOutputsResultApi, TransactionTemplateApi } from "@cwi/dojo-base"
+import { AvatarApi, CertificateApi, CreateTxOutputApi, DojoApi, DojoTxInputsApi, FeeModelApi, GetTotalOfAmountsOptions, GetTransactionOutputsOptions, GetTransactionsOptions, OutputGenerationApi, PendingTxApi, PendingTxInputsApi, PendingTxOutputApi, ProcessTransactionResultApi, TransactionStatusApi, TxInputSelectionApi } from "@cwi/dojo-base"
+import { EnvelopeEvidenceApi } from "cwi-external-services"
+import { GetTransactionsResultApi, GetTxWithOutputsResultApi, GetTransactionOutputsResultApi, TransactionTemplateApi } from "@cwi/dojo-base"
 
 /**
  * A client for creating, signing, and delivering Bitcoin transactions
@@ -14,7 +14,7 @@ export interface NinjaApi {
      * isAuthenticated must be true.
      */
     dojo: DojoApi
-    
+
     /**
      * Returns the current Paymail handle
      */
@@ -88,58 +88,62 @@ export interface NinjaApi {
      */
     setAvatar(name: string, photoURL: string): Promise<void>
 
-   /**
-    * Returns a set of transactions that match the criteria
-    *
-    * @param options limit defaults to 25, offset defaults to 0, addLabels defaults to true, order defaults to 'descending'
-    */
-    getTransactions(options?: GetTransactionsOptions): Promise<GetTransactionsResultApi>
-    
-  /**
-     * Returns a set of transaction outputs that Dojo has tracked
+    /**
+     * Returns a set of transactions that match the criteria
+     *
+     * @param options limit defaults to 25, offset defaults to 0, addLabels defaults to true, order defaults to 'descending'
      */
+    getTransactions(options?: GetTransactionsOptions): Promise<GetTransactionsResultApi>
+
+    /**
+       * Returns a set of transaction outputs that Dojo has tracked
+       */
     getTransactionOutputs(options?: GetTransactionOutputsOptions): Promise<GetTransactionOutputsResultApi[]>
 
-  /**
-     * Returns a set of all transactions that need to be signed and submitted, or canceled
-     * @returns {Promise<GetPendingTransactionsTx[]>} The array of pending transactions
-     */
+    /**
+       * Returns a set of all transactions that need to be signed and submitted, or canceled
+       * @returns {Promise<GetPendingTransactionsTx[]>} The array of pending transactions
+       */
     getPendingTransactions(referenceNumber?: string): Promise<PendingTxApi[]>
 
-  /**
-   * Signs and processes all pending transactions, useful when recovering from an
-   * error or crash, or on startup. If a transaction fails to process, marks it
-   * as failed.
-   */
+    /**
+     * Use this endpoint to update the status of a transaction. This is useful for flagging incomplete transactions as aborted or reverting a completed transaction back into a pending status if it never got confirmed. Setting the status to "completed" or "waitingForSenderToSend" will make any selected UTXOs unavailable for spending, while any other status value will free up the UTXOs for use in other transactions.
+     * @param {Object} obj All parameters are given in an object
+     * @param {String} obj.reference The Dojo reference number for the transaction
+     * @param {String} obj.status The new status of the transaction
+     * @returns {Promise<Object>} A success object with `status: "success"`
+     */
+    updateTransactionStatus(params: { reference: string, status: TransactionStatusApi }): Promise<void>
+
+    /**
+     * Use this endpoint to update the status of one of your outputs, given as the TXID of a transaction and the vout (output index) in that transaction. This is useful for flagging transaction outpoints as spent if they were inadvertantly broadcasted or used without properly submitting them to the Dojo, or to undo the spending of an output if it was never actually spent.
+     * @param {Object} obj All parameters are given in an object
+     * @param {String} obj.txid The TXID of the transaction that created the output
+     * @param {Number} obj.vout The index of the output in the transaction
+     * @param {Boolean} obj.spendable The true spendability status of this outpoint
+     * @returns {Promise<Object>} A success object with `status: "success"`
+     */
+    updateOutpointStatus(params: { txid: string, vout: number, spendable: boolean }): Promise<void>
+
+    /**
+     * Signs and processes all pending transactions, useful when recovering from an
+     * error or crash, or on startup. If a transaction fails to process, marks it
+     * as failed.
+     */
     processPendingTransactions(onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler): Promise<void>
 
-
-
-  /**
-   * Creates and signs a transaction with specified outputs, so that it can be processed with `processTransaction`. This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing, when you are not providing any non-Dojo inputs.
-   *
-   * Use this by default, and fall back to `createTransaction` if you need more customization.
-   *
-   * @param {Object} obj All parameters are given in an object
-   * @param {Authrite} obj.authriteClient An API for invoking mutually authenticated requests
-   * @param {Array<GetTxWithOutputsOutput>} [obj.outputs=[]] A set of outputs to include, each with `script` and `satoshis`.
-   * @param {Number} [obj.feePerKb=110] The number of satoshis to pay per KB of block space used by this transaction.
-   * @param {Array<String>} [obj.labels=[]] A set of label strings to affix to the transaction
-   * @param {Object} [obj.inputs={}] Input scripts to spend as part of this transaction. This is an object whose keys are TXIDs and whose values are Everett-style transaction envelopes that contain an additional field called `outputsToRedeem`. This is an array of objects, each containing `index` and `unlockingScript` properties. The `index` property is the output number in the transaction you are spending, and `unlockingScript` is the hex scriptcode that unlocks the satoshis. Note that you should create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar so that the additional Dojo outputs can be added afterward without invalidating your signature.
-   * @param {Boolean} [obj.autoProcess=true] Whether the transaction should be processed automatically with processTransaction. Note that this will return `mapiResponses` and `note` instead of referenceNumber
-   * @param {String} [obj.recipient] Paymail recipient for transaction
-   * @param {String} [obj.note] A note about the transaction
-   * @returns {Promise<GetTxWithOutputsResult>} The serialized transaction, inputs, reference number and amount
-  */
-    getTransactionWithOutputs(
-        outputs: { script: string, satoshis: number }[],
-        labels: string[],
-        inputs: Record<string, EnvelopeApi>,
-        note: string,
-        recipient: string,
-        autoProcess?: boolean, // default true
-        feePerKb?: number // default 110
-    ): Promise<GetTxWithOutputsResultApi>
+    /**
+     * After a transaction is created (with `createTransaction` or with `getTransactionWithOutputs`),
+     * submit the serialized raw transaction to transaction processors for processing.
+     * 
+     * @param params.submittedTransaction The transaction that has been created and signed
+     * @param params.reference The reference number provided by `createTransaction` or `getTransactionWithOutputs`
+     * @param params.outputMap An object whose keys are derivation prefixes
+     *  and whose values are corresponding change output numbers from the transaction.
+     *
+     * @returns `ProcessTransactionResultApi` with txid and status of 'completed' or 'unknown'
+     */
+    processTransaction(params: { submittedTransaction: string | Buffer, reference: string, outputMap: Record<string, number> }): Promise<ProcessTransactionResultApi>
 
     /**
      * Creates a new transaction that must be processed with `processTransaction`
@@ -203,47 +207,56 @@ export interface NinjaApi {
      *
      * @returns {Promise<TransactionTemplate>} The template you need to sign and process
      */
-    createTransaction({
-        inputs,
-        inputSelection,
-        outputs,
-        outputGeneration,
-        fee,
-        labels,
-        note,
-        recipient
+    createTransaction(params: {
+        inputs: Record<string, DojoTxInputsApi>,
+        inputSelection: TxInputSelectionApi,
+        outputs: CreateTxOutputApi[],
+        outputGeneration: OutputGenerationApi,
+        fee: FeeModelApi,
+        labels: string[],
+        note?: string,
+        recipient?: string
     }): Promise<TransactionTemplateApi>
 
     /**
-     * After a transaction is created (with `createTransaction` or with `getTransactionWithOutputs`) this is used to process the transaction, thereby activating any change outputs and flagging designated inputs as spent
+     * Creates and signs a transaction with specified outputs, so that it can be processed with `processTransaction`. This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing, when you are not providing any non-Dojo inputs.
+     *
+     * Use this by default, and fall back to `createTransaction` if you need more customization.
+     *
      * @param {Object} obj All parameters are given in an object
-     * @param {String} obj.inputs Inputs to spend as part of this transaction
-     * @param {String} obj.submittedTransaction The transaction that has been created and signed
-     * @param {String} obj.reference The reference number provided by `createTransaction` or `getTransactionWithOutputs`
-     * @param {Object} obj.outputMap An object whose keys are derivation prefixes and whose values are corresponding change output numbers from the transaction.
-     * @returns {Promise<Object>} An object containing a `note` field with a success message, and `mapiResponses`, for use in creating an SPV Envelope
+     * @param {Authrite} obj.authriteClient An API for invoking mutually authenticated requests
+     * @param {Array<GetTxWithOutputsOutput>} [obj.outputs=[]] A set of outputs to include,
+     * each with `script` and `satoshis`.
+     * @param {Number} [obj.feePerKb=110] The number of satoshis to pay per KB of block space used by this transaction.
+     * @param {Array<String>} [obj.labels=[]] A set of label strings to affix to the transaction
+     * @param {Object} [obj.inputs={}] Input scripts to spend as part of this transaction.
+     * This is an object whose keys are TXIDs and whose values are Everett-style
+     * transaction envelopes that contain an additional field called `outputsToRedeem`.
+     * This is an array of objects, each containing `index` and `unlockingScript` properties.
+     * The `index` property is the output number in the transaction you are spending,
+     * and `unlockingScript` is the hex scriptcode that unlocks the satoshis.
+     * Note that you should create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
+     * so that the additional Dojo outputs can be added afterward without invalidating your signature.
+     * @param {Boolean} [obj.autoProcess=true] Whether the transaction should be processed automatically
+     * with processTransaction. Note that this will return `mapiResponses` and `note`
+     * instead of referenceNumber
+     * @param {String} [obj.recipient] Paymail recipient for transaction
+     * @param {String} [obj.note] A note about the transaction
+     * @returns {Promise<GetTxWithOutputsResult>} The serialized transaction, inputs, reference number and amount,
+     * or autoprocess results.
      */
-    processTransaction({ inputs, submittedTransaction, reference, outputMap }): Promise<void>
+    getTransactionWithOutputs(
+        outputs: { script: string, satoshis: number }[],
+        labels: string[],
+        inputs: Record<string, NinjaTxInputsApi>,
+        note: string,
+        recipient: string,
+        autoProcess?: boolean, // default true
+        feePerKb?: number // default 110
+    ): Promise<GetTxWithOutputsResultApi>
 
 
-    /**
-     * Use this endpoint to update the status of a transaction. This is useful for flagging incomplete transactions as aborted or reverting a completed transaction back into a pending status if it never got confirmed. Setting the status to "completed" or "waitingForSenderToSend" will make any selected UTXOs unavailable for spending, while any other status value will free up the UTXOs for use in other transactions.
-     * @param {Object} obj All parameters are given in an object
-     * @param {String} obj.reference The Dojo reference number for the transaction
-     * @param {String} obj.status The new status of the transaction
-     * @returns {Promise<Object>} A success object with `status: "success"`
-     */
-    updateTransactionStatus(params: { reference: string, status : TransactionStatusApi }): Promise<void>
 
-    /**
-     * Use this endpoint to update the status of one of your outputs, given as the TXID of a transaction and the vout (output index) in that transaction. This is useful for flagging transaction outpoints as spent if they were inadvertantly broadcasted or used without properly submitting them to the Dojo, or to undo the spending of an output if it was never actually spent.
-     * @param {Object} obj All parameters are given in an object
-     * @param {String} obj.txid The TXID of the transaction that created the output
-     * @param {Number} obj.vout The index of the output in the transaction
-     * @param {Boolean} obj.spendable The true spendability status of this outpoint
-     * @returns {Promise<Object>} A success object with `status: "success"`
-     */
-    updateOutpointStatus(params: { txid: string, vout: number, spendable: boolean }): Promise<void>
 
     /**
      * This endpoint allows a recipient to submit a transactions that was directly given to them by a sender. Saves the inputs and key derivation information, allowing the UTXOs to be redeemed in the future. Sets the transaction to completed and marks the outputs as spendable.
@@ -309,4 +322,23 @@ export interface NinjaTransactionProcessedApi {
     senderIdentityKey?: string | null
     derivationPrefix?: string
     // ...processResult from processTransaction call return
+}
+
+export interface NinjaOutputToRedeemApi {
+    /**
+     * Zero based output index within its transaction to spend.
+     */
+    index: number,
+    /**
+     * Hex scriptcode that unlocks the satoshis.
+     *
+     * Note that you should create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
+     * so that the additional Dojo outputs can be added afterward without invalidating your signature.
+     */
+    unlockingScript: string,
+    spendingDescription?: string
+}
+
+export interface NinjaTxInputsApi extends EnvelopeEvidenceApi {
+    outputsToRedeem: NinjaOutputToRedeemApi[]
 }

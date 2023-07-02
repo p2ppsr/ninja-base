@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Chain, ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString } from "cwi-base";
-import { GetTransactionsOptions, TransactionApi, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, DojoApi, DojoUserStateApi, AvatarApi, PendingTxApi, GetTransactionOutputsOptions } from "@cwi/dojo-base";
+import { GetTransactionsOptions, TransactionApi, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, DojoApi, DojoUserStateApi, AvatarApi, PendingTxApi, GetTransactionOutputsOptions, ProcessTransactionResultApi, DojoTxInputsApi, TxInputSelectionApi, CreateTxOutputApi, OutputGenerationApi, FeeModelApi } from "@cwi/dojo-base";
 import { EnvelopeApi } from "cwi-external-services";
 import { GetPendingTransactionsTxApi, GetTransactionsResultApi, GetTxWithOutputsResultApi, GetTransactionOutputsResultApi, TransactionTemplateApi } from "@cwi/dojo-base";
 import { NinjaApi, NinjaTransactionFailedHandler, NinjaTransactionProcessedHandler } from "../Api/NinjaApi";
 import { processPendingTransactions } from "./processPendingTransactions";
 import { Authrite } from "authrite-js"
+import { getTransactionWithOutputs } from "./getTransactionWithOutputs";
 
 export class NinjaBase implements NinjaApi {
     chain?: Chain
@@ -138,19 +139,49 @@ export class NinjaBase implements NinjaApi {
         return gtors
     }
 
+    async processTransaction(params: { submittedTransaction: string | Buffer, reference: string, outputMap: Record<string, number> }): Promise<ProcessTransactionResultApi> {
+        const r = await this.dojo.processTransaction(params.submittedTransaction, params.reference, params.outputMap)
+        return r
+    }
+    
+    async createTransaction(params: {
+        inputs: Record<string, DojoTxInputsApi>,
+        inputSelection: TxInputSelectionApi,
+        outputs: CreateTxOutputApi[],
+        outputGeneration: OutputGenerationApi,
+        fee: FeeModelApi,
+        labels: string[],
+        note?: string,
+        recipient?: string
+    }): Promise<TransactionTemplateApi> {
+        const r = await this.dojo.createTransaction(
+            params.inputs,
+            params.inputSelection,
+            params.outputs,
+            params.outputGeneration,
+            params.fee,
+            params.labels,
+            params.note,
+            params.recipient
+        )
+        return r
+    }
+
+    async getTransactionWithOutputs(
+        outputs: { script: string; satoshis: number; }[],
+        labels: string[],
+        inputs: Record<string, EnvelopeApi>,
+        note: string,
+        recipient: string,
+        autoProcess?: boolean | undefined,
+        feePerKb?: number | undefined
+    ): Promise<GetTxWithOutputsResultApi> {
+        const r = await getTransactionWithOutputs(this, outputs, labels, inputs, note, recipient, autoProcess, feePerKb)
+        return r
+    }
+
     
 
-
-    
-    getTransactionWithOutputs(outputs: { script: string; satoshis: number; }[], labels: string[], inputs: Record<string, EnvelopeApi>, note: string, recipient: string, autoProcess?: boolean | undefined, feePerKb?: number | undefined): Promise<GetTxWithOutputsResultApi> {
-        throw new Error("Method not implemented.");
-    }
-    createTransaction({ inputs, inputSelection, outputs, outputGeneration, fee, labels, note, recipient }: { inputs: any; inputSelection: any; outputs: any; outputGeneration: any; fee: any; labels: any; note: any; recipient: any; }): Promise<TransactionTemplateApi> {
-        throw new Error("Method not implemented.");
-    }
-    processTransaction({ inputs, submittedTransaction, reference, outputMap }: { inputs: any; submittedTransaction: any; reference: any; outputMap: any; }): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
     submitDirectTransaction({ protocol, transaction, senderIdentityKey, note, amount, labels, derivationPrefix }: { protocol: any; transaction: any; senderIdentityKey: any; note: any; amount: any; labels: any; derivationPrefix: any; }): Promise<string> {
         throw new Error("Method not implemented.");
     }
