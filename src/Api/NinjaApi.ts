@@ -1,5 +1,5 @@
 import { Chain } from "cwi-base"
-import { AvatarApi, CertificateApi, CreateTxOutputApi, DojoApi, DojoTxInputsApi, FeeModelApi, GetTotalOfAmountsOptions, GetTransactionOutputsOptions, GetTransactionsOptions, OutputGenerationApi, PendingTxApi, PendingTxInputsApi, PendingTxOutputApi, ProcessTransactionResultApi, TransactionStatusApi, TxInputSelectionApi } from "@cwi/dojo-base"
+import { AvatarApi, CertificateApi, CreateTxOutputApi, DojoApi, DojoTxInputsApi, FeeModelApi, GetTotalOfAmountsOptions, GetTransactionOutputsOptions, GetTransactionsOptions, GetTxWithOutputsProcessedResultApi, OutputGenerationApi, PendingTxApi, PendingTxInputsApi, PendingTxOutputApi, ProcessTransactionResultApi, TransactionStatusApi, TxInputSelectionApi } from "@cwi/dojo-base"
 import { EnvelopeEvidenceApi } from "cwi-external-services"
 import { GetTransactionsResultApi, GetTxWithOutputsResultApi, GetTransactionOutputsResultApi, TransactionTemplateApi } from "@cwi/dojo-base"
 
@@ -14,6 +14,11 @@ export interface NinjaApi {
      * isAuthenticated must be true.
      */
     dojo: DojoApi
+    
+    /**
+     * Return the private / public keypair used by the Ninja client for change UTXOs
+     */
+    getClientChangeKeyPair(): KeyPairApi
 
     /**
      * Returns the current Paymail handle
@@ -242,18 +247,19 @@ export interface NinjaApi {
      * instead of referenceNumber
      * @param {String} [obj.recipient] Paymail recipient for transaction
      * @param {String} [obj.note] A note about the transaction
-     * @returns {Promise<GetTxWithOutputsResult>} The serialized transaction, inputs, reference number and amount,
-     * or autoprocess results.
+     *
+     * @returns `GetTxWithOutputsResult` if not autoProcess
+     * @returns `GetTxWithOutputsProcessedResult` if autoProcess
      */
-    getTransactionWithOutputs(
-        outputs: { script: string, satoshis: number }[],
+    getTransactionWithOutputs(params: {
+        outputs: CreateTxOutputApi[],
         labels: string[],
         inputs: Record<string, NinjaTxInputsApi>,
         note: string,
         recipient: string,
         autoProcess?: boolean, // default true
         feePerKb?: number // default 110
-    ): Promise<GetTxWithOutputsResultApi>
+    }): Promise<GetTxWithOutputsResultApi | GetTxWithOutputsProcessedResultApi>
 
 
 
@@ -341,4 +347,9 @@ export interface NinjaOutputToRedeemApi {
 
 export interface NinjaTxInputsApi extends EnvelopeEvidenceApi {
     outputsToRedeem: NinjaOutputToRedeemApi[]
+}
+
+export interface KeyPairApi {
+    privateKey: string
+    publicKey: string
 }

@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Chain, ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString } from "cwi-base";
-import { GetTransactionsOptions, TransactionApi, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, DojoApi, DojoUserStateApi, AvatarApi, PendingTxApi, GetTransactionOutputsOptions, ProcessTransactionResultApi, DojoTxInputsApi, TxInputSelectionApi, CreateTxOutputApi, OutputGenerationApi, FeeModelApi } from "@cwi/dojo-base";
-import { EnvelopeApi } from "cwi-external-services";
-import { GetPendingTransactionsTxApi, GetTransactionsResultApi, GetTxWithOutputsResultApi, GetTransactionOutputsResultApi, TransactionTemplateApi } from "@cwi/dojo-base";
-import { NinjaApi, NinjaTransactionFailedHandler, NinjaTransactionProcessedHandler } from "../Api/NinjaApi";
-import { processPendingTransactions } from "./processPendingTransactions";
 import { Authrite } from "authrite-js"
+
+import { Chain, ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString } from "cwi-base";
+import { GetTransactionsOptions, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, DojoApi, AvatarApi, PendingTxApi, GetTransactionOutputsOptions, ProcessTransactionResultApi, DojoTxInputsApi, TxInputSelectionApi, CreateTxOutputApi, OutputGenerationApi, FeeModelApi, GetTxWithOutputsProcessedResultApi } from "@cwi/dojo-base";
+import { GetTransactionsResultApi, GetTxWithOutputsResultApi, GetTransactionOutputsResultApi, TransactionTemplateApi } from "@cwi/dojo-base";
+import { KeyPairApi, NinjaApi, NinjaTransactionFailedHandler, NinjaTransactionProcessedHandler, NinjaTxInputsApi } from "../Api/NinjaApi";
+
+import { processPendingTransactions } from "./processPendingTransactions";
 import { getTransactionWithOutputs } from "./getTransactionWithOutputs";
 
 export class NinjaBase implements NinjaApi {
@@ -15,6 +16,14 @@ export class NinjaBase implements NinjaApi {
 
     constructor(public dojo: DojoApi, authriteClient: Authrite) {
         this.authriteClient = authriteClient
+    }
+
+    getClientChangeKeyPair(): KeyPairApi {
+        const r: KeyPairApi = {
+            privateKey: this.authriteClient.clientPrivateKey,
+            publicKey: this.authriteClient.clientPublicKey            
+        }
+        return r
     }
 
     async getPaymail(): Promise<string> {
@@ -139,8 +148,32 @@ export class NinjaBase implements NinjaApi {
         return gtors
     }
 
-    async processTransaction(params: { submittedTransaction: string | Buffer, reference: string, outputMap: Record<string, number> }): Promise<ProcessTransactionResultApi> {
+    async processTransaction(params: {
+        submittedTransaction: string | Buffer,
+        reference: string,
+        outputMap: Record<string, number>
+    }): Promise<ProcessTransactionResultApi> {
         const r = await this.dojo.processTransaction(params.submittedTransaction, params.reference, params.outputMap)
+        return r
+    }
+    
+    async getTransactionWithOutputs(params: {
+        outputs: CreateTxOutputApi[],
+        labels: string[],
+        inputs: Record<string, NinjaTxInputsApi>,
+        note: string,
+        recipient: string,
+        autoProcess?: boolean | undefined,
+        feePerKb?: number | undefined
+    }): Promise<GetTxWithOutputsResultApi | GetTxWithOutputsProcessedResultApi> {
+        const r = await getTransactionWithOutputs(this,
+            params.outputs,
+            params.labels,
+            params.inputs,
+            params.note,
+            params.recipient,
+            params.autoProcess,
+            params.feePerKb)
         return r
     }
     
@@ -167,20 +200,6 @@ export class NinjaBase implements NinjaApi {
         return r
     }
 
-    async getTransactionWithOutputs(
-        outputs: { script: string; satoshis: number; }[],
-        labels: string[],
-        inputs: Record<string, EnvelopeApi>,
-        note: string,
-        recipient: string,
-        autoProcess?: boolean | undefined,
-        feePerKb?: number | undefined
-    ): Promise<GetTxWithOutputsResultApi> {
-        const r = await getTransactionWithOutputs(this, outputs, labels, inputs, note, recipient, autoProcess, feePerKb)
-        return r
-    }
-
-    
 
     submitDirectTransaction({ protocol, transaction, senderIdentityKey, note, amount, labels, derivationPrefix }: { protocol: any; transaction: any; senderIdentityKey: any; note: any; amount: any; labels: any; derivationPrefix: any; }): Promise<string> {
         throw new Error("Method not implemented.");
