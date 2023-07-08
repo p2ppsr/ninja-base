@@ -3,7 +3,7 @@
 import { Authrite } from "authrite-js"
 
 import { Chain, ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString } from "cwi-base";
-import { GetTransactionsOptions, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, DojoApi, AvatarApi, PendingTxApi, GetTransactionOutputsOptions, ProcessTransactionResultApi, DojoTxInputsApi, TxInputSelectionApi, CreateTxOutputApi, OutputGenerationApi, FeeModelApi, GetTxWithOutputsProcessedResultApi } from "@cwi/dojo-base";
+import { GetTransactionsOptions, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, DojoApi, AvatarApi, PendingTxApi, GetTransactionOutputsOptions, ProcessTransactionResultApi, DojoTxInputsApi, TxInputSelectionApi, CreateTxOutputApi, OutputGenerationApi, FeeModelApi, GetTxWithOutputsProcessedResultApi, CreateTransactionResultApi } from "@cwi/dojo-base";
 import { GetTransactionsResultApi, GetTxWithOutputsResultApi, GetTransactionOutputsResultApi, TransactionTemplateApi } from "@cwi/dojo-base";
 import { KeyPairApi, NinjaApi, NinjaTransactionFailedHandler, NinjaTransactionProcessedHandler, NinjaTxInputsApi } from "../Api/NinjaApi";
 
@@ -186,7 +186,7 @@ export class NinjaBase implements NinjaApi {
         labels: string[],
         note?: string,
         recipient?: string
-    }): Promise<TransactionTemplateApi> {
+    }): Promise<CreateTransactionResultApi> {
         const r = await this.dojo.createTransaction(
             params.inputs,
             params.inputSelection,
@@ -201,9 +201,15 @@ export class NinjaBase implements NinjaApi {
     }
 
 
-    submitDirectTransaction({ protocol, transaction, senderIdentityKey, note, amount, labels, derivationPrefix }: { protocol: any; transaction: any; senderIdentityKey: any; note: any; amount: any; labels: any; derivationPrefix: any; }): Promise<string> {
+    submitDirectTransaction(params: {
+        protocol, transaction, senderIdentityKey, note, amount, labels, derivationPrefix
+    }: 
+    {
+        protocol: any; transaction: any; senderIdentityKey: any; note: any; amount: any; labels: any; derivationPrefix: any; 
+    }): Promise<string> {
         throw new Error("Method not implemented.");
     }
+
     verifyIncomingTransaction({ senderPaymail, senderIdentityKey, referenceNumber, description, amount }: { senderPaymail: any; senderIdentityKey: any; referenceNumber: any; description: any; amount: any; }): Promise<boolean> {
         throw new Error("Method not implemented.");
     }

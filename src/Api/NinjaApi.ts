@@ -1,5 +1,5 @@
 import { Chain } from "cwi-base"
-import { AvatarApi, CertificateApi, CreateTxOutputApi, DojoApi, DojoTxInputsApi, FeeModelApi, GetTotalOfAmountsOptions, GetTransactionOutputsOptions, GetTransactionsOptions, GetTxWithOutputsProcessedResultApi, OutputGenerationApi, PendingTxApi, PendingTxInputsApi, PendingTxOutputApi, ProcessTransactionResultApi, TransactionStatusApi, TxInputSelectionApi } from "@cwi/dojo-base"
+import { AvatarApi, CertificateApi, CreateTransactionResultApi, CreateTxOutputApi, DojoApi, DojoTxInputsApi, FeeModelApi, GetTotalOfAmountsOptions, GetTransactionOutputsOptions, GetTransactionsOptions, GetTxWithOutputsProcessedResultApi, OutputGenerationApi, PendingTxApi, PendingTxInputsApi, PendingTxOutputApi, ProcessTransactionResultApi, TransactionStatusApi, TxInputSelectionApi } from "@cwi/dojo-base"
 import { EnvelopeEvidenceApi } from "cwi-external-services"
 import { GetTransactionsResultApi, GetTxWithOutputsResultApi, GetTransactionOutputsResultApi, TransactionTemplateApi } from "@cwi/dojo-base"
 
@@ -151,6 +151,44 @@ export interface NinjaApi {
     processTransaction(params: { submittedTransaction: string | Buffer, reference: string, outputMap: Record<string, number> }): Promise<ProcessTransactionResultApi>
 
     /**
+     * Creates and signs a transaction with specified outputs, so that it can be processed with `processTransaction`. This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing, when you are not providing any non-Dojo inputs.
+     *
+     * Use this by default, and fall back to `createTransaction` if you need more customization.
+     *
+     * @param {Object} obj All parameters are given in an object
+     * @param {Authrite} obj.authriteClient An API for invoking mutually authenticated requests
+     * @param {Array<GetTxWithOutputsOutput>} [obj.outputs=[]] A set of outputs to include,
+     * each with `script` and `satoshis`.
+     * @param {Number} [obj.feePerKb=110] The number of satoshis to pay per KB of block space used by this transaction.
+     * @param {Array<String>} [obj.labels=[]] A set of label strings to affix to the transaction
+     * @param {Object} [obj.inputs={}] Input scripts to spend as part of this transaction.
+     * This is an object whose keys are TXIDs and whose values are Everett-style
+     * transaction envelopes that contain an additional field called `outputsToRedeem`.
+     * This is an array of objects, each containing `index` and `unlockingScript` properties.
+     * The `index` property is the output number in the transaction you are spending,
+     * and `unlockingScript` is the hex scriptcode that unlocks the satoshis.
+     * Note that you should create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
+     * so that the additional Dojo outputs can be added afterward without invalidating your signature.
+     * @param {Boolean} [obj.autoProcess=true] Whether the transaction should be processed automatically
+     * with processTransaction. Note that this will return `mapiResponses` and `note`
+     * instead of referenceNumber
+     * @param {String} [obj.recipient] Paymail recipient for transaction
+     * @param {String} [obj.note] A note about the transaction
+     *
+     * @returns `GetTxWithOutputsResult` if not autoProcess
+     * @returns `GetTxWithOutputsProcessedResult` if autoProcess
+     */
+    getTransactionWithOutputs(params: {
+        outputs: CreateTxOutputApi[],
+        labels: string[],
+        inputs: Record<string, NinjaTxInputsApi>,
+        note: string,
+        recipient: string,
+        autoProcess?: boolean, // default true
+        feePerKb?: number // default 110
+    }): Promise<GetTxWithOutputsResultApi | GetTxWithOutputsProcessedResultApi>
+
+    /**
      * Creates a new transaction that must be processed with `processTransaction`
      * after you sign it
      *
@@ -221,64 +259,38 @@ export interface NinjaApi {
         labels: string[],
         note?: string,
         recipient?: string
-    }): Promise<TransactionTemplateApi>
-
-    /**
-     * Creates and signs a transaction with specified outputs, so that it can be processed with `processTransaction`. This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing, when you are not providing any non-Dojo inputs.
-     *
-     * Use this by default, and fall back to `createTransaction` if you need more customization.
-     *
-     * @param {Object} obj All parameters are given in an object
-     * @param {Authrite} obj.authriteClient An API for invoking mutually authenticated requests
-     * @param {Array<GetTxWithOutputsOutput>} [obj.outputs=[]] A set of outputs to include,
-     * each with `script` and `satoshis`.
-     * @param {Number} [obj.feePerKb=110] The number of satoshis to pay per KB of block space used by this transaction.
-     * @param {Array<String>} [obj.labels=[]] A set of label strings to affix to the transaction
-     * @param {Object} [obj.inputs={}] Input scripts to spend as part of this transaction.
-     * This is an object whose keys are TXIDs and whose values are Everett-style
-     * transaction envelopes that contain an additional field called `outputsToRedeem`.
-     * This is an array of objects, each containing `index` and `unlockingScript` properties.
-     * The `index` property is the output number in the transaction you are spending,
-     * and `unlockingScript` is the hex scriptcode that unlocks the satoshis.
-     * Note that you should create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
-     * so that the additional Dojo outputs can be added afterward without invalidating your signature.
-     * @param {Boolean} [obj.autoProcess=true] Whether the transaction should be processed automatically
-     * with processTransaction. Note that this will return `mapiResponses` and `note`
-     * instead of referenceNumber
-     * @param {String} [obj.recipient] Paymail recipient for transaction
-     * @param {String} [obj.note] A note about the transaction
-     *
-     * @returns `GetTxWithOutputsResult` if not autoProcess
-     * @returns `GetTxWithOutputsProcessedResult` if autoProcess
-     */
-    getTransactionWithOutputs(params: {
-        outputs: CreateTxOutputApi[],
-        labels: string[],
-        inputs: Record<string, NinjaTxInputsApi>,
-        note: string,
-        recipient: string,
-        autoProcess?: boolean, // default true
-        feePerKb?: number // default 110
-    }): Promise<GetTxWithOutputsResultApi | GetTxWithOutputsProcessedResultApi>
+    }): Promise<CreateTransactionResultApi>
 
 
 
 
     /**
-     * This endpoint allows a recipient to submit a transactions that was directly given to them by a sender. Saves the inputs and key derivation information, allowing the UTXOs to be redeemed in the future. Sets the transaction to completed and marks the outputs as spendable.
+     * This endpoint allows a recipient to submit a transactions that was directly given to them by a sender.
+     * Saves the inputs and key derivation information, allowing the UTXOs to be redeemed in the future.
+     * Sets the transaction to completed and marks the outputs as spendable.
      *
      * @param {Object} obj All parameters are given in an object
-     * @param {string} obj.protocol Specify the transaction submission payment protocol to use. Currently, the only supported protocol is that with BRFC ID "3241645161d8"
-     * @param {Object} obj.transaction The transaction envelope to submit, including key derivation information
-     * @param {Array} obj.transaction.outputs An array of outputs, each containing `vout`, `satoshis`, `derivationSuffix`, and (optionally), `derivationPrefix`. If a global `derivationPrefix` is used (recommended), output-specific derivation prefixes should be omitted.
+     * @param {string} obj.protocol Specify the transaction submission payment protocol to use.
+     *  Currently, the only supported protocol is that with BRFC ID "3241645161d8"
+     * @param {Object} obj.transaction The transaction envelope to submit, including key derivation information.
+     * @param {Array} obj.transaction.outputs An array of outputs, each containing:
+     *  `vout`,
+     *  `satoshis`,
+     *  `derivationSuffix`,
+     *  and (optionally), `derivationPrefix`.
+     *  If a global `derivationPrefix` is used (recommended), output-specific derivation prefixes should be omitted.
      * @param {string} obj.senderIdentityKey Provide the identity key for the person who sent the transaction
      * @param {string} obj.note Human-readable description for the transaction
-     * @param {string} [obj.derivationPrefix] A derivation prefix used for all outputs. If provided, derivation prefixes on all outputs are optional.
+     * @param {string} [obj.derivationPrefix] A derivation prefix used for all outputs.
+     * If provided, derivation prefixes on all outputs are optional.
      *
-     * @returns {Promise<Object>} Object containing reference number, status=success, and human-readable note acknowledging the transaction
+     * @returns {Promise<Object>} Object containing
+     *  reference number,
+     *  status=success,
+     *  note: human-readable, acknowledging the transaction
      */
-    submitDirectTransaction({
-        protocol,
+    submitDirectTransaction(params: {
+        protocol: string,
         transaction,
         senderIdentityKey,
         note,

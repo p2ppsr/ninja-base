@@ -2,7 +2,7 @@
 import bsvJs from 'babbage-bsv'
 import { getPaymentAddress, getPaymentPrivateKey } from 'sendover'
 
-import { CreateTransactionResultApi, DojoTxBuilderBase, DojoTxBuilderBaseOptions, verifyTruthy } from "@cwi/dojo-base";
+import { CreateTransactionResultApi, DojoTxBuilderBase, DojoTxBuilderBaseOptions, invoice3241645161d8, verifyTruthy } from "@cwi/dojo-base";
 import { NinjaApi, NinjaTxInputsApi } from "./Api/NinjaApi";
 import { ERR_INVALID_PARAMETER } from 'cwi-base';
 
@@ -45,7 +45,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
                 // Get derivation invoice data
                 const derivationSuffix = verifyTruthy(out.derivationSuffix)
                 outputMap[derivationSuffix] = i
-                const invoiceNumber = this.invoiceProtocol(derivationPrefix, derivationSuffix, paymailHandle)
+                const invoiceNumber = invoice3241645161d8(derivationPrefix, derivationSuffix, paymailHandle)
                 // Derive the public key used for creating the output script
                 const derivedAddress = getPaymentAddress({
                     senderPrivateKey: changeKeys.privateKey,
@@ -122,7 +122,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
                     const derivationPrefix = verifyTruthy(instructions.derivationPrefix)
                     const derivationSuffix = verifyTruthy(instructions.derivationSuffix)
 
-                    const invoiceNumber = this.invoiceProtocol(derivationPrefix, derivationSuffix, paymailHandle)
+                    const invoiceNumber = invoice3241645161d8(derivationPrefix, derivationSuffix, paymailHandle)
 
                     // Derive the key used to unlock funds
                     const derivedPrivateKey = getPaymentPrivateKey({
