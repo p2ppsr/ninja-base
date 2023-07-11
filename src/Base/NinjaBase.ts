@@ -3,12 +3,16 @@
 import { Authrite } from "authrite-js"
 
 import { Chain, ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString } from "cwi-base";
-import { GetTransactionsOptions, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, DojoApi, AvatarApi, PendingTxApi, GetTransactionOutputsOptions, ProcessTransactionResultApi, DojoTxInputsApi, TxInputSelectionApi, CreateTxOutputApi, OutputGenerationApi, FeeModelApi, GetTxWithOutputsProcessedResultApi, CreateTransactionResultApi } from "@cwi/dojo-base";
+import { GetTransactionsOptions, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, verifyTruthy } from "@cwi/dojo-base";
+import { DojoApi, AvatarApi, PendingTxApi, GetTransactionOutputsOptions, ProcessTransactionResultApi } from "@cwi/dojo-base";
+import { DojoTxInputsApi, TxInputSelectionApi, CreateTxOutputApi, OutputGenerationApi } from "@cwi/dojo-base";
+import { FeeModelApi, GetTxWithOutputsProcessedResultApi, CreateTransactionResultApi } from "@cwi/dojo-base";
 import { GetTransactionsResultApi, GetTxWithOutputsResultApi, GetTransactionOutputsResultApi, TransactionTemplateApi } from "@cwi/dojo-base";
 import { KeyPairApi, NinjaApi, NinjaTransactionFailedHandler, NinjaTransactionProcessedHandler, NinjaTxInputsApi } from "../Api/NinjaApi";
 
 import { processPendingTransactions } from "./processPendingTransactions";
 import { getTransactionWithOutputs } from "./getTransactionWithOutputs";
+import { SubmitDirectTransactionParams } from "./submitDirectTransaction";
 
 export class NinjaBase implements NinjaApi {
     chain?: Chain
@@ -36,10 +40,8 @@ export class NinjaBase implements NinjaApi {
     }
 
     async getChain(): Promise<Chain> {
-        if (!this.chain) {
-            this.chain = await this.dojo.getChain()
-        }
-        return this.chain
+        this.chain ||= await this.dojo.getChain()
+        return verifyTruthy(this.chain)
     }
 
     async getNetwork(format?: 'default' | 'nonet'): Promise<string> {
@@ -130,7 +132,7 @@ export class NinjaBase implements NinjaApi {
     }
 
     async processPendingTransactions(onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler): Promise<void> {
-        await processPendingTransactions(this.dojo, this.authriteClient, onTransactionProcessed, onTransactionFailed)
+        await processPendingTransactions(this, onTransactionProcessed, onTransactionFailed)
     }
 
     async getTransactionOutputs(options?: GetTransactionOutputsOptions): Promise<GetTransactionOutputsResultApi[]> {
@@ -201,12 +203,8 @@ export class NinjaBase implements NinjaApi {
     }
 
 
-    submitDirectTransaction(params: {
-        protocol, transaction, senderIdentityKey, note, amount, labels, derivationPrefix
-    }: 
-    {
-        protocol: any; transaction: any; senderIdentityKey: any; note: any; amount: any; labels: any; derivationPrefix: any; 
-    }): Promise<string> {
+    submitDirectTransaction(params: SubmitDirectTransactionParams)
+    : Promise<string> {
         throw new Error("Method not implemented.");
     }
 

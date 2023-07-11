@@ -1,53 +1,74 @@
-import {  NinjaTransactionFailedHandler,  NinjaTransactionProcessedHandler } from "../Api/NinjaApi";
-import { DojoApi, ERR_DOJO_PROCESS_PENDING_OUTGOING } from "@cwi/dojo-base";
-import { Authrite } from 'authrite-js'
-import { processIncomingTransaction } from "./processIncomingTransaction";
+import {  NinjaTransactionFailedApi, NinjaTransactionFailedHandler,  NinjaTransactionProcessedApi,  NinjaTransactionProcessedHandler } from "../Api/NinjaApi";
+import { ProcessIncomingTransactionResultApi, processIncomingTransaction } from "./processIncomingTransaction";
+import { NinjaBase } from "./NinjaBase";
+import { CwiError, asString } from "cwi-base";
 
 export async function processPendingTransactions(
-    dojo: DojoApi,
-    authriteClient: Authrite,
+    ninja: NinjaBase,
     onTransactionProcessed?: NinjaTransactionProcessedHandler,
     onTransactionFailed?: NinjaTransactionFailedHandler
 ): Promise<void> {
 
+    const dojo = ninja.dojo
+
     const pending = await dojo.getPendingTransactions()
 
     await Promise.all(pending.map(async ptx => {
-        if (!ptx.isOutgoing) {
-            await processIncomingTransaction(
-                ptx,
-                dojo,
-                authriteClient,
-                undefined,
-                true,
-                onTransactionProcessed,
-                onTransactionFailed
-            )
-        } else {
-            // Pending outgoing transactions ...
-            // There was a try block here that would always throw due to the following line
-            // const derivationSuffix = out.instructions.derivationSuffix
-            // because out had no instructions from getPendingTransactions
-            // TODO: think through what realy should be happening for outgoing transactions...
-            const e = new ERR_DOJO_PROCESS_PENDING_OUTGOING()
-            const r = {
-                error: e,
-                inputs: ptx.inputs,
-                isOutgoing: ptx.isOutgoing,
-                reference: ptx.referenceNumber
+        let pitr: ProcessIncomingTransactionResultApi | undefined = undefined
+        try {
+            if (!ptx.isOutgoing) {
+                pitr = await processIncomingTransaction(
+                    ninja,
+                    ptx,
+                    undefined,
+                    true,
+                )
+            } else {
+                // Pending outgoing transactions ...
+
+                // TODO: The key architectural issue with processing outgoing transactions in parallel
+                // from Dojo getPendingTransactions is that Dojo must never store UTXO unlocking scripts.
+                // To make this work, the unlocking scripts would need to be merged with the Dojo pending
+                // transactions before they could be processed... for now, log any transactions that pass
+                // through this code path...
+
+                console.log(`processPendingTransactions outgoing transaction reference ${ptx.referenceNumber} ignored`)
+
+                // If we were going to process, re-use of code used by the createTransaction / processTransaction
+                // const { tx, outputMap, amount } = NinjaTxBuilder.buildJsTxFromPendingTx(ninja, ptx)
             }
+            if (onTransactionProcessed && pitr) {
+                try {
+                    const r: NinjaTransactionProcessedApi = {
+                        inputs: ptx.inputs,
+                        outputs: ptx.outputs,
+                        reference: ptx.referenceNumber,
+                        hex: asString(ptx.rawTransaction || ''),
+                        isOutgoing: ptx.isOutgoing,
+                        txid: pitr.txid,
+                        amount: pitr.amount,
+                        senderIdentityKey: pitr.senderIdentityKey,
+                        derivationPrefix: pitr.derivationPrefix
+                    }
+                    await onTransactionProcessed(r)
+                } catch (e: unknown) {
+                    console.error('onTransactionProcessed callback threw', e)
+                }
+            }
+        } catch (e: unknown) {
             if (onTransactionFailed) {
                 try {
+                    const r: NinjaTransactionFailedApi = {
+                        inputs: ptx.inputs,
+                        reference: ptx.referenceNumber,
+                        isOutgoing: ptx.isOutgoing,
+                        error: CwiError.fromUnknown(e)
+                    }
                     await onTransactionFailed(r)
-                } catch (e) {
+                } catch (e: unknown) {
                     console.error('onTransactionFailed callback threw', e)
                 }
             }
-            try {
-                await dojo.updateTransactionStatus( ptx.referenceNumber, 'failed' )
-            } catch (e) { /* ignore, so that we can still deal with other TXs */ }
-            // pending incoming transactions are first validated and then their status is updated to be completed or failed
-            return e
         }
     }))
 }

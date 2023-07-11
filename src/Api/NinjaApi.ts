@@ -1,7 +1,8 @@
-import { Chain } from "cwi-base"
-import { AvatarApi, CertificateApi, CreateTransactionResultApi, CreateTxOutputApi, DojoApi, DojoTxInputsApi, FeeModelApi, GetTotalOfAmountsOptions, GetTransactionOutputsOptions, GetTransactionsOptions, GetTxWithOutputsProcessedResultApi, OutputGenerationApi, PendingTxApi, PendingTxInputsApi, PendingTxOutputApi, ProcessTransactionResultApi, TransactionStatusApi, TxInputSelectionApi } from "@cwi/dojo-base"
-import { EnvelopeEvidenceApi } from "cwi-external-services"
-import { GetTransactionsResultApi, GetTxWithOutputsResultApi, GetTransactionOutputsResultApi, TransactionTemplateApi } from "@cwi/dojo-base"
+import { Chain, CwiError } from "cwi-base"
+import { AvatarApi, CertificateApi, CreateTransactionResultApi, CreateTxOutputApi, DojoApi, DojoTxInputsApi, FeeModelApi, GetTotalOfAmountsOptions, GetTransactionOutputsOptions, GetTransactionsOptions, GetTxWithOutputsProcessedResultApi, OutputGenerationApi, PendingTxApi, PendingTxInputApi, PendingTxOutputApi, ProcessTransactionResultApi, TransactionStatusApi, TxInputSelectionApi } from "@cwi/dojo-base"
+import { EnvelopeEvidenceApi, MapiResponseApi, TscMerkleProofApi } from "cwi-external-services"
+import { GetTransactionsResultApi, GetTxWithOutputsResultApi, GetTransactionOutputsResultApi } from "@cwi/dojo-base"
+import { SubmitDirectTransactionParams } from "../Base/submitDirectTransaction"
 
 /**
  * A client for creating, signing, and delivering Bitcoin transactions
@@ -26,7 +27,11 @@ export interface NinjaApi {
     getPaymail(): Promise<string>
 
     /**
-     * Changes the Paymail handle of the user. NOTE that the old handle will be available for others to use. NOTE that to prevent span, you may only do this if there is at least one unspent output under Dojo management.
+     * Changes the Paymail handle of the user.
+     * 
+     * NOTE that the old handle will be available for others to use.
+     * 
+     * NOTE that to prevent span, you may only do this if there is at least one unspent output under Dojo management.
      */
     setPaymail(paymail: string): Promise<void>
 
@@ -49,7 +54,10 @@ export interface NinjaApi {
      * @param {Object} obj.types The certificate types to filter certificates by
      * @returns {Promise<Object>} A success object with `status: "success"` and any found certificates
      */
-    findCertificates(certifiers?: string[] | object, types?: Record<string, string[]>): Promise<{ status: 'success', certificates: CertificateApi[] }>
+    findCertificates(
+        certifiers?: string[] | object,
+        types?: Record<string, string[]>
+    ): Promise<{ status: 'success', certificates: CertificateApi[] }>
 
     /**
      * Use this endpoint to store an incoming certificate.
@@ -289,15 +297,7 @@ export interface NinjaApi {
      *  status=success,
      *  note: human-readable, acknowledging the transaction
      */
-    submitDirectTransaction(params: {
-        protocol: string,
-        transaction,
-        senderIdentityKey,
-        note,
-        amount,
-        labels,
-        derivationPrefix
-    }): Promise<string>
+    submitDirectTransaction(params: SubmitDirectTransactionParams) : Promise<string>
 
     /**
      * Verifies an incoming Paymail transaction (deprecated, use submitDirectTransaction)
@@ -322,24 +322,22 @@ export type NinjaTransactionFailedHandler = (args: NinjaTransactionFailedApi) =>
 export type NinjaTransactionProcessedHandler = (args: NinjaTransactionProcessedApi) => Promise<void>
 
 export interface NinjaTransactionFailedApi {
-    inputs: unknown
+    inputs: Record<string, PendingTxInputApi>
     isOutgoing: boolean
     reference: string
-    error: unknown
+    error: CwiError
 }
 
 export interface NinjaTransactionProcessedApi {
-    inputs: PendingTxInputsApi
+    inputs: Record<string, PendingTxInputApi>
     outputs: PendingTxOutputApi[]
     isOutgoing: boolean
     reference: string
     txid: string
-    amount?: number
+    amount: number
     hex: string
-    outputMap?: unknown
-    senderIdentityKey?: string | null
     derivationPrefix?: string
-    // ...processResult from processTransaction call return
+    senderIdentityKey?: string
 }
 
 export interface NinjaOutputToRedeemApi {
@@ -364,4 +362,29 @@ export interface NinjaTxInputsApi extends EnvelopeEvidenceApi {
 export interface KeyPairApi {
     privateKey: string
     publicKey: string
+}
+
+export interface NinjaSubmitDirectTransactionOutputApi {
+    vout: number,
+    basket: string
+    derivationPrefix?: string,
+    derivationSuffix?: string,
+    customInstructions?: object
+}
+
+export interface NinjaSubmitDirectTransactionApi {
+    rawTx: string
+    inputs?: Record<string, EnvelopeEvidenceApi>
+    mapiResponses?: MapiResponseApi[]
+    proof?: TscMerkleProofApi
+    /**
+     * sparse array of outputs of interest where indices match vout numbers.
+     */
+    outputs: NinjaSubmitDirectTransactionOutputApi[]
+    referenceNumber?: string
+}
+
+export interface NinjaSubmitDirectTransactionResultApi {
+    transactionId: number
+    referenceNumber: string
 }

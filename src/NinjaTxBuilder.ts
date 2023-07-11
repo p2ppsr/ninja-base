@@ -2,18 +2,31 @@
 import bsvJs from 'babbage-bsv'
 import { getPaymentAddress, getPaymentPrivateKey } from 'sendover'
 
-import { CreateTransactionResultApi, DojoTxBuilderBase, DojoTxBuilderBaseOptions, invoice3241645161d8, verifyTruthy } from "@cwi/dojo-base";
+import { CreateTransactionResultApi, CreatingTxInputsApi, CreatingTxOutputApi, DojoTxBuilderBase, DojoTxBuilderBaseOptions, PendingTxApi, invoice3241645161d8, verifyTruthy } from "@cwi/dojo-base";
 import { NinjaApi, NinjaTxInputsApi } from "./Api/NinjaApi";
-import { ERR_INVALID_PARAMETER } from 'cwi-base';
+import { ERR_BAD_REQUEST, ERR_INVALID_PARAMETER, ERR_NOT_IMPLEMENTED } from 'cwi-base';
+import { NinjaBase } from './Base/NinjaBase';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface NinjaTxBuilderOptions extends DojoTxBuilderBaseOptions {
 }
 
 export class NinjaTxBuilder extends DojoTxBuilderBase {
-    
+
     constructor(public ninja: NinjaApi, public options?: NinjaTxBuilderOptions) {
         super(ninja.dojo, options)
+    }
+    
+    // TODO: For this to work, NinjaTxInputsApi with unlocking scripts need a way into
+    // the flow. 
+    static buildJsTxFromPendingTx(ninja: NinjaBase, ptx: PendingTxApi)
+     : {
+            tx: bsvJs.Transaction,
+            outputMap: Record<string, number>,
+            amount: number
+        }
+    {
+        throw new ERR_NOT_IMPLEMENTED()
     }
     
     static buildJsTxFromCreateTransactionResult(
@@ -26,14 +39,30 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
             amount: number
         }
     {
-       const changeKeys = ninja.getClientChangeKeyPair()
-
         const {
             inputs: txInputs,
             outputs: txOutputs,
             derivationPrefix,
             paymailHandle
         } = createResult
+
+        return this.buildJsTx(ninja, inputs, txInputs, txOutputs, derivationPrefix, paymailHandle)
+    }
+
+    static buildJsTx(
+        ninja: NinjaApi,
+        inputs: Record<string, NinjaTxInputsApi>,
+        txInputs: Record<string, CreatingTxInputsApi>,
+        txOutputs: CreatingTxOutputApi[],
+        derivationPrefix: string,
+        paymailHandle?: string
+        ) : {
+            tx: bsvJs.Transaction,
+            outputMap: Record<string, number>,
+            amount: number
+        }
+    {
+        const changeKeys = ninja.getClientChangeKeyPair()
 
         const tx = new bsvJs.Transaction()
 
