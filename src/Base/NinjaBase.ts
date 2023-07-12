@@ -118,7 +118,7 @@ export class NinjaBase implements NinjaApi {
                 recipientPaymail: t.recipientPaymail || '',
                 isOutgoing: t.isOutgoing,
                 note: t.note || '',
-                created_at: t.created_at?.toISOString() || '',
+                created_at: t.created_at instanceof Date ? t.created_at.toISOString() : t.created_at || '',
                 referenceNumber: t.referenceNumber || '',
                 labels: t.labels || []
             }))

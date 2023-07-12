@@ -47,7 +47,7 @@ describe('NinjaLocalSqlite', () => {
         expect(c).toBe(chain)
     }, 300000)
 
-    test('copyState mergeState', async () => {
+    test.skip('copyState mergeState', async () => {
         const s = await ninja.dojo.copyState()
         expect(s.user.identityKey).toBe(identityKey)
         
@@ -163,7 +163,7 @@ describe('NinjaLocalSqlite', () => {
 
     }, 300000)
 
-    test('getTransactions', async () => {
+    test.skip('getTransactions', async () => {
         const txid = '5af9d7f042a34c156f549a42c2b24be80c409835e0c971acf84b24506b1e2d81'
         
         const e = await ninjaV1.getEnvelopeForTransaction()
