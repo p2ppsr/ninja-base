@@ -129,20 +129,12 @@ export class DojoExpressClient implements DojoClientApi {
         throw new Error('Method not implemented.')
     }
 
-    async getJsonOrUndefined<T>(path: string) : Promise<T | undefined> {
-        if (this.authrite) {
-            const r = await this.authrite.createSignedRequest(path, {})
-            const v = <FetchStatus<T>>await r.json()
-            if (v.status === 'success')
-                return v.value
-            throw new Error(JSON.stringify(v))
-        } else {
-            const r = await fetch(`${this.serviceUrl}${path}`)
-            const v = <FetchStatus<T>>await r.json()
-            if (v.status === 'success')
-                return v.value
-            throw new Error(JSON.stringify(v))
-        }
+    async getJsonOrUndefined<T>(path: string): Promise<T | undefined> {
+        const r = await fetch(`${this.serviceUrl}${path}`)
+        const v = <FetchStatus<T>>await r.json()
+        if (v.status === 'success')
+            return v.value
+        throw new Error(JSON.stringify(v))
     }
 
     async getJson<T>(path: string): Promise<T> {
