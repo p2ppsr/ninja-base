@@ -1,5 +1,6 @@
 export * from './Api/NinjaApi'
 export * from './Base/NinjaBase'
+export * from './Base/DojoTxBuilderBase'
 export * from './DojoExpressClient'
 export * from './DojoTxBuilder'
 export * from './NinjaTxBuilder'

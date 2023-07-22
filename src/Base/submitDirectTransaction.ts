@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { ERR_INTERNAL, ERR_INVALID_PARAMETER } from "cwi-base"
+import { ERR_INTERNAL, ERR_INVALID_PARAMETER, ERR_DOJO_TX_BAD_AMOUNT } from "cwi-base"
 import { NinjaBase } from "./NinjaBase"
 import { processIncomingTransaction } from "./processIncomingTransaction"
-import { ERR_DOJO_TX_BAD_AMOUNT } from "@cwi/dojo-base"
 import { NinjaSubmitDirectTransactionParams, NinjaSubmitDirectTransactionResultApi } from "../Api/NinjaApi"
 
 export async function submitDirectTransaction(ninja: NinjaBase, params: NinjaSubmitDirectTransactionParams)

@@ -3,9 +3,9 @@ import bsvJs from 'babbage-bsv'
 
 import { getPaymentPrivateKey } from 'sendover'
 
-import { ERR_INTERNAL, verifyTruthy } from "cwi-base"
+import { ERR_DOJO_INVALID_SATOSHIS, ERR_DOJO_INVALID_SCRIPT, ERR_INTERNAL, verifyTruthy } from "cwi-base"
 
-import { ERR_DOJO_INVALID_SATOSHIS, ERR_DOJO_INVALID_SCRIPT, invoice3241645161d8 } from "@cwi/dojo-base";
+import { invoice3241645161d8 } from "@cwi/dojo-base";
 
 import { NinjaBase } from './NinjaBase'
 

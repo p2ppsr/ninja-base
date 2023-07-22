@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { CwiError, DojoClientApi, DojoCreateTxOutputApi, DojoCreatingTxInputsApi, DojoCreatingTxOutputApi } from "cwi-base";
-import { transactionSize } from "../utils/dojoHelpers";
-import { validateCustomInstructions, validateOutputDescription, validateSatoshis, validateScript, validateTxLabel } from "../utils/validateHelpers";
-import { ERR_DOJO_CREATE_TX_EMPTY } from "../ERR_DOJO_errors";
+import {
+    CwiError, DojoClientApi, DojoCreateTxOutputApi, DojoCreatingTxInputsApi, DojoCreatingTxOutputApi,
+    validateCustomInstructions, validateOutputDescription,
+    validateSatoshis, validateScript, validateTxLabel,
+    ERR_DOJO_CREATE_TX_EMPTY,
+    transactionSize
+} from "cwi-base";
 
 export interface DojoTxBuilderInputApi {
     txid: string
