@@ -2,30 +2,50 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Authrite } from "authrite-js"
 
-import { Chain, ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString } from "cwi-base";
-import { GetTransactionsOptions, GetTotalOfAmountsOptions, TransactionStatusApi, CertificateApi, verifyTruthy } from "@cwi/dojo-base";
-import { DojoApi, AvatarApi, PendingTxApi, GetTransactionOutputsOptions, ProcessTransactionResultApi } from "@cwi/dojo-base";
-import { DojoTxInputsApi, TxInputSelectionApi, CreateTxOutputApi, OutputGenerationApi } from "@cwi/dojo-base";
-import { FeeModelApi, GetTxWithOutputsProcessedResultApi, CreateTransactionResultApi } from "@cwi/dojo-base";
-import { GetTransactionsResultApi, GetTxWithOutputsResultApi, GetTransactionOutputsResultApi, TransactionTemplateApi } from "@cwi/dojo-base";
-import { KeyPairApi, NinjaApi, NinjaTransactionFailedHandler, NinjaTransactionProcessedHandler, NinjaTxInputsApi } from "../Api/NinjaApi";
+import {
+    Chain, DojoAvatarApi, DojoCertificateApi,
+    DojoClientApi,
+    DojoCreateTransactionResultApi,
+    DojoCreateTxOutputApi,
+    DojoFeeModelApi,
+    DojoGetTotalOfAmountsOptions,
+    DojoGetTransactionOutputsOptions,
+    DojoGetTransactionsOptions,
+    DojoOutputGenerationApi,
+    DojoPendingTxApi,
+    DojoProcessTransactionResultApi,
+    DojoSubmitDirectTransactionResultApi,
+    DojoTransactionStatusApi,
+    DojoTxInputSelectionApi,
+    DojoTxInputsApi,
+    ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString, verifyTruthy
+} from "cwi-base";
+
+import {
+    KeyPairApi, NinjaApi, NinjaCreateTransactionParams, NinjaGetTransactionOutputsResultApi, NinjaGetTransactionsResultApi, NinjaGetTxWithOutputsProcessedResultApi, NinjaGetTxWithOutputsResultApi, NinjaSubmitDirectTransactionParams, NinjaSubmitDirectTransactionResultApi, NinjaTransactionFailedHandler, NinjaTransactionProcessedHandler,
+    NinjaTxInputsApi
+} from "../Api/NinjaApi";
 
 import { processPendingTransactions } from "./processPendingTransactions";
 import { getTransactionWithOutputs } from "./getTransactionWithOutputs";
-import { SubmitDirectTransactionParams } from "./submitDirectTransaction";
 
 export class NinjaBase implements NinjaApi {
     chain?: Chain
-    authriteClient: Authrite
+    authrite?: Authrite
 
-    constructor(public dojo: DojoApi, authriteClient: Authrite) {
-        this.authriteClient = authriteClient
+    constructor(public dojo: DojoClientApi, clientPrivateKey?: string, authrite?: Authrite) {
+        if (clientPrivateKey && authrite) throw new ERR_INVALID_PARAMETER('clientPrivateKey or authrite', 'only one or the other valid')
+        if (clientPrivateKey)
+            this.authrite = new Authrite({ clientPrivateKey })
+        else
+            // clientPrivateKey is obtained during initialRequest processing...
+            this.authrite = new Authrite()
     }
 
     getClientChangeKeyPair(): KeyPairApi {
         const r: KeyPairApi = {
-            privateKey: this.authriteClient.clientPrivateKey,
-            publicKey: this.authriteClient.clientPublicKey            
+            privateKey: this.authrite.clientPrivateKey,
+            publicKey: this.authrite.clientPublicKey            
         }
         return r
     }
@@ -50,7 +70,7 @@ export class NinjaBase implements NinjaApi {
         return chain
     }
 
-    async findCertificates(certifiers?: string[] | object, types?: Record<string, string[]>): Promise<{ status: 'success', certificates: CertificateApi[] }> {
+    async findCertificates(certifiers?: string[] | object, types?: Record<string, string[]>): Promise<{ status: 'success', certificates: DojoCertificateApi[] }> {
         if (certifiers && !Array.isArray(certifiers)) {
             // Named Object Parameter Destructuring pattern conversion...
             types = certifiers['types']
@@ -62,11 +82,11 @@ export class NinjaBase implements NinjaApi {
         return { status: 'success', certificates: certs }
     }
 
-    async saveCertificate(certificate: CertificateApi | object): Promise<void> {
+    async saveCertificate(certificate: DojoCertificateApi | object): Promise<void> {
         if (certificate && typeof certificate === 'object' && certificate['certificate']) {
             certificate = certificate['certificate']
         }
-        const cert = certificate as CertificateApi
+        const cert = certificate as DojoCertificateApi
         await this.dojo.saveCertificate(cert)
     }
 
@@ -76,20 +96,20 @@ export class NinjaBase implements NinjaApi {
         return total
     }
 
-    async getTotalOfAmounts(options: GetTotalOfAmountsOptions): Promise<number> {
+    async getTotalOfAmounts(options: DojoGetTotalOfAmountsOptions): Promise<{ total: number}> {
         const direction = options.direction
         if (!direction) throw new ERR_MISSING_PARAMETER('direction', 'incoming or outgoing')
         delete options.direction
         const total = await this.dojo.getTotalOfAmounts(direction, options)
-        return total
+        return { total }
     }
 
-    async getNetOfAmounts(options?: GetTotalOfAmountsOptions | undefined): Promise<number> {
+    async getNetOfAmounts(options?: DojoGetTotalOfAmountsOptions | undefined): Promise<number> {
         const total = await this.dojo.getNetOfAmounts(options)
         return total
     }
     
-    async getAvatar(): Promise<AvatarApi> {
+    async getAvatar(): Promise<DojoAvatarApi> {
         const a = await this.dojo.getAvatar()
         return a
     }
@@ -98,7 +118,7 @@ export class NinjaBase implements NinjaApi {
         await this.dojo.setAvatar({ name, photoURL })
     }
 
-    async updateTransactionStatus(params: { reference: string, status: TransactionStatusApi }): Promise<void> {
+    async updateTransactionStatus(params: { reference: string, status: DojoTransactionStatusApi }): Promise<void> {
         await this.dojo.updateTransactionStatus(params.reference, params.status)
     }
     
@@ -106,9 +126,9 @@ export class NinjaBase implements NinjaApi {
         await this.dojo.updateOutpointStatus(params.txid, params.vout, params.spendable)
     }
 
-    async getTransactions(options?: GetTransactionsOptions): Promise<GetTransactionsResultApi> {
+    async getTransactions(options?: DojoGetTransactionsOptions): Promise<NinjaGetTransactionsResultApi> {
         const r = await this.dojo.getTransactions(options)
-        const rr: GetTransactionsResultApi = {
+        const rr: NinjaGetTransactionsResultApi = {
             totalTransactions: r.total,
             transactions: r.txs.map(t => ({
                 txid: t.txid,
@@ -126,18 +146,19 @@ export class NinjaBase implements NinjaApi {
         return rr
     }
 
-    async getPendingTransactions(referenceNumber?: string): Promise<PendingTxApi[]> {
+    async getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]> {
         const r = await this.dojo.getPendingTransactions(referenceNumber)
         return r
     }
 
-    async processPendingTransactions(onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler): Promise<void> {
+    async processPendingTransactions(onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler)
+    : Promise<void> {
         await processPendingTransactions(this, onTransactionProcessed, onTransactionFailed)
     }
 
-    async getTransactionOutputs(options?: GetTransactionOutputsOptions): Promise<GetTransactionOutputsResultApi[]> {
+    async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<NinjaGetTransactionOutputsResultApi[]> {
         const r = await this.dojo.getTransactionOutputs(options)
-        const gtors: GetTransactionOutputsResultApi[] = r.outputs
+        const gtors: NinjaGetTransactionOutputsResultApi[] = r.outputs
             .filter(x => x.txid && typeof x.vout === 'number' && typeof x.amount === 'number' && x.outputScript)
             .map(x => ({
             txid: x.txid || '',
@@ -154,20 +175,20 @@ export class NinjaBase implements NinjaApi {
         submittedTransaction: string | Buffer,
         reference: string,
         outputMap: Record<string, number>
-    }): Promise<ProcessTransactionResultApi> {
+    }): Promise<DojoProcessTransactionResultApi> {
         const r = await this.dojo.processTransaction(params.submittedTransaction, params.reference, params.outputMap)
         return r
     }
     
     async getTransactionWithOutputs(params: {
-        outputs: CreateTxOutputApi[],
-        labels: string[],
-        inputs: Record<string, NinjaTxInputsApi>,
-        note: string,
-        recipient: string,
+        outputs: DojoCreateTxOutputApi[],
+        labels?: string[],
+        inputs?: Record<string, NinjaTxInputsApi>,
+        note?: string,
+        recipient?: string,
         autoProcess?: boolean | undefined,
         feePerKb?: number | undefined
-    }): Promise<GetTxWithOutputsResultApi | GetTxWithOutputsProcessedResultApi> {
+    }): Promise<NinjaGetTxWithOutputsResultApi | NinjaGetTxWithOutputsProcessedResultApi> {
         const r = await getTransactionWithOutputs(this,
             params.outputs,
             params.labels,
@@ -179,16 +200,7 @@ export class NinjaBase implements NinjaApi {
         return r
     }
     
-    async createTransaction(params: {
-        inputs: Record<string, DojoTxInputsApi>,
-        inputSelection: TxInputSelectionApi,
-        outputs: CreateTxOutputApi[],
-        outputGeneration: OutputGenerationApi,
-        fee: FeeModelApi,
-        labels: string[],
-        note?: string,
-        recipient?: string
-    }): Promise<CreateTransactionResultApi> {
+    async createTransaction(params: NinjaCreateTransactionParams): Promise<DojoCreateTransactionResultApi> {
         const r = await this.dojo.createTransaction(
             params.inputs,
             params.inputSelection,
@@ -203,13 +215,16 @@ export class NinjaBase implements NinjaApi {
     }
 
 
-    submitDirectTransaction(params: SubmitDirectTransactionParams)
-    : Promise<string> {
-        throw new Error("Method not implemented.");
+    async submitDirectTransaction(params: NinjaSubmitDirectTransactionParams)
+    : Promise<NinjaSubmitDirectTransactionResultApi> {
+        const r = await this.dojo.submitDirectTransaction(
+            params.protocol,
+            params.transaction,
+            params.senderIdentityKey,
+            params.note,
+            params.labels,
+            params.derivationPrefix
+        )
+        return r
     }
-
-    verifyIncomingTransaction({ senderPaymail, senderIdentityKey, referenceNumber, description, amount }: { senderPaymail: any; senderIdentityKey: any; referenceNumber: any; description: any; amount: any; }): Promise<boolean> {
-        throw new Error("Method not implemented.");
-    }
-
 }

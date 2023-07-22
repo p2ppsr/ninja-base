@@ -1,5 +1,5 @@
 {
-  "name": "@cwi/ninja-base",
+  "name": "ninja-base",
   "version": "0.1.0",
   "description": "Base level functions, classes, interfaces for Ninja",
   "author": "Peer-to-peer Privacy Systems Research LLC",
@@ -54,15 +54,9 @@
     "utxoninja": "^0.2.49"
   },
   "dependencies": {
-    "@cwi/chaintracks-base": "file:../chaintracks-base",
-    "@cwi/chaintracks-core": "file:../chaintracks-core",
-    "@cwi/dojo-base": "file:../dojo-base",
-    "@cwi/dojo-core": "file:../dojo-core",
-    "@cwi/dojo-knex": "file:../dojo-knex",
-    "@cwi/dojo-watchman": "file:../dojo-watchman",
-    "authrite-utils": "^0.1.15",
+    "authrite-js": "^0.2.15",
+    "authrite-utils": "^0.1.16",
     "babbage-bsv": "^0.1.1",
-    "bsv-is-final-tx": "^0.1.1",
     "crypto": "^1.0.1",
     "cwi-base": "file:../cwi-base",
     "cwi-external-services": "file:../cwi-external-services",

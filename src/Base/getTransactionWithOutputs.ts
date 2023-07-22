@@ -1,21 +1,22 @@
-import { CreateTxOutputApi, DojoTxInputsApi, GetTxWithOutputsProcessedResultApi, GetTxWithOutputsResultApi } from "@cwi/dojo-base";
 import { NinjaBase } from "./NinjaBase";
-import { NinjaTxInputsApi } from "../Api/NinjaApi";
+import { NinjaGetTxWithOutputsProcessedResultApi, NinjaGetTxWithOutputsResultApi, NinjaTxInputsApi } from "../Api/NinjaApi";
 import { NinjaTxBuilder } from "../NinjaTxBuilder";
+import { DojoCreateTxOutputApi, DojoTxInputsApi } from "cwi-base";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 export async function getTransactionWithOutputs(
     ninja: NinjaBase,
-    outputs: CreateTxOutputApi[],
-    labels: string[],
-    inputs: Record<string, NinjaTxInputsApi>,
-    note: string,
-    recipient: string,
+    outputs: DojoCreateTxOutputApi[],
+    labels?: string[],
+    inputs?: Record<string, NinjaTxInputsApi>,
+    note?: string,
+    recipient?: string,
     autoProcess?: boolean,
     feePerKb?: number
-): Promise<GetTxWithOutputsResultApi | GetTxWithOutputsProcessedResultApi> {
+): Promise<NinjaGetTxWithOutputsResultApi | NinjaGetTxWithOutputsProcessedResultApi> {
 
     const dojo = ninja.dojo
+    inputs ||= {}
 
     // Convert NinjaTxInputsApi to DojoTxInputsApi to protect unlocking scripts.
     const dojoInputs: Record<string, DojoTxInputsApi> = Object.fromEntries(Object.entries(inputs).map(([k, v]) => ([k, {

@@ -1,4 +1,7 @@
 export * from '@cwi/dojo-base'
 export * from './Api/NinjaApi'
 export * from './Base/NinjaBase'
+export * from './DojoExpressClient'
+export * from './DojoTxBuilder'
 export * from './NinjaTxBuilder'
+export * from './Ninja'

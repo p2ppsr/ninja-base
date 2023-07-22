@@ -2,10 +2,10 @@
 import bsvJs from 'babbage-bsv'
 import { getPaymentAddress, getPaymentPrivateKey } from 'sendover'
 
-import { CreateTransactionResultApi, CreatingTxInputsApi, CreatingTxOutputApi, DojoTxBuilderBase, DojoTxBuilderBaseOptions, PendingTxApi, invoice3241645161d8, verifyTruthy } from "@cwi/dojo-base";
 import { NinjaApi, NinjaTxInputsApi } from "./Api/NinjaApi";
-import { ERR_BAD_REQUEST, ERR_INVALID_PARAMETER, ERR_NOT_IMPLEMENTED } from 'cwi-base';
+import { DojoCreateTransactionResultApi, DojoCreatingTxInputsApi, DojoCreatingTxOutputApi, DojoPendingTxApi, ERR_INVALID_PARAMETER, ERR_NOT_IMPLEMENTED, verifyTruthy } from 'cwi-base';
 import { NinjaBase } from './Base/NinjaBase';
+import { DojoTxBuilderBase, DojoTxBuilderBaseOptions, invoice3241645161d8 } from '@cwi/dojo-base';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface NinjaTxBuilderOptions extends DojoTxBuilderBaseOptions {
@@ -19,7 +19,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     
     // TODO: For this to work, NinjaTxInputsApi with unlocking scripts need a way into
     // the flow. 
-    static buildJsTxFromPendingTx(ninja: NinjaBase, ptx: PendingTxApi)
+    static buildJsTxFromPendingTx(ninja: NinjaBase, ptx: DojoPendingTxApi)
      : {
             tx: bsvJs.Transaction,
             outputMap: Record<string, number>,
@@ -32,7 +32,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     static buildJsTxFromCreateTransactionResult(
         ninja: NinjaApi,
         inputs: Record<string, NinjaTxInputsApi>,
-        createResult: CreateTransactionResultApi
+        createResult: DojoCreateTransactionResultApi
         ) : {
             tx: bsvJs.Transaction,
             outputMap: Record<string, number>,
@@ -52,8 +52,8 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     static buildJsTx(
         ninja: NinjaApi,
         inputs: Record<string, NinjaTxInputsApi>,
-        txInputs: Record<string, CreatingTxInputsApi>,
-        txOutputs: CreatingTxOutputApi[],
+        txInputs: Record<string, DojoCreatingTxInputsApi>,
+        txOutputs: DojoCreatingTxOutputApi[],
         derivationPrefix: string,
         paymailHandle?: string
         ) : {

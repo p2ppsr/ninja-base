@@ -3,11 +3,10 @@ import bsvJs from 'babbage-bsv'
 
 import { getPaymentPrivateKey } from 'sendover'
 
-import { CwiError, ERR_INTERNAL } from "cwi-base"
+import { ERR_INTERNAL, verifyTruthy } from "cwi-base"
 
-import { ERR_DOJO_INVALID_SATOSHIS, ERR_DOJO_INVALID_SCRIPT, PendingTxApi, invoice3241645161d8, verifyTruthy } from "@cwi/dojo-base";
+import { ERR_DOJO_INVALID_SATOSHIS, ERR_DOJO_INVALID_SCRIPT, invoice3241645161d8 } from "@cwi/dojo-base";
 
-import { NinjaSubmitDirectTransactionApi, NinjaTransactionFailedHandler, NinjaTransactionProcessedApi, NinjaTransactionProcessedHandler } from "../Api/NinjaApi";
 import { NinjaBase } from './NinjaBase'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

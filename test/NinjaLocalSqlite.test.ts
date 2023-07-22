@@ -4,14 +4,12 @@ import { Dojo } from '@cwi/dojo-core'
 import { NinjaApi } from '../src/Api/NinjaApi'
 import { NinjaBase } from '../src/Base/NinjaBase'
 
-import { default as NinjaV1 } from 'utxoninja'
-
+import bsvJs from 'babbage-bsv'
 import { promises as fsp } from 'fs'
-import { GetTotalOfAmountsOptions, GetTransactionsOptions } from '@cwi/dojo-base'
+import { DojoGetTotalOfAmountsOptions, DojoGetTransactionsOptions } from '@cwi/dojo-base'
 
 describe('NinjaLocalSqlite', () => {
     let ninja: NinjaApi
-    let ninjaV1: NinjaV1
     const identityKey = '02a1c81d78f5c404fd34c418525ba4a3b52be35328c30e67234bfcf30eb8a064d8' // tone
     const chain: Chain = 'test'
     const dataFolder = './test/data/NinjaLocalSqlite/'
@@ -23,9 +21,7 @@ describe('NinjaLocalSqlite', () => {
 
         const dojo = new Dojo(chain, dataFolder)
         await dojo.authenticate(identityKey, true)
-        ninja = new NinjaBase(dojo, null)
-        
-        ninjaV1 = new NinjaV1({ config: { dojoURL: 'https://staging-dojo.babbage.systems' } })
+        ninja = new NinjaBase(dojo)
     }, 300000)
 
     test('getPaymail', async () => {
@@ -47,16 +43,6 @@ describe('NinjaLocalSqlite', () => {
         expect(c).toBe(chain)
     }, 300000)
 
-    test.skip('copyState mergeState', async () => {
-        const s = await ninja.dojo.copyState()
-        expect(s.user.identityKey).toBe(identityKey)
-        
-        const { diffs, inserts } = await ninja.dojo.mergeState(s, false)
-        expect(diffs).toBe(0)
-        expect(inserts).toBe(0)
-
-    }, 300000)
-    
     test('findCertificates', async () => {
         const certifiers = ['025684945b734e80522f645b9358d4ac5b49e5180444b5911bf8285a7230edee8b']
         const types = {
@@ -83,15 +69,9 @@ describe('NinjaLocalSqlite', () => {
         expect(certs.certificates[0].fields?.domain.length).toBeGreaterThan(0)
         expect(certs.certificates[0].fields?.stake).toBeUndefined()
 
-        const certsV1 = await ninjaV1.findCertificates(p)
-        expect(certsV1.certificates.length).toBe(3)
-        expect(certsV1.certificates[0].fields?.domain.length).toBeGreaterThan(0)
-        expect(certsV1.certificates[0].fields?.stake.length).toBeGreaterThan(0) // API Difference
     }, 300000)
 
     test('getTotalValue', async () => {
-        const t0 = await ninjaV1.getTotalValue()
-        expect(t0.total).toBeGreaterThan(0)
 
         let t = await ninja.getTotalValue()
         expect(t).toBe(183584)
@@ -104,12 +84,10 @@ describe('NinjaLocalSqlite', () => {
     }, 300000)
 
     test('getTotalOfAmounts', async () => {
-        const o: GetTotalOfAmountsOptions = { direction: 'incoming' }
-        const t0 = await ninjaV1.getTotalOfAmounts(o)
-        expect(t0.total).toBeGreaterThan(0)
+        const o: DojoGetTotalOfAmountsOptions = { direction: 'incoming' }
 
         const t = await ninja.getTotalOfAmounts(o)
-        expect(t).toBeGreaterThan(0)
+        expect(t.total).toBeGreaterThan(0)
 
         const n = await ninja.getNetOfAmounts()
         expect(n).toBe(-115416)
@@ -117,44 +95,32 @@ describe('NinjaLocalSqlite', () => {
     }, 300000)
 
     test('getAvatar', async () => {
-        const t0 = await ninjaV1.getAvatar()
-        expect(t0.name).toBe('TonesNotes')
-        expect(t0.photoURL).toBe('uhrp:XUTED5T3rtNwrnh4m2inPALayvJ8CJP1v2pcMnDWKwYs5WdZbi3M')
-        
         const t = await ninja.getAvatar()
-        expect(t.name).toBe(t0.name)
-        expect(t.photoURL).toBe(t0.photoURL)
+        expect(t.name).toBe('TonesNotes')
+        expect(t.photoURL).toBe('uhrp:XUTED5T3rtNwrnh4m2inPALayvJ8CJP1v2pcMnDWKwYs5WdZbi3M')
 
         await ninja.setAvatar('bob', 'foobar')
         const t1 = await ninja.getAvatar()
         expect(t1.name).toBe('bob')
         expect(t1.photoURL).toBe('foobar')
 
-        await ninja.setAvatar(t0.name, t0.photoURL)
+        await ninja.setAvatar(t.name, t.photoURL)
         const t2 = await ninja.getAvatar()
-        expect(t2.name).toBe(t0.name)
-        expect(t2.photoURL).toBe(t0.photoURL)
+        expect(t2.name).toBe(t.name)
+        expect(t2.photoURL).toBe(t.photoURL)
     }, 300000)
 
     test('getTransactions', async () => {
-        const a0 = await ninjaV1.getTransactions()
-        expect(a0.totalTransactions).toBeGreaterThan(0)
-        expect(a0.transactions.length).toBe(25)
 
         const b0 = await ninja.getTransactions()
         expect(b0.totalTransactions).toBeGreaterThan(0)
         expect(b0.transactions.length).toBe(25)
         
-        const options: GetTransactionsOptions = {
+        const options: DojoGetTransactionsOptions = {
            limit: 30,
            offset: 0,
            referenceNumber: '3f7bdbdd00b96d'
         }
-
-        const a1 = await ninjaV1.getTransactions(options)
-        expect(a1.totalTransactions).toBe(1)
-        expect(a1.transactions.length).toBe(1)
-        expect(a1.transactions[0].referenceNumber).toBe('3f7bdbdd00b96d')
 
         const b1 = await ninja.getTransactions(options)
         expect(b1.totalTransactions).toBe(1)
@@ -163,9 +129,4 @@ describe('NinjaLocalSqlite', () => {
 
     }, 300000)
 
-    test.skip('getTransactions', async () => {
-        const txid = '5af9d7f042a34c156f549a42c2b24be80c409835e0c971acf84b24506b1e2d81'
-        
-        const e = await ninjaV1.getEnvelopeForTransaction()
-    }, 300000)
 })

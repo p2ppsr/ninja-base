@@ -3,20 +3,10 @@
 import { ERR_INTERNAL, ERR_INVALID_PARAMETER } from "cwi-base"
 import { NinjaBase } from "./NinjaBase"
 import { processIncomingTransaction } from "./processIncomingTransaction"
-import { ERR_DOJO_TX_BAD_AMOUNT, PendingTxApi, SubmitDirectTransactionApi, SubmitDirectTransactionResultApi } from "@cwi/dojo-base"
-import { NinjaSubmitDirectTransactionApi, NinjaSubmitDirectTransactionResultApi, NinjaTransactionProcessedApi } from "../Api/NinjaApi"
+import { ERR_DOJO_TX_BAD_AMOUNT } from "@cwi/dojo-base"
+import { NinjaSubmitDirectTransactionParams, NinjaSubmitDirectTransactionResultApi } from "../Api/NinjaApi"
 
-export interface SubmitDirectTransactionParams {
-    protocol: string,
-    transaction: NinjaSubmitDirectTransactionApi,
-    senderIdentityKey: string,
-    note: string,
-    labels: string[],
-    derivationPrefix?: string
-    amount?: number,
-}
-
-export async function submitDirectTransaction(ninja: NinjaBase, params: SubmitDirectTransactionParams)
+export async function submitDirectTransaction(ninja: NinjaBase, params: NinjaSubmitDirectTransactionParams)
 : Promise<NinjaSubmitDirectTransactionResultApi>
 {
     const {
@@ -43,7 +33,7 @@ export async function submitDirectTransaction(ninja: NinjaBase, params: SubmitDi
     return submitResult
 }
 
-function validateSubmitDirectTransactionPrams(params: SubmitDirectTransactionParams) : SubmitDirectTransactionParams {
+function validateSubmitDirectTransactionPrams(params: NinjaSubmitDirectTransactionParams) : NinjaSubmitDirectTransactionParams {
     if (typeof params.senderIdentityKey !== 'string') throw new ERR_INVALID_PARAMETER('senderIdentityKey', 'valid')
     if (typeof params.transaction !== 'object') throw new ERR_INVALID_PARAMETER('transaction', 'an object')
     if (!Array.isArray(params.transaction.outputs)) throw new ERR_INVALID_PARAMETER('transaction.outputs', 'an array')
