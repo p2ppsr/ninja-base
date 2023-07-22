@@ -145,29 +145,28 @@ export class DojoExpressClient implements DojoClientApi {
     }
 
     async postJsonOrUndefined<T, R>(path: string, params: T) : Promise<R | undefined> {
-        if (this.authrite) {
-            const r = await this.authrite.createSignedRequest(path, params)
-            if (r.status === 'success') {
-                console.log("Yeah!")
+        let s: FetchStatus<R>
+        try {
+            if (this.authrite) {
+                // eslint-disable-next-line no-debugger
+                s = <FetchStatus<R>>await this.authrite.createSignedRequest(path, params)
+            } else {
+                const headers = {}
+                headers['Content-Type'] = 'application/json'
+                const r = await fetch(`${this.serviceUrl}${path}`, {
+                    body: JSON.stringify(params),
+                    method: 'POST',
+                    headers,
+                    //cache: 'no-cache',
+                })
+                s = <FetchStatus<R>>await r.json()
             }
-        } else {
-            const headers = {}
-            headers['Content-Type'] = 'application/json'
-            const r = await fetch(`${this.serviceUrl}${path}`, {
-                body: JSON.stringify(params),
-                method: 'POST',
-                headers,
-                //cache: 'no-cache',
-            })
-            try {
-                const s = <FetchStatus<R>>await r.json()
-                if (s.status === 'success')
-                    return s.value
-                throw new Error(JSON.stringify(s))
-            } catch (e) {
-                console.log(`Exception: ${JSON.stringify(e)}`)
-                throw new Error(JSON.stringify(e))
-            }
+            if (s.status === 'success')
+                return s.value
+            throw new Error(JSON.stringify(s))
+        } catch (e) {
+            console.log(`Exception: ${JSON.stringify(e)}`)
+            throw new Error(JSON.stringify(e))
         }
     }
 
