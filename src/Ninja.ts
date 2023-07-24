@@ -1,5 +1,5 @@
-import { Authrite } from "authrite-js"
-import { Chain, DojoClientApi } from "cwi-base";
+import { AuthriteClient } from "authrite-js"
+import { Chain, DojoClientApi, ERR_INVALID_PARAMETER } from "cwi-base";
 import { NinjaBase } from "./Base/NinjaBase";
 import { DojoExpressClient, DojoExpressClientOptions } from "./DojoExpressClient";
 
@@ -19,14 +19,16 @@ export interface NinjaV1Params {
  * "Drop-in-replacement" for the original (v1) Ninja
  */
 export class Ninja extends NinjaBase {
-    constructor(dojo: NinjaV1Params | DojoClientApi, clientPrivateKey?: string, authrite?: Authrite) {
-        if (dojo['privateKey'] || dojo['config']) {
+    constructor(dojo: NinjaV1Params | DojoClientApi, clientPrivateKey?: string, authrite?: AuthriteClient) {
+        if (!dojo['getUser']) {
+            // Support for V1 params style construction
+            if (clientPrivateKey || authrite) throw new ERR_INVALID_PARAMETER('clientPrivateKey and authrite', 'undefined when using NinjaV1Params')
             const params = <NinjaV1Params>dojo
-            clientPrivateKey = params.privateKey
             const serviceUrl = params.config?.dojoURL || 'https://dojo.babbage.systems'
             const chain: Chain = serviceUrl === 'https://dojo.babbage.systems' ? 'main' : 'test'
+            authrite = new AuthriteClient(serviceUrl, { clientPrivateKey: params.privateKey })
             const options: DojoExpressClientOptions = {
-                useAuthrite: true
+                authrite
             }
             dojo = new DojoExpressClient(chain, serviceUrl, options)
         } else

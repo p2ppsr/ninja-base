@@ -14,6 +14,15 @@ import { DojoTxBuilderBase, DojoTxBuilderBaseOptions } from './Base/DojoTxBuilde
 export interface NinjaTxBuilderOptions extends DojoTxBuilderBaseOptions {
 }
 
+/**
+ * NinjaTxBuilder is intended to complement DojoTxBuilder, implementing the signing functions
+ * that only Ninja can do with access to private keys.
+ *
+ * Ultimately most of the generically useful code that supports building and signing
+ * actual bitcoin transactions should be collected here.
+ * 
+ * This is a work in progress...
+ */
 export class NinjaTxBuilder extends DojoTxBuilderBase {
 
     constructor(public ninja: NinjaApi, public options?: NinjaTxBuilderOptions) {

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Authrite } from "authrite-js"
+import { AuthriteClient } from "authrite-js"
 
 import {
     Chain, DojoAvatarApi, DojoCertificateApi,
@@ -31,21 +31,19 @@ import { getTransactionWithOutputs } from "./getTransactionWithOutputs";
 
 export class NinjaBase implements NinjaApi {
     chain?: Chain
-    authrite?: Authrite
 
-    constructor(public dojo: DojoClientApi, clientPrivateKey?: string, authrite?: Authrite) {
-        if (clientPrivateKey && authrite) throw new ERR_INVALID_PARAMETER('clientPrivateKey or authrite', 'only one or the other valid')
-        if (clientPrivateKey)
-            this.authrite = new Authrite({ clientPrivateKey })
-        else
-            // clientPrivateKey is obtained during initialRequest processing...
-            this.authrite = new Authrite()
+    constructor(public dojo: DojoClientApi, public clientPrivateKey?: string, public authrite?: AuthriteClient) {
+    }
+
+    async authenticate(identityKey?: string, addIfNew?: boolean): Promise<void> {
+        await this.dojo.authenticate(identityKey, addIfNew)
     }
 
     getClientChangeKeyPair(): KeyPairApi {
+        const ac = this.authrite.authrite
         const r: KeyPairApi = {
-            privateKey: this.authrite.clientPrivateKey,
-            publicKey: this.authrite.clientPublicKey            
+            privateKey: ac.clientPrivateKey,
+            publicKey: ac.clientPublicKey            
         }
         return r
     }

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
-    Chain, DojoAvatarApi, DojoCertificateApi, DojoClientApi, DojoClientUserApi, DojoCreateTransactionResultApi, DojoCreateTxOutputApi, DojoFeeModelApi, DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions, DojoGetTransactionsOptions, DojoOutputApi, DojoOutputGenerationApi, DojoPendingTxApi, DojoStatsApi, DojoSubmitDirectTransactionApi, DojoSubmitDirectTransactionResultApi, DojoTransactionApi, DojoTransactionStatusApi, DojoTxInputSelectionApi, DojoTxInputsApi, ERR_CHAIN, ERR_INTERNAL, ERR_UNAUTHORIZED, EnvelopeApi, DojoProcessTransactionResultApi
+    Chain, DojoAvatarApi, DojoCertificateApi, DojoClientApi, DojoClientUserApi, DojoCreateTransactionResultApi, DojoCreateTxOutputApi, DojoFeeModelApi, DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions, DojoGetTransactionsOptions, DojoOutputApi, DojoOutputGenerationApi, DojoPendingTxApi, DojoStatsApi, DojoSubmitDirectTransactionApi, DojoSubmitDirectTransactionResultApi, DojoTransactionApi, DojoTransactionStatusApi, DojoTxInputSelectionApi, DojoTxInputsApi, ERR_CHAIN, ERR_INTERNAL, ERR_UNAUTHORIZED, EnvelopeApi, DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -15,7 +15,7 @@ interface FetchStatus<T> {
 }
 
 export interface DojoExpressClientOptions {
-    useAuthrite: boolean
+    authrite?: AuthriteClient
 
     identityKey?: string
 }
@@ -26,7 +26,6 @@ export interface DojoExpressClientOptions {
 export class DojoExpressClient implements DojoClientApi {
     static createDojoExpressClientOptions() : DojoExpressClientOptions {
         const options: DojoExpressClientOptions = {
-            useAuthrite: false
         }
         return options
     }
@@ -41,9 +40,7 @@ export class DojoExpressClient implements DojoClientApi {
 
     constructor (public chain: Chain, public serviceUrl: string, options?: DojoExpressClientOptions) {
         this.options = options || DojoExpressClient.createDojoExpressClientOptions()
-        if (this.options.useAuthrite) {
-            this.authrite = new AuthriteClient(serviceUrl)
-        }
+        this.authrite = options?.authrite
     }
 
     //
@@ -59,74 +56,110 @@ export class DojoExpressClient implements DojoClientApi {
     
     async stats(): Promise<DojoStatsApi> { return await this.getJson('/stats') }
 
-    async authenticate(identityKey: string, addIfNew: boolean): Promise<void> {
-        this._user = await this.postJson('/authenticate', { identityKey, addIfNew })
-        if (!this._user) throw new ERR_UNAUTHORIZED('Unknown identityKey')
-    }
+    async authenticate(identityKey?: string, addIfNew?: boolean): Promise<void> {
 
-    verifyAuthenticated() {
-        if (!this.isAuthenticated) throw new ERR_UNAUTHORIZED('This Dojo Api requires authentication.')
+        this._user = await this.postJson('/authenticate', { identityKey, addIfNew })
+
+        if (!this._user) throw new ERR_UNAUTHORIZED('Unknown identityKey or unauthorized.')
+
+        if (identityKey && identityKey !== this._user.identityKey)
+            throw new ERR_INVALID_PARAMETER('identityKey', 'same as Authrite authenticated idenity')
     }
 
     getUser(): DojoClientUserApi {
-        this.verifyAuthenticated()
+        if (!this.isAuthenticated) throw new ERR_UNAUTHORIZED('Must already be autheticated.')
         if (!this._user) throw new ERR_INTERNAL()
         return this._user
+    }
+
+    async verifyAuthenticated() : Promise<void> {
+        if (!this.isAuthenticated)
+            await this.authenticate()
     }
 
     async getCurrentPaymails(): Promise<string[]> {
         this.verifyAuthenticated()
         return await this.postJson('/getCurrentPaymails', { identityKey: this.identityKey })
     }
-
-    getAvatar(): Promise<DojoAvatarApi> {
-        throw new Error('Method not implemented.')
+    async getAvatar(): Promise<DojoAvatarApi> {
+        this.verifyAuthenticated()
+        return await this.postJson('/getAvatar', { identityKey: this.identityKey })
     }
-    setAvatar(avatar: DojoAvatarApi): Promise<void> {
-        throw new Error('Method not implemented.')
+    async setAvatar(avatar: DojoAvatarApi): Promise<void> {
+        this.verifyAuthenticated()
+        return await this.postJson('/setAvatar', { identityKey: this.identityKey, avatar })
     }
-
-    saveCertificate(certificate: DojoCertificateApi): Promise<number> {
-        throw new Error('Method not implemented.')
+    async saveCertificate(certificate: DojoCertificateApi): Promise<number> {
+        this.verifyAuthenticated()
+        return await this.postJson('/saveCertificate', { identityKey: this.identityKey, certificate })
     }
-    findCertificates(certifiers?: string[], types?: Record<string, string[]>): Promise<DojoCertificateApi[]> {
-        throw new Error('Method not implemented.')
+    async findCertificates(certifiers?: string[], types?: Record<string, string[]>): Promise<DojoCertificateApi[]> {
+        this.verifyAuthenticated()
+        return await this.postJson('/findCertificate', { identityKey: this.identityKey, certifiers, types })
     }
-    getTotalOfUnspentOutputs(basket: string): Promise<number> {
-        throw new Error('Method not implemented.')
+    async getTotalOfUnspentOutputs(basket: string): Promise<number | undefined> {
+        this.verifyAuthenticated()
+        return await this.postJson('/getTotalOfUnspentOutputs', { identityKey: this.identityKey, basket })
     }
-    updateOutpointStatus(txid: string, vout: number, spendable: boolean): Promise<void> {
-        throw new Error('Method not implemented.')
+    async updateOutpointStatus(txid: string, vout: number, spendable: boolean): Promise<void> {
+        this.verifyAuthenticated()
+        await this.postJson('/updateOutpointStatus', { identityKey: this.identityKey, txid, vout, spendable })
     }
-    getTotalOfAmounts(direction: 'incoming' | 'outgoing', options?: DojoGetTotalOfAmountsOptions): Promise<number> {
-        throw new Error('Method not implemented.')
+    async getTotalOfAmounts(direction: 'incoming' | 'outgoing', options?: DojoGetTotalOfAmountsOptions): Promise<number> {
+        this.verifyAuthenticated()
+        return await this.postJson('/getTotalOfAmounts', { identityKey: this.identityKey, direction, options })
     }
-    getNetOfAmounts(options?: DojoGetTotalOfAmountsOptions): Promise<number> {
-        throw new Error('Method not implemented.')
+    async getNetOfAmounts(options?: DojoGetTotalOfAmountsOptions): Promise<number> {
+        this.verifyAuthenticated()
+        return await this.postJson('/getNetOfAmounts', { identityKey: this.identityKey, options })
     }
-    updateTransactionStatus(reference: string, status: DojoTransactionStatusApi): Promise<void> {
-        throw new Error('Method not implemented.')
+    async updateTransactionStatus(reference: string, status: DojoTransactionStatusApi): Promise<void> {
+        this.verifyAuthenticated()
+        await this.postJson('/updateTransactionStatus', { identityKey: this.identityKey, reference, status })
     }
-    getTransactions(options?: DojoGetTransactionsOptions): Promise<{ txs: DojoTransactionApi[]; total: number }> {
-        throw new Error('Method not implemented.')
+    async getTransactions(options?: DojoGetTransactionsOptions): Promise<{ txs: DojoTransactionApi[]; total: number }> {
+        this.verifyAuthenticated()
+        return await this.postJson('/getTransactions', { identityKey: this.identityKey, options })
     }
-    getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]> {
-        throw new Error('Method not implemented.')
+    async getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]> {
+        this.verifyAuthenticated()
+        return await this.postJson('/getPendingTransactions', { identityKey: this.identityKey, referenceNumber })
     }
-    getEnvelopeForTransaction(txid: string) : Promise<EnvelopeApi | undefined> {
-        throw new Error('Method not implemented.')
+    async getEnvelopeForTransaction(txid: string) : Promise<EnvelopeApi | undefined> {
+        this.verifyAuthenticated()
+        return await this.postJson('/getEnvelopeForTransaction', { identityKey: this.identityKey, txid })
     }
-    getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<{ outputs: DojoOutputApi[]; total: number }> {
-        throw new Error('Method not implemented.')
+    async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<{ outputs: DojoOutputApi[]; total: number }> {
+        this.verifyAuthenticated()
+        return await this.postJson('/getTransactionOutputs', { identityKey: this.identityKey, options })
     }
-    createTransaction(inputs: Record<string, DojoTxInputsApi>, inputSelection: DojoTxInputSelectionApi | undefined, outputs: DojoCreateTxOutputApi[], outputGeneration: DojoOutputGenerationApi | undefined, feeModel: DojoFeeModelApi, labels?: string[] | undefined, note?: string | undefined, recipient?: string | undefined): Promise<DojoCreateTransactionResultApi> {
-        throw new Error('Method not implemented.')
+    async createTransaction(
+        inputs: Record<string, DojoTxInputsApi>,
+        inputSelection: DojoTxInputSelectionApi | undefined,
+        outputs: DojoCreateTxOutputApi[],
+        outputGeneration?: DojoOutputGenerationApi,
+        feeModel?: DojoFeeModelApi,
+        labels?: string[] | undefined,
+        note?: string | undefined,
+        recipient?: string | undefined
+    ): Promise<DojoCreateTransactionResultApi> {
+        this.verifyAuthenticated()
+        return await this.postJson('/createTransaction', { identityKey: this.identityKey, inputs, inputSelection, outputs, outputGeneration, feeModel, labels, note, recipient })
     }
-    processTransaction(rawTx: string | Buffer, reference: string, outputMap: Record<string, number>): Promise<DojoProcessTransactionResultApi> {
-        throw new Error('Method not implemented.')
+    async processTransaction(rawTx: string | Buffer, reference: string, outputMap: Record<string, number>): Promise<DojoProcessTransactionResultApi> {
+        this.verifyAuthenticated()
+        return await this.postJson('/processTransaction', { identityKey: this.identityKey, rawTx: asString(rawTx), reference, outputMap })
     }
-    submitDirectTransaction(protocol: string, transaction: DojoSubmitDirectTransactionApi, senderIdentityKey: string, note: string, labels: string[], derivationPrefix?: string | undefined): Promise<DojoSubmitDirectTransactionResultApi> {
-        throw new Error('Method not implemented.')
+    async submitDirectTransaction(
+        protocol: string,
+        transaction: DojoSubmitDirectTransactionApi,
+        senderIdentityKey: string,
+        note: string,
+        labels: string[],
+        derivationPrefix?: string
+    ): Promise<DojoSubmitDirectTransactionResultApi> {
+        this.verifyAuthenticated()
+        return await this.postJson('/submitDirectTransaction', { identityKey: this.identityKey, protocol, transaction, senderIdentityKey, note, labels, derivationPrefix })
     }
 
     async getJsonOrUndefined<T>(path: string): Promise<T | undefined> {
