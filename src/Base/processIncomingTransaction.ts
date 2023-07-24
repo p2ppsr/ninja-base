@@ -5,9 +5,8 @@ import { getPaymentPrivateKey } from 'sendover'
 
 import { ERR_DOJO_INVALID_SATOSHIS, ERR_DOJO_INVALID_SCRIPT, ERR_INTERNAL, verifyTruthy } from "cwi-base"
 
-import { invoice3241645161d8 } from "@cwi/dojo-base";
-
 import { NinjaBase } from './NinjaBase'
+import { invoice3241645161d8 } from '../invoice'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ProcessIncomingTransactionInputApi {

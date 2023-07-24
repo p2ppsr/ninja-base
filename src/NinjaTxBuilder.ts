@@ -4,11 +4,10 @@ import { getPaymentAddress, getPaymentPrivateKey } from 'sendover'
 
 import { DojoCreateTransactionResultApi, DojoCreatingTxInputsApi, DojoCreatingTxOutputApi, DojoPendingTxApi, ERR_INVALID_PARAMETER, ERR_NOT_IMPLEMENTED, verifyTruthy } from 'cwi-base';
 
-import { invoice3241645161d8 } from '@cwi/dojo-base';
-
 import { NinjaApi, NinjaTxInputsApi } from "./Api/NinjaApi";
 import { NinjaBase } from './Base/NinjaBase';
 import { DojoTxBuilderBase, DojoTxBuilderBaseOptions } from './Base/DojoTxBuilderBase';
+import { invoice3241645161d8 } from './invoice';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface NinjaTxBuilderOptions extends DojoTxBuilderBaseOptions {
