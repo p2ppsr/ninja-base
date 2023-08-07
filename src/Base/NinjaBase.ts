@@ -100,6 +100,9 @@ export class NinjaBase implements NinjaApi {
     }
 
     async getTotalValue(basket?: string): Promise<number> {
+        if (basket && typeof basket !== 'string') {
+            basket = undefined
+        }
         const total = await this.dojo.getTotalOfUnspentOutputs(basket || 'default')
         if (total === undefined) throw new ERR_MISSING_PARAMETER('basket', 'existing basket name')
         return total
