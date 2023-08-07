@@ -99,13 +99,15 @@ export class NinjaBase implements NinjaApi {
         await this.dojo.saveCertificate(cert)
     }
 
-    async getTotalValue(basket?: string): Promise<number> {
+    async getTotalValue(basket?: string): Promise<{ total: number }> {
         if (basket && typeof basket !== 'string') {
             basket = undefined
         }
         const total = await this.dojo.getTotalOfUnspentOutputs(basket || 'default')
         if (total === undefined) throw new ERR_MISSING_PARAMETER('basket', 'existing basket name')
-        return total
+        return {
+            total
+        }
     }
 
     async getTotalOfAmounts(options: DojoGetTotalOfAmountsOptions): Promise<{ total: number}> {

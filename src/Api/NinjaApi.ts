@@ -72,7 +72,7 @@ export interface NinjaApi {
      * 
      * @param basket defaults to 'default' if undefined
      */
-    getTotalValue(basket?: string): Promise<number>
+    getTotalValue(basket?: string): Promise<{ total: number }>
 
     /**
      * Returns the sum of transaction amounts belonging to authenticated user,
