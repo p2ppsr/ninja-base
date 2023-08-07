@@ -38,7 +38,10 @@ export class NinjaBase implements NinjaApi {
 
     async authenticate(identityKey?: string, addIfNew?: boolean): Promise<void> {
         if (this.clientPrivateKey) {
-            const identityPublicKey = bsv.PubKey.fromPrivKey(bsv.PrivKey.fromHex(this.clientPrivateKey)).toDer(false).toString('hex')
+            const priv = bsv.PrivKey.fromBn(bsv.Bn.fromBuffer(
+                Buffer.from(this.clientPrivateKey, 'hex'))
+            )
+            const identityPublicKey = bsv.PubKey.fromPrivKey(priv).toDer(false).toString('hex')
             await this.dojo.authenticate(identityPublicKey, addIfNew)
         } else if (identityKey) {
             await this.dojo.authenticate(identityKey, addIfNew)
