@@ -18,8 +18,9 @@ import {
     DojoTransactionStatusApi,
     DojoTxInputSelectionApi,
     DojoTxInputsApi,
+    bsv,
     ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString, verifyTruthy
-} from "cwi-base";
+} from "cwi-base"
 
 import {
     KeyPairApi, NinjaApi, NinjaCreateTransactionParams, NinjaGetTransactionOutputsResultApi, NinjaGetTransactionsResultApi, NinjaGetTxWithOutputsProcessedResultApi, NinjaGetTxWithOutputsResultApi, NinjaSubmitDirectTransactionParams, NinjaSubmitDirectTransactionResultApi, NinjaTransactionFailedHandler, NinjaTransactionProcessedHandler,
@@ -36,7 +37,14 @@ export class NinjaBase implements NinjaApi {
     }
 
     async authenticate(identityKey?: string, addIfNew?: boolean): Promise<void> {
-        await this.dojo.authenticate(identityKey, addIfNew)
+        if (this.clientPrivateKey) {
+            const identityPublicKey = bsv.PubKey.fromPrivKey(bsv.PrivKey.fromHex(this.clientPrivateKey)).toDer(false).toString('hex')
+            await this.dojo.authenticate(identityPublicKey, addIfNew)
+        } else if (identityKey) {
+            await this.dojo.authenticate(identityKey, addIfNew)
+        } else {
+            throw new Error('yeee')
+        }
     }
 
     getClientChangeKeyPair(): KeyPairApi {
