@@ -41,7 +41,7 @@ export class NinjaBase implements NinjaApi {
             const priv = bsv.PrivKey.fromBn(bsv.Bn.fromBuffer(
                 Buffer.from(this.clientPrivateKey, 'hex'))
             )
-            const identityPublicKey = bsv.PubKey.fromPrivKey(priv).toDer(false).toString('hex')
+            const identityPublicKey = bsv.PubKey.fromPrivKey(priv).toDer(true).toString('hex')
             await this.dojo.authenticate(identityPublicKey, addIfNew)
         } else if (identityKey) {
             await this.dojo.authenticate(identityKey, addIfNew)
