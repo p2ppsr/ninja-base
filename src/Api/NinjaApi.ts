@@ -17,6 +17,14 @@ export interface NinjaApi {
     dojo: DojoClientApi
     
     /**
+     * Authenticates with configured dojo, if necessary.
+     * 
+     * @param identityKey Optional. The user's public identity key. Must be authorized to act on behalf of this user.
+     * @param addIfNew Optional. Create new user records if identityKey is unknown.
+     */
+    authenticate(identityKey?: string, addIfNew?: boolean): Promise<void>
+
+    /**
      * Return the private / public keypair used by the Ninja client for change UTXOs
      */
     getClientChangeKeyPair(): KeyPairApi

@@ -19,7 +19,7 @@ import {
     DojoTxInputSelectionApi,
     DojoTxInputsApi,
     bsv,
-    ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString, verifyTruthy
+    ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString, verifyTruthy, ERR_BAD_REQUEST
 } from "cwi-base"
 
 import {
@@ -32,34 +32,55 @@ import { getTransactionWithOutputs } from "./getTransactionWithOutputs";
 
 export class NinjaBase implements NinjaApi {
     chain?: Chain
+    _keyPair: KeyPairApi | undefined
+    _isDojoAuthenticated: boolean
 
-    constructor(public dojo: DojoClientApi, public clientPrivateKey?: string, public authrite?: AuthriteClient) {
-    }
+    constructor(public dojo: DojoClientApi, clientPrivateKey?: string, public authrite?: AuthriteClient) {
+        if (clientPrivateKey && authrite) throw new ERR_INVALID_PARAMETER('clientPrivateKey and authrite', 'only one provided')
 
-    async authenticate(identityKey?: string, addIfNew?: boolean): Promise<void> {
-        if (this.clientPrivateKey) {
-            const priv = bsv.PrivKey.fromBn(bsv.Bn.fromBuffer(
-                Buffer.from(this.clientPrivateKey, 'hex'))
-            )
-            const identityPublicKey = bsv.PubKey.fromPrivKey(priv).toDer(true).toString('hex')
-            await this.dojo.authenticate(identityPublicKey, addIfNew)
-        } else if (identityKey) {
-            await this.dojo.authenticate(identityKey, addIfNew)
-        } else {
-            throw new Error('yeee')
+        if (clientPrivateKey) {
+            const privKey = new bsv.PrivKey(new bsv.Bn(clientPrivateKey, 'hex'), true)
+            const identityPublicKey = bsv.PubKey.fromPrivKey(privKey).toDer(true).toString('hex')
+            this._keyPair = {
+                privateKey: clientPrivateKey,
+                publicKey: identityPublicKey
+            }
         }
+        
+        this._isDojoAuthenticated = false
     }
 
     getClientChangeKeyPair(): KeyPairApi {
-        const ac = this.authrite.authrite
-        const r: KeyPairApi = {
-            privateKey: ac.clientPrivateKey,
-            publicKey: ac.clientPublicKey            
+        if (this._keyPair)
+            return this._keyPair
+
+        if (this.authrite) {
+            const ac = this.authrite.authrite
+            const r: KeyPairApi = {
+                privateKey: ac.clientPrivateKey,
+                publicKey: ac.clientPublicKey            
+            }
+            return r
         }
-        return r
+        
+        throw new ERR_BAD_REQUEST('Ninja constructed without clientPrivateKey or authrite.')
+    }
+
+    async authenticate(identityKey?: string, addIfNew?: boolean): Promise<void> {
+        identityKey ||= this.getClientChangeKeyPair().publicKey
+
+        await this.dojo.authenticate(identityKey, addIfNew)
+        this._isDojoAuthenticated = true
+    }
+    
+    async verifyDojoAuthenticated() {
+        if (!this._isDojoAuthenticated) {
+            await this.authenticate(undefined, true)
+        }
     }
 
     async getPaymail(): Promise<string> {
+        await this.verifyDojoAuthenticated()
         const paymails = await this.dojo.getCurrentPaymails()
         return paymails[0]
     }
@@ -80,6 +101,7 @@ export class NinjaBase implements NinjaApi {
     }
 
     async findCertificates(certifiers?: string[] | object, types?: Record<string, string[]>): Promise<{ status: 'success', certificates: DojoCertificateApi[] }> {
+        await this.verifyDojoAuthenticated()
         if (certifiers && !Array.isArray(certifiers)) {
             // Named Object Parameter Destructuring pattern conversion...
             types = certifiers['types']
@@ -92,6 +114,7 @@ export class NinjaBase implements NinjaApi {
     }
 
     async saveCertificate(certificate: DojoCertificateApi | object): Promise<void> {
+        await this.verifyDojoAuthenticated()
         if (certificate && typeof certificate === 'object' && certificate['certificate']) {
             certificate = certificate['certificate']
         }
@@ -100,6 +123,7 @@ export class NinjaBase implements NinjaApi {
     }
 
     async getTotalValue(basket?: string): Promise<{ total: number }> {
+        await this.verifyDojoAuthenticated()
         if (basket && typeof basket !== 'string') {
             basket = undefined
         }
@@ -111,6 +135,7 @@ export class NinjaBase implements NinjaApi {
     }
 
     async getTotalOfAmounts(options: DojoGetTotalOfAmountsOptions): Promise<{ total: number}> {
+        await this.verifyDojoAuthenticated()
         const direction = options.direction
         if (!direction) throw new ERR_MISSING_PARAMETER('direction', 'incoming or outgoing')
         delete options.direction
@@ -119,28 +144,34 @@ export class NinjaBase implements NinjaApi {
     }
 
     async getNetOfAmounts(options?: DojoGetTotalOfAmountsOptions | undefined): Promise<number> {
+        await this.verifyDojoAuthenticated()
         const total = await this.dojo.getNetOfAmounts(options)
         return total
     }
     
     async getAvatar(): Promise<DojoAvatarApi> {
+        await this.verifyDojoAuthenticated()
         const a = await this.dojo.getAvatar()
         return a
     }
 
     async setAvatar(name: string, photoURL: string): Promise<void> {
+        await this.verifyDojoAuthenticated()
         await this.dojo.setAvatar({ name, photoURL })
     }
 
     async updateTransactionStatus(params: { reference: string, status: DojoTransactionStatusApi }): Promise<void> {
+        await this.verifyDojoAuthenticated()
         await this.dojo.updateTransactionStatus(params.reference, params.status)
     }
     
     async updateOutpointStatus(params: { txid: string, vout: number, spendable: boolean }): Promise<void> {
+        await this.verifyDojoAuthenticated()
         await this.dojo.updateOutpointStatus(params.txid, params.vout, params.spendable)
     }
 
     async getTransactions(options?: DojoGetTransactionsOptions): Promise<NinjaGetTransactionsResultApi> {
+        await this.verifyDojoAuthenticated()
         const r = await this.dojo.getTransactions(options)
         const rr: NinjaGetTransactionsResultApi = {
             totalTransactions: r.total,
@@ -161,16 +192,19 @@ export class NinjaBase implements NinjaApi {
     }
 
     async getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]> {
+        await this.verifyDojoAuthenticated()
         const r = await this.dojo.getPendingTransactions(referenceNumber)
         return r
     }
 
     async processPendingTransactions(onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler)
     : Promise<void> {
+        await this.verifyDojoAuthenticated()
         await processPendingTransactions(this, onTransactionProcessed, onTransactionFailed)
     }
 
     async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<NinjaGetTransactionOutputsResultApi[]> {
+        await this.verifyDojoAuthenticated()
         const r = await this.dojo.getTransactionOutputs(options)
         const gtors: NinjaGetTransactionOutputsResultApi[] = r.outputs
             .filter(x => x.txid && typeof x.vout === 'number' && typeof x.amount === 'number' && x.outputScript)
@@ -190,6 +224,7 @@ export class NinjaBase implements NinjaApi {
         reference: string,
         outputMap: Record<string, number>
     }): Promise<DojoProcessTransactionResultApi> {
+        await this.verifyDojoAuthenticated()
         const r = await this.dojo.processTransaction(params.submittedTransaction, params.reference, params.outputMap)
         return r
     }
@@ -203,6 +238,7 @@ export class NinjaBase implements NinjaApi {
         autoProcess?: boolean | undefined,
         feePerKb?: number | undefined
     }): Promise<NinjaGetTxWithOutputsResultApi | NinjaGetTxWithOutputsProcessedResultApi> {
+        await this.verifyDojoAuthenticated()
         const r = await getTransactionWithOutputs(this,
             params.outputs,
             params.labels,
@@ -215,6 +251,7 @@ export class NinjaBase implements NinjaApi {
     }
     
     async createTransaction(params: NinjaCreateTransactionParams): Promise<DojoCreateTransactionResultApi> {
+        await this.verifyDojoAuthenticated()
         const r = await this.dojo.createTransaction(
             params.inputs,
             params.inputSelection,
@@ -231,6 +268,7 @@ export class NinjaBase implements NinjaApi {
 
     async submitDirectTransaction(params: NinjaSubmitDirectTransactionParams)
     : Promise<NinjaSubmitDirectTransactionResultApi> {
+        await this.verifyDojoAuthenticated()
         const r = await this.dojo.submitDirectTransaction(
             params.protocol,
             params.transaction,
