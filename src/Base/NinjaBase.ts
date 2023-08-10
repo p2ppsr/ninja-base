@@ -214,7 +214,8 @@ export class NinjaBase implements NinjaApi {
             amount: x.amount || 0,
             outputScript: asString(x.outputScript || ''),
             type: x.type,
-            spendable: x.spendable
+            spendable: x.spendable,
+            envelope: x.envelope
         }))
         return gtors
     }
