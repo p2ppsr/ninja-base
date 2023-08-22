@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
-    Chain, DojoAvatarApi, DojoCertificateApi, DojoClientApi, DojoClientUserApi, DojoCreateTransactionResultApi, DojoCreateTxOutputApi, DojoFeeModelApi, DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions, DojoGetTransactionsOptions, DojoOutputApi, DojoOutputGenerationApi, DojoPendingTxApi, DojoStatsApi, DojoSubmitDirectTransactionApi, DojoSubmitDirectTransactionResultApi, DojoTransactionApi, DojoTransactionStatusApi, DojoTxInputSelectionApi, DojoTxInputsApi, ERR_CHAIN, ERR_INTERNAL, ERR_UNAUTHORIZED, EnvelopeApi, DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString
+    Chain, DojoAvatarApi, DojoCertificateApi, DojoClientApi, DojoClientUserApi, DojoCreateTransactionResultApi, DojoCreateTxOutputApi, DojoFeeModelApi, DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions, DojoGetTransactionsOptions, DojoOutputApi, DojoOutputGenerationApi, DojoPendingTxApi, DojoStatsApi, DojoSubmitDirectTransactionApi, DojoSubmitDirectTransactionResultApi, DojoTransactionApi, DojoTransactionStatusApi, DojoTxInputSelectionApi, DojoTxInputsApi, ERR_CHAIN, ERR_INTERNAL, ERR_UNAUTHORIZED, EnvelopeApi, DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -160,6 +160,16 @@ export class DojoExpressClient implements DojoClientApi {
     ): Promise<DojoSubmitDirectTransactionResultApi> {
         this.verifyAuthenticated()
         return await this.postJson('/submitDirectTransaction', { identityKey: this.identityKey, protocol, transaction, senderIdentityKey, note, labels, derivationPrefix })
+    }
+
+    async copyState(): Promise<DojoUserStateApi> {
+        this.verifyAuthenticated()
+        return await this.postJson('/copyState', { identityKey: this.identityKey })
+    }
+
+    async mergeState(state: DojoUserStateApi, makeChanges?: boolean | undefined): Promise<{ updates: number; inserts: number; updated?: DojoUserStateApi | undefined; inserted?: DojoUserStateApi | undefined }> {
+        this.verifyAuthenticated()
+        return await this.postJson('/mergeState', { identityKey: this.identityKey, state, makeChanges })
     }
 
     async getJsonOrUndefined<T>(path: string): Promise<T | undefined> {
