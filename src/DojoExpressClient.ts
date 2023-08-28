@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
-    Chain, DojoAvatarApi, DojoCertificateApi, DojoClientApi, DojoClientUserApi, DojoCreateTransactionResultApi, DojoCreateTxOutputApi, DojoFeeModelApi, DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions, DojoGetTransactionsOptions, DojoOutputApi, DojoOutputGenerationApi, DojoPendingTxApi, DojoStatsApi, DojoSubmitDirectTransactionApi, DojoSubmitDirectTransactionResultApi, DojoTransactionApi, DojoTransactionStatusApi, DojoTxInputSelectionApi, DojoTxInputsApi, ERR_CHAIN, ERR_INTERNAL, ERR_UNAUTHORIZED, EnvelopeApi, DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi
+    Chain, DojoAvatarApi, DojoCertificateApi, DojoClientApi, DojoClientUserApi, DojoCreateTransactionResultApi, DojoCreateTxOutputApi, DojoFeeModelApi, DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions, DojoGetTransactionsOptions, DojoOutputApi, DojoOutputGenerationApi, DojoPendingTxApi, DojoStatsApi, DojoSubmitDirectTransactionApi, DojoSubmitDirectTransactionResultApi, DojoTransactionApi, DojoTransactionStatusApi, DojoTxInputSelectionApi, DojoTxInputsApi, ERR_CHAIN, ERR_INTERNAL, ERR_UNAUTHORIZED, EnvelopeApi, DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi, DojoSyncResultApi
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -77,6 +77,14 @@ export class DojoExpressClient implements DojoClientApi {
             await this.authenticate()
     }
 
+    async syncIdentify(fromUserIdentityKey: string, fromDojoIdentityKey: string, fromDojoName?: string): Promise<DojoSyncResultApi> {
+        this.verifyAuthenticated()
+        return await this.postJson('/syncIdentity', { identityKey: this.identityKey, fromUserIdentityKey, fromDojoIdentityKey, fromDojoName})
+    }
+    async syncUpdate(state: DojoUserStateApi, fromDojoIdentityKey: string, when: Date, since?: Date): Promise<DojoSyncResultApi> {
+        this.verifyAuthenticated()
+        return await this.postJson('/syncUpdate', { identityKey: this.identityKey, state, fromDojoIdentityKey, when, since })
+    }
     async getCurrentPaymails(): Promise<string[]> {
         this.verifyAuthenticated()
         return await this.postJson('/getCurrentPaymails', { identityKey: this.identityKey })
