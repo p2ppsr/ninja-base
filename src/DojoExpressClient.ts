@@ -175,11 +175,6 @@ export class DojoExpressClient implements DojoClientApi {
         return await this.postJson('/copyState', { identityKey: this.identityKey })
     }
 
-    async mergeState(state: DojoUserStateApi, makeChanges?: boolean | undefined): Promise<{ updates: number; inserts: number; updated?: DojoUserStateApi | undefined; inserted?: DojoUserStateApi | undefined }> {
-        this.verifyAuthenticated()
-        return await this.postJson('/mergeState', { identityKey: this.identityKey, state, makeChanges })
-    }
-
     async getJsonOrUndefined<T>(path: string): Promise<T | undefined> {
         const r = await fetch(`${this.serviceUrl}${path}`)
         const v = <FetchStatus<T>>await r.json()
