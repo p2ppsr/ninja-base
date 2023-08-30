@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
-    Chain, DojoAvatarApi, DojoCertificateApi, DojoClientApi, DojoClientUserApi, DojoCreateTransactionResultApi, DojoCreateTxOutputApi, DojoFeeModelApi, DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions, DojoGetTransactionsOptions, DojoOutputApi, DojoOutputGenerationApi, DojoPendingTxApi, DojoStatsApi, DojoSubmitDirectTransactionApi, DojoSubmitDirectTransactionResultApi, DojoTransactionApi, DojoTransactionStatusApi, DojoTxInputSelectionApi, DojoTxInputsApi, ERR_CHAIN, ERR_INTERNAL, ERR_UNAUTHORIZED, EnvelopeApi, DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi, DojoSyncResultApi, CwiError, ERR_BAD_REQUEST
+    Chain, DojoAvatarApi, DojoCertificateApi, DojoClientApi, DojoClientUserApi, DojoCreateTransactionResultApi, DojoCreateTxOutputApi, DojoFeeModelApi, DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions, DojoGetTransactionsOptions, DojoOutputApi, DojoOutputGenerationApi, DojoPendingTxApi, DojoStatsApi, DojoSubmitDirectTransactionApi, DojoSubmitDirectTransactionResultApi, DojoTransactionApi, DojoTransactionStatusApi, DojoTxInputSelectionApi, DojoTxInputsApi, ERR_CHAIN, ERR_INTERNAL, ERR_UNAUTHORIZED, EnvelopeApi, DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi, DojoSyncResultApi, CwiError, ERR_BAD_REQUEST, DojoSyncApi, DojoSyncOptionsApi
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -43,6 +43,14 @@ export class DojoExpressClient implements DojoClientApi {
         this.authrite = options?.authrite
     }
 
+    setSyncDojos(dojos: DojoSyncApi[], syncOptions?: DojoSyncOptionsApi | undefined): void {
+        throw new ERR_BAD_REQUEST('DojoExpressClient does not support syncDojos.')
+    }
+
+    getSyncDojos(): { dojos: DojoSyncApi[]; options: DojoSyncOptionsApi } {
+        return { dojos: [], options: {} }
+    }
+
     //
     // HTTP API FUNCTIONS
     //
@@ -63,7 +71,7 @@ export class DojoExpressClient implements DojoClientApi {
         if (!this._user) throw new ERR_UNAUTHORIZED('Unknown identityKey or unauthorized.')
 
         if (identityKey && identityKey !== this._user.identityKey)
-            throw new ERR_INVALID_PARAMETER('identityKey', 'same as Authrite authenticated idenity')
+            throw new ERR_INVALID_PARAMETER('identityKey', 'same as Authrite authenticated identity')
     }
 
     getUser(): DojoClientUserApi {
