@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
-    Chain, DojoAvatarApi, DojoCertificateApi, DojoClientApi, DojoClientUserApi, DojoCreateTransactionResultApi, DojoCreateTxOutputApi, DojoFeeModelApi, DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions, DojoGetTransactionsOptions, DojoOutputApi, DojoOutputGenerationApi, DojoPendingTxApi, DojoStatsApi, DojoSubmitDirectTransactionApi, DojoSubmitDirectTransactionResultApi, DojoTransactionApi, DojoTransactionStatusApi, DojoTxInputSelectionApi, DojoTxInputsApi, ERR_CHAIN, ERR_INTERNAL, ERR_UNAUTHORIZED, EnvelopeApi, DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi, DojoSyncResultApi
+    Chain, DojoAvatarApi, DojoCertificateApi, DojoClientApi, DojoClientUserApi, DojoCreateTransactionResultApi, DojoCreateTxOutputApi, DojoFeeModelApi, DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions, DojoGetTransactionsOptions, DojoOutputApi, DojoOutputGenerationApi, DojoPendingTxApi, DojoStatsApi, DojoSubmitDirectTransactionApi, DojoSubmitDirectTransactionResultApi, DojoTransactionApi, DojoTransactionStatusApi, DojoTxInputSelectionApi, DojoTxInputsApi, ERR_CHAIN, ERR_INTERNAL, ERR_UNAUTHORIZED, EnvelopeApi, DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi, DojoSyncResultApi, CwiError, ERR_BAD_REQUEST
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -79,7 +79,7 @@ export class DojoExpressClient implements DojoClientApi {
 
     async syncIdentify(fromUserIdentityKey: string, fromDojoIdentityKey: string, fromDojoName?: string): Promise<DojoSyncResultApi> {
         this.verifyAuthenticated()
-        return await this.postJson('/syncIdentity', { identityKey: this.identityKey, fromUserIdentityKey, fromDojoIdentityKey, fromDojoName})
+        return await this.postJson('/syncIdentify', { identityKey: this.identityKey, fromUserIdentityKey, fromDojoIdentityKey, fromDojoName})
     }
     async syncUpdate(state: DojoUserStateApi, fromDojoIdentityKey: string, when: Date, since?: Date): Promise<DojoSyncResultApi> {
         this.verifyAuthenticated()
@@ -180,13 +180,13 @@ export class DojoExpressClient implements DojoClientApi {
         const v = <FetchStatus<T>>await r.json()
         if (v.status === 'success')
             return v.value
-        throw new Error(JSON.stringify(v))
+        throw new ERR_BAD_REQUEST(`path=${path} status=${v.status}`)
     }
 
     async getJson<T>(path: string): Promise<T> {
         const r = await this.getJsonOrUndefined<T>(path)
         if (r === undefined)
-            throw new Error('Value was undefined. Requested object may not exist.')
+            throw new ERR_BAD_REQUEST(`path=${path}. Value was undefined. Requested object may not exist.`)
         return r
     }
 
@@ -209,17 +209,19 @@ export class DojoExpressClient implements DojoClientApi {
             }
             if (s.status === 'success')
                 return s.value
-            throw new Error(JSON.stringify(s))
-        } catch (e) {
-            console.log(`Exception: ${JSON.stringify(e)}`)
-            throw new Error(JSON.stringify(e))
+            throw new ERR_BAD_REQUEST(`path=${path} status=${s.status}`)
+        } catch (eu: unknown) {
+            const err = CwiError.fromUnknown(eu)
+            err.description += `  <<path>> ${path}`
+            //console.log(`Exception: ${JSON.stringify(err)}`)
+            throw err
         }
     }
 
     async postJson<T, R>(path: string, params: T): Promise<R> {
         const r = await this.postJsonOrUndefined<T, R>(path, params)
         if (r === undefined)
-            throw new Error('Value was undefined. Requested object may not exist.')
+            throw new ERR_BAD_REQUEST(`path=${path}. Value was undefined. Requested object may not exist.`)
         return r
     }
 
