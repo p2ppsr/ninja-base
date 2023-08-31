@@ -9,7 +9,7 @@ import { DojoExpressClient } from "./DojoExpressClient";
  */
 export class NinjaV2 extends NinjaBase {
     constructor(dojo: DojoClientApi, clientPrivateKey: string, chain: Chain) {
-        
+
         const serviceUrl = `https://${chain === 'test' ? 'staging-' : ''}dojo.babbage.systems`
 
         const authrite = new AuthriteClient(serviceUrl, { clientPrivateKey })

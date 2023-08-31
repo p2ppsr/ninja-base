@@ -55,7 +55,7 @@
     "utxoninja": "^0.2.49"
   },
   "dependencies": {
-    "authrite-js": "^0.2.15",
+    "authrite-js": "^0.2.16",
     "authrite-utils": "^0.1.16",
     "babbage-bsv": "^0.1.1",
     "cwi-base": "file:../cwi-base",

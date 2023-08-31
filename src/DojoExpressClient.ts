@@ -202,7 +202,6 @@ export class DojoExpressClient implements DojoClientApi {
         let s: FetchStatus<R>
         try {
             if (this.authrite) {
-                // eslint-disable-next-line no-debugger
                 s = <FetchStatus<R>>await this.authrite.createSignedRequest(path, params)
             } else {
                 const headers = {}
