@@ -3,12 +3,12 @@
  * @param prefix Typically a random string unique to a single transaction.
  * @param suffix Typically a random string unique to a single output in that transaction.
  * @param paymail An optional paymail handle
- * @returns 
+ * @returns
  */
-export function invoice3241645161d8(prefix: string, suffix: string, paymail?: string): string {
-    const protocol = '2-3241645161d8'
-    const invoice = paymail
-        ? `${protocol}-${paymail} ${prefix} ${suffix}`
-        : `${protocol}-${prefix} ${suffix}`
-    return invoice
+export function invoice3241645161d8 (prefix: string, suffix: string, paymail?: string): string {
+  const protocol = '2-3241645161d8'
+  const invoice = paymail
+    ? `${protocol}-${paymail} ${prefix} ${suffix}`
+    : `${protocol}-${prefix} ${suffix}`
+  return invoice
 }
