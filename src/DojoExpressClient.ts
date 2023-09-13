@@ -125,9 +125,13 @@ export class DojoExpressClient implements DojoClientApi {
     await this.postJsonVoid('/sync', { identityKey: this.identityKey })
   }
 
-  async syncIdentify (params: DojoSyncIdentifyParams): Promise<DojoSyncIdentifyResultApi> {
+  async syncIdentify(params: DojoSyncIdentifyParams): Promise<DojoSyncIdentifyResultApi> {
     this.verifyAuthenticated()
-    return await this.postJson('/syncIdentify', { identityKey: this.identityKey, params })
+    const result:DojoSyncIdentifyResultApi = await this.postJson('/syncIdentify', { identityKey: this.identityKey, params })
+    if (result.when) {
+      result.when = new Date(result.when)
+    }
+    return result
   }
 
   async syncUpdate (params: DojoSyncUpdateParams): Promise<DojoSyncUpdateResultApi> {
