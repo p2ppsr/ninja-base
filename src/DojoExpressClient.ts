@@ -8,7 +8,7 @@ import {
   DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi,
   CwiError, ERR_BAD_REQUEST, DojoSyncApi, DojoSyncOptionsApi, DojoSyncIdentifyParams, DojoSyncIdentifyResultApi,
   DojoSyncUpdateParams, DojoSyncUpdateResultApi, DojoSyncMergeParams, DojoSyncMergeResultApi,
-  restoreUserStateBuffers
+  restoreUserStateBuffers, DojoIdentityApi, SyncDojoConfigBaseApi
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -46,17 +46,14 @@ export class DojoExpressClient implements DojoClientApi {
   get identityKey (): string { return this._user?.identityKey || '' }
   get isAuthenticated (): boolean { return this._user !== undefined }
 
+  /**
+   * Only vaild if this dojo was created as a syncDojo by setSyncDojosByConfig
+   */
+  syncDojoConfig?: SyncDojoConfigBaseApi
+
   constructor (public chain: Chain, public serviceUrl: string, options?: DojoExpressClientOptions) {
     this.options ||= DojoExpressClient.createDojoExpressClientOptions()
     this.authrite = options?.authrite
-  }
-
-  setSyncDojos (dojos: DojoSyncApi[], syncOptions?: DojoSyncOptionsApi | undefined): void {
-    throw new ERR_BAD_REQUEST('DojoExpressClient does not support syncDojos.')
-  }
-
-  getSyncDojos (): { dojos: DojoSyncApi[], options: DojoSyncOptionsApi } {
-    return { dojos: [], options: {} }
   }
 
   //
@@ -87,6 +84,40 @@ export class DojoExpressClient implements DojoClientApi {
 
   async verifyAuthenticated (): Promise<void> {
     if (!this.isAuthenticated) { await this.authenticate() }
+  }
+
+  async getDojoIdentity(): Promise<DojoIdentityApi> {
+    this.verifyAuthenticated()
+    return await this.postJson('/getDojoIdentity', { identityKey: this.identityKey })
+  }
+
+  async getSyncDojoConfig(): Promise<SyncDojoConfigBaseApi> {
+    let config = this.syncDojoConfig
+    if (!config) {
+        const s = await this.getDojoIdentity()
+        config = {
+            dojoType: '<custom>',
+            dojoIdentityKey: s.dojoIdentityKey,
+            dojoName: s.dojoName
+        }
+    }
+    return config
+  }
+
+  setSyncDojos (dojos: DojoSyncApi[], syncOptions?: DojoSyncOptionsApi | undefined): void {
+    throw new ERR_BAD_REQUEST('DojoExpressClient does not support setSyncDojos.')
+  }
+
+  getSyncDojos (): { dojos: DojoSyncApi[], options: DojoSyncOptionsApi } {
+    throw new ERR_BAD_REQUEST('DojoExpressClient does not support getSyncDojos.')
+  }
+
+  async setSyncDojosByConfig(syncDojoConfigs: SyncDojoConfigBaseApi[], options?: DojoSyncOptionsApi | undefined): Promise<void> {
+    throw new ERR_BAD_REQUEST('DojoExpressClient does not support setSyncDojosByConfig.')
+  }
+
+  async getSyncDojosByConfig(): Promise<{ dojos: SyncDojoConfigBaseApi[]; options?: DojoSyncOptionsApi | undefined }> {
+    throw new ERR_BAD_REQUEST('DojoExpressClient does not support getSyncDojosByConfig.')
   }
 
   async sync (): Promise<void> {

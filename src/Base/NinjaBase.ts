@@ -19,7 +19,7 @@ import {
   DojoTxInputSelectionApi,
   DojoTxInputsApi,
   bsv,
-  ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString, verifyTruthy, ERR_BAD_REQUEST
+  ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString, verifyTruthy, ERR_BAD_REQUEST, DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl
 } from 'cwi-base'
 
 import {
@@ -76,6 +76,41 @@ export class NinjaBase implements NinjaApi {
     if (!this._isDojoAuthenticated) {
       await this.authenticate(undefined, true)
     }
+  }
+
+  async sync(): Promise<void> {
+    await this.verifyDojoAuthenticated()
+    await this.dojo.sync()
+  }
+
+  async setSyncDojosByConfig(syncDojoConfigs: SyncDojoConfigBaseApi[], options?: DojoSyncOptionsApi | undefined): Promise<void> {
+    await this.verifyDojoAuthenticated()
+    const configs: SyncDojoConfigBaseApi[] = []
+    for (const config of syncDojoConfigs) {
+      switch (config.dojoType) {
+        case 'MySql Connection': configs.push(config); break
+        case 'Sqlite File': configs.push(config); break
+        case 'Cloud URL':
+          const c = config as SyncDojoConfigCloudUrl
+          if (c.clientPrivateKey === 'true') {
+            const c2 = {...c}
+            c2.clientPrivateKey = this.getClientChangeKeyPair().privateKey
+            configs.push(c2)
+          } else {
+            configs.push(config)
+          }
+          break
+        default:
+          throw new ERR_BAD_REQUEST(`dojoType ${config.dojoType} may not be set by 'setSyncDojosByConfig'`)
+      }
+    }
+    await this.dojo.setSyncDojosByConfig(configs, options)
+  }
+
+  async getSyncDojosByConfig(): Promise<{ dojos: SyncDojoConfigBaseApi[]; options?: DojoSyncOptionsApi | undefined }> {
+    await this.verifyDojoAuthenticated()
+    const r = await this.dojo.getSyncDojosByConfig()
+    return r
   }
 
   async getPaymail (): Promise<string> {

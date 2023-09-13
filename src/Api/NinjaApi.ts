@@ -1,7 +1,7 @@
 import {
   Chain, CwiError, DojoAvatarApi, DojoCertificateApi, DojoClientApi, EnvelopeEvidenceApi,
   DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions, DojoGetTransactionsOptions,
-  MapiResponseApi, DojoTransactionStatusApi, TscMerkleProofApi, DojoPendingTxApi, DojoTxInputsApi, DojoTxInputSelectionApi, DojoCreateTxOutputApi, DojoOutputGenerationApi, DojoFeeModelApi, DojoPendingTxInputApi, DojoPendingTxOutputApi, DojoCreateTransactionResultApi, DojoProcessTransactionResultApi
+  MapiResponseApi, DojoTransactionStatusApi, TscMerkleProofApi, DojoPendingTxApi, DojoTxInputsApi, DojoTxInputSelectionApi, DojoCreateTxOutputApi, DojoOutputGenerationApi, DojoFeeModelApi, DojoPendingTxInputApi, DojoPendingTxOutputApi, DojoCreateTransactionResultApi, DojoProcessTransactionResultApi, SyncDojoConfigBaseApi, DojoSyncOptionsApi
 } from 'cwi-base'
 
 /**
@@ -24,6 +24,61 @@ export interface NinjaApi {
      */
   authenticate: (identityKey?: string, addIfNew?: boolean) => Promise<void>
 
+  /**
+     * Sync's the dojo's state for the authenticated user with all of the configured syncDojos
+     *
+     * This method should only be called when either a local or remote state change occurs, or may have occurred.
+     *
+     * User state changes are propagated across all configured syncDojos.
+     *
+     */
+  sync: () => Promise<void>
+
+  /**
+   * Sets the syncDojo's to be used by all users by the `sync()` function.
+   * 
+   * Each syncDojo config has the following properties:
+   * 
+   * 'dojoType' one of 'Cloud URL' | 'Sqlite File' | 'MySql Connection'
+   * 'dojoIdentityKey' the identity key of the syncDojo.
+   * 'dojoName' the name of the syncDojo.
+   * 
+   * Currently supports three syncDojo configurations, each identified by its dojoType:
+   * 
+   * 'Sqlite File'
+   *   The derived `SyncDojoConfigSqliteFile` interface adds:
+   *   'filename' will be passed to Knex Sqlite3 to configure a locally accessible, single user Sqlite database.
+   *   If the database exists, it must already be configured with matching dojoIdentityKey.
+   *   If the database does not exist and can be created, it will be configured with the specified dojoIdentityKey.
+   *
+   * 'MySql Connection'
+   *   The derived `SyncDojoConfigMySqlConnection` interface adds:
+   *   'connection', a stringified MySql connection object, will be passed to Knex MySql to access a network
+   *   accessible, possibly shared, MySql database.
+   *   The database must exists and must already be configured with matching dojoIdentityKey.
+   *
+   * 'Cloud URL'
+   *   The derived `SyncDojoConfigCloudUrl` interface adds:
+   *   'url' the service URL of the cloud dojo with which to sync
+   *   'clientPrivateKey' should be set to the string value 'true' to enable automatic use of Authrite as the authenticated user.
+   *   'useIdentityKey' may be set to true instead of using 'clientPrivateKey' if the cloud dojo does not use Authrite for access control.
+   *   The cloud dojo must exists and must already be configured with matching dojoIdentityKey.
+   * 
+   * @param syncDojoConfigs array of syncDojos to be used. May be empty.
+   * @param options place holder for future synchronization control options.
+   * @throws ERR_BAD_REQUEST if dojo's syncDojos are managed directly, e.g. `DojoExpressClient`
+   * @throws ERR_BAD_REQUEST if an attempt to set a `<custom>` sync dojo.
+   */
+  setSyncDojosByConfig: (syncDojoConfigs: SyncDojoConfigBaseApi[], options?: DojoSyncOptionsApi) => Promise<void>
+
+  /**
+   * Gets the currently configured syncDojos and sync options.
+   * 
+   * If syncDojos are not being managed by `setSyncDojosByConfig` the returned configurations may include
+   * a 'dojoType' of '<custom>'.
+   */
+  getSyncDojosByConfig: () => Promise<{ dojos: SyncDojoConfigBaseApi[], options?: DojoSyncOptionsApi }>
+  
   /**
      * Return the private / public keypair used by the Ninja client for change UTXOs
      */
