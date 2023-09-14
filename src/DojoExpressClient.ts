@@ -68,6 +68,8 @@ export class DojoExpressClient implements DojoClientApi {
 
   async stats (): Promise<DojoStatsApi> { return await this.getJson('/stats') }
 
+  async getDojoIdentity(): Promise<DojoIdentityApi> { return await this.getJson('/getDojoIdentity') }
+
   async authenticate (identityKey?: string, addIfNew?: boolean): Promise<void> {
     this._user = await this.postJson('/authenticate', { identityKey, addIfNew })
 
@@ -84,11 +86,6 @@ export class DojoExpressClient implements DojoClientApi {
 
   async verifyAuthenticated (): Promise<void> {
     if (!this.isAuthenticated) { await this.authenticate() }
-  }
-
-  async getDojoIdentity(): Promise<DojoIdentityApi> {
-    this.verifyAuthenticated()
-    return await this.postJson('/getDojoIdentity', { identityKey: this.identityKey })
   }
 
   async getSyncDojoConfig(): Promise<SyncDojoConfigBaseApi> {
