@@ -123,8 +123,7 @@ export class DojoExpressClient implements DojoClientApi {
   }
 
   async syncIdentify(params: DojoSyncIdentifyParams): Promise<DojoSyncIdentifyResultApi> {
-    this.verifyAuthenticated()
-    const r:DojoSyncIdentifyResultApi = await this.postJson('/syncIdentify', { identityKey: this.identityKey, params })
+    const r:DojoSyncIdentifyResultApi = await this.postJson('/syncIdentify', params, true)
     r.when = validateDate(r.when)
     return r
   }
@@ -280,10 +279,10 @@ export class DojoExpressClient implements DojoClientApi {
     return r
   }
 
-  async postJsonOrUndefined<T, R>(path: string, params: T): Promise<R | undefined> {
+  async postJsonOrUndefined<T, R>(path: string, params: T, noAuth?: boolean): Promise<R | undefined> {
     let s: FetchStatus<R>
     try {
-      if (this.authrite) {
+      if (this.authrite && !noAuth) {
         s = await this.authrite.createSignedRequest(path, params) as FetchStatus<R>
       } else {
         const headers = {}
@@ -306,13 +305,13 @@ export class DojoExpressClient implements DojoClientApi {
     }
   }
 
-  async postJson<T, R>(path: string, params: T): Promise<R> {
-    const r = await this.postJsonOrUndefined<T, R>(path, params)
+  async postJson<T, R>(path: string, params: T, noAuth?: boolean): Promise<R> {
+    const r = await this.postJsonOrUndefined<T, R>(path, params, noAuth)
     if (r === undefined) { throw new ERR_BAD_REQUEST(`path=${path}. Value was undefined. Requested object may not exist.`) }
     return r
   }
 
-  async postJsonVoid<T>(path: string, params: T): Promise<void> {
-    await this.postJsonOrUndefined<T, void>(path, params)
+  async postJsonVoid<T>(path: string, params: T, noAuth?: boolean): Promise<void> {
+    await this.postJsonOrUndefined<T, void>(path, params, noAuth)
   }
 }
