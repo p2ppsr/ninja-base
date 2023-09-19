@@ -22,7 +22,7 @@ export interface NinjaApi {
      * @param identityKey Optional. The user's public identity key. Must be authorized to act on behalf of this user.
      * @param addIfNew Optional. Create new user records if identityKey is unknown.
      */
-  authenticate: (identityKey?: string, addIfNew?: boolean) => Promise<void>
+  authenticate(identityKey?: string, addIfNew?: boolean) : Promise<void>
 
   /**
      * Sync's the dojo's state for the authenticated user with all of the configured syncDojos
@@ -32,7 +32,7 @@ export interface NinjaApi {
      * User state changes are propagated across all configured syncDojos.
      *
      */
-  sync: () => Promise<void>
+  sync() : Promise<void>
 
   /**
    * Sets the syncDojo's to be used by all users by the `sync()` function.
@@ -69,7 +69,7 @@ export interface NinjaApi {
    * @throws ERR_BAD_REQUEST if dojo's syncDojos are managed directly, e.g. `DojoExpressClient`
    * @throws ERR_BAD_REQUEST if an attempt to set a `<custom>` sync dojo.
    */
-  setSyncDojosByConfig: (syncDojoConfigs: SyncDojoConfigBaseApi[], options?: DojoSyncOptionsApi) => Promise<void>
+  setSyncDojosByConfig(syncDojoConfigs: SyncDojoConfigBaseApi[], options?: DojoSyncOptionsApi) : Promise<void>
 
   /**
    * Gets the currently configured syncDojos and sync options.
@@ -77,17 +77,17 @@ export interface NinjaApi {
    * If syncDojos are not being managed by `setSyncDojosByConfig` the returned configurations may include
    * a 'dojoType' of '<custom>'.
    */
-  getSyncDojosByConfig: () => Promise<{ dojos: SyncDojoConfigBaseApi[], options?: DojoSyncOptionsApi }>
+  getSyncDojosByConfig() : Promise<{ dojos: SyncDojoConfigBaseApi[], options?: DojoSyncOptionsApi }>
   
   /**
      * Return the private / public keypair used by the Ninja client for change UTXOs
      */
-  getClientChangeKeyPair: () => KeyPairApi
+  getClientChangeKeyPair() : KeyPairApi
 
   /**
      * Returns the current Paymail handle
      */
-  getPaymail: () => Promise<string>
+  getPaymail() : Promise<string>
 
   /**
      * Changes the Paymail handle of the user.
@@ -96,19 +96,19 @@ export interface NinjaApi {
      *
      * NOTE that to prevent span, you may only do this if there is at least one unspent output under Dojo management.
      */
-  setPaymail: (paymail: string) => Promise<void>
+  setPaymail(paymail: string) : Promise<void>
 
   /**
      * Returns which BSV network we are using (main or test)
      */
-  getChain: () => Promise<Chain>
+  getChain() : Promise<Chain>
 
   /**
      * Returns which BSV network we are using (mainnet or testnet)
      * @param {String} format for the returned string. Either with (default) or without (nonet) a 'net' suffix.
      * @returns {String} The current BSV network formatted as requested.
      */
-  getNetwork: (format?: 'default' | 'nonet') => Promise<string>
+  getNetwork(format?: 'default' | 'nonet') : Promise<string>
 
   /**
      * Use this endpoint to retrieve certificates.
@@ -117,10 +117,10 @@ export interface NinjaApi {
      * @param {Object} obj.types The certificate types to filter certificates by
      * @returns {Promise<Object>} A success object with `status: "success"` and any found certificates
      */
-  findCertificates: (
+  findCertificates(
     certifiers?: string[] | object,
     types?: Record<string, string[]>
-  ) => Promise<{ status: 'success', certificates: DojoCertificateApi[] }>
+  ) : Promise<{ status: 'success', certificates: DojoCertificateApi[] }>
 
   /**
      * Use this endpoint to store an incoming certificate.
@@ -128,58 +128,58 @@ export interface NinjaApi {
      * @param {Object} obj.certificate The certificate object to save
      * @returns {Promise<Object>} A success object with `status: "success"`
      */
-  saveCertificate: (certificate: DojoCertificateApi | object) => Promise<void>
+  saveCertificate(certificate: DojoCertificateApi | object) : Promise<void>
 
   /**
      * Returns the total of unspent outputs in satoshis. A non-negative integer.
      *
      * @param basket defaults to 'default' if undefined
      */
-  getTotalValue: (basket?: string) => Promise<{ total: number }>
+  getTotalValue(basket?: string) : Promise<{ total: number }>
 
   /**
      * Returns the sum of transaction amounts belonging to authenticated user,
      * matching the given direction (which must be specified),
      * and optionally matching remaining conditions in `options`.
      */
-  getTotalOfAmounts: (options: DojoGetTotalOfAmountsOptions) => Promise<{ total: number }>
+  getTotalOfAmounts(options: DojoGetTotalOfAmountsOptions) : Promise<{ total: number }>
 
   /**
      * Returns the net sum of transaction amounts belonging to authenticated user,
      * incoming minus outgoing,
      * and optionally matching conditions in `options`.
      */
-  getNetOfAmounts: (options?: DojoGetTotalOfAmountsOptions) => Promise<number>
+  getNetOfAmounts(options?: DojoGetTotalOfAmountsOptions) : Promise<number>
 
   /**
      * Returns the name and photo URL of the user
      * @returns {Promise<Avatar>} The avatar of the user
      */
-  getAvatar: () => Promise<DojoAvatarApi>
+  getAvatar() : Promise<DojoAvatarApi>
 
   /**
      * Sets a new name and photo URL
      * @param name A new name
      * @param photoURL A new UHRP or HTTPS URL to a photo of the user
      */
-  setAvatar: (name: string, photoURL: string) => Promise<void>
+  setAvatar(name: string, photoURL: string) : Promise<void>
 
   /**
      * Returns a set of transactions that match the criteria
      *
      * @param options limit defaults to 25, offset defaults to 0, addLabels defaults to true, order defaults to 'descending'
      */
-  getTransactions: (options?: DojoGetTransactionsOptions) => Promise<NinjaGetTransactionsResultApi>
+  getTransactions(options?: DojoGetTransactionsOptions) : Promise<NinjaGetTransactionsResultApi>
 
   /**
      * Returns a set of transaction outputs that Dojo has tracked
      */
-  getTransactionOutputs: (options?: DojoGetTransactionOutputsOptions) => Promise<NinjaGetTransactionOutputsResultApi[]>
+  getTransactionOutputs(options?: DojoGetTransactionOutputsOptions) : Promise<NinjaGetTransactionOutputsResultApi[]>
 
   /**
      * Returns a set of all transactions that need to be signed and submitted, or canceled
      */
-  getPendingTransactions: (referenceNumber?: string) => Promise<DojoPendingTxApi[]>
+  getPendingTransactions(referenceNumber?: string) : Promise<DojoPendingTxApi[]>
 
   /**
      * Use this endpoint to update the status of a transaction. This is useful for flagging incomplete transactions as aborted or reverting a completed transaction back into a pending status if it never got confirmed. Setting the status to "completed" or "waitingForSenderToSend" will make any selected UTXOs unavailable for spending, while any other status value will free up the UTXOs for use in other transactions.
@@ -187,7 +187,7 @@ export interface NinjaApi {
      * @param params.reference The Dojo reference number for the transaction
      * @param params.status The new status of the transaction
      */
-  updateTransactionStatus: (params: { reference: string, status: DojoTransactionStatusApi }) => Promise<void>
+  updateTransactionStatus(params: { reference: string, status: DojoTransactionStatusApi }) : Promise<void>
 
   /**
      * Use this endpoint to update the status of one of your outputs, given as the TXID of a transaction and the vout (output index) in that transaction. This is useful for flagging transaction outpoints as spent if they were inadvertantly broadcasted or used without properly submitting them to the Dojo, or to undo the spending of an output if it was never actually spent.
@@ -196,14 +196,14 @@ export interface NinjaApi {
      * @param params.vout The index of the output in the transaction
      * @param params.spendable The true spendability status of this outpoint
      */
-  updateOutpointStatus: (params: { txid: string, vout: number, spendable: boolean }) => Promise<void>
+  updateOutpointStatus(params: { txid: string, vout: number, spendable: boolean }) : Promise<void>
 
   /**
      * Signs and processes all pending transactions, useful when recovering from an
      * error or crash, or on startup. If a transaction fails to process, marks it
      * as failed.
      */
-  processPendingTransactions: (onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler) => Promise<void>
+  processPendingTransactions(onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler) : Promise<void>
 
   /**
      * After a transaction is created (with `createTransaction` or with `getTransactionWithOutputs`),
@@ -216,7 +216,7 @@ export interface NinjaApi {
      *
      * @returns `DojoProcessTransactionResultApi` with txid and status of 'completed' or 'unknown'
      */
-  processTransaction: (params: { submittedTransaction: string | Buffer, reference: string, outputMap: Record<string, number> }) => Promise<DojoProcessTransactionResultApi>
+  processTransaction(params: { submittedTransaction: string | Buffer, reference: string, outputMap: Record<string, number> }) : Promise<DojoProcessTransactionResultApi>
 
   /**
      * Creates and signs a transaction with specified outputs, so that it can be processed with `processTransaction`. This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing, when you are not providing any non-Dojo inputs.
@@ -226,7 +226,7 @@ export interface NinjaApi {
      * @returns `GetTxWithOutputsResult` if not autoProcess
      * @returns `GetTxWithOutputsProcessedResult` if autoProcess
      */
-  getTransactionWithOutputs: (params: NinjaGetTransactionWithOutputsParams) => Promise<NinjaGetTxWithOutputsResultApi | NinjaGetTxWithOutputsProcessedResultApi>
+  getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams) : Promise<NinjaGetTxWithOutputsResultApi | NinjaGetTxWithOutputsProcessedResultApi>
 
   /**
      * Creates a new transaction that must be processed with `processTransaction`
@@ -235,7 +235,7 @@ export interface NinjaApi {
      *
      * @returns {Promise<TransactionTemplate>} The template you need to sign and process
      */
-  createTransaction: (params: NinjaCreateTransactionParams) => Promise<DojoCreateTransactionResultApi>
+  createTransaction(params: NinjaCreateTransactionParams) : Promise<DojoCreateTransactionResultApi>
 
   /**
      * This endpoint allows a recipient to submit a transactions that was directly given to them by a sender.
@@ -243,7 +243,7 @@ export interface NinjaApi {
      * Sets the transaction to completed and marks the outputs as spendable.
      *
      */
-  submitDirectTransaction: (params: NinjaSubmitDirectTransactionParams) => Promise<NinjaSubmitDirectTransactionResultApi>
+  submitDirectTransaction(params: NinjaSubmitDirectTransactionParams) : Promise<NinjaSubmitDirectTransactionResultApi>
 }
 
 /**
