@@ -12,7 +12,8 @@ export async function getTransactionWithOutputs (
   note?: string,
   recipient?: string,
   autoProcess?: boolean,
-  feePerKb?: number
+  feePerKb?: number,
+  lockTime?: number
 ): Promise<NinjaGetTxWithOutputsResultApi | NinjaGetTxWithOutputsProcessedResultApi> {
   const dojo = ninja.dojo
   inputs ||= {}
@@ -23,7 +24,8 @@ export async function getTransactionWithOutputs (
     // Calculate unlockingScriptLength from unlockingScript
     outputsToRedeem: v.outputsToRedeem.map(x => ({
       unlockingScriptLength: x.unlockingScript.length / 2,
-      index: x.index
+      index: x.index,
+      sequenceNumber: x.sequenceNumber
     }))
   }])))
 
@@ -38,7 +40,7 @@ export async function getTransactionWithOutputs (
     recipient
   )
 
-  const { tx, outputMap, amount } = NinjaTxBuilder.buildJsTxFromCreateTransactionResult(ninja, inputs, createResult)
+  const { tx, outputMap, amount } = NinjaTxBuilder.buildJsTxFromCreateTransactionResult(ninja, inputs, createResult, lockTime)
 
   const { inputs: txInputs, referenceNumber } = createResult
 

@@ -339,6 +339,10 @@ export interface NinjaOutputToRedeemApi {
      */
   unlockingScript: string
   spendingDescription?: string
+   /**
+     * Sequence number to use when spending
+     */
+  sequenceNumber?: number
 }
 
 export interface NinjaTxInputsApi extends EnvelopeEvidenceApi {
@@ -699,7 +703,11 @@ export interface NinjaGetTransactionWithOutputsParams {
   /**
      * A note about the transaction
      */
-  note?: string
+   note?: string
+   /**
+     * A lock time for the transaction
+     */
+   lockTime?: number
   /**
      * Paymail recipient for transaction
      */

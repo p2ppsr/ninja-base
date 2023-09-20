@@ -40,7 +40,8 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
   static buildJsTxFromCreateTransactionResult (
     ninja: NinjaApi,
     inputs: Record<string, NinjaTxInputsApi>,
-    createResult: DojoCreateTransactionResultApi
+    createResult: DojoCreateTransactionResultApi,
+    lockTime?: number
   ): {
       tx: bsvJs.Transaction
       outputMap: Record<string, number>
@@ -53,7 +54,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
       paymailHandle
     } = createResult
 
-    return this.buildJsTx(ninja, inputs, txInputs, txOutputs, derivationPrefix, paymailHandle)
+    return this.buildJsTx(ninja, inputs, txInputs, txOutputs, derivationPrefix, paymailHandle, lockTime)
   }
 
   static buildJsTx (
@@ -62,7 +63,8 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     txInputs: Record<string, DojoCreatingTxInputsApi>,
     txOutputs: DojoCreatingTxOutputApi[],
     derivationPrefix: string,
-    paymailHandle?: string
+    paymailHandle?: string,
+    lockTime?: string
   ): {
       tx: bsvJs.Transaction
       outputMap: Record<string, number>
@@ -137,10 +139,19 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
           // indicating that the entire unlocking script is already present for
           // this foreign input, and no new signatures are ever needed.
           txInput.getSignatures = () => ([])
+          // Set a custom sequence number, if provided
+          if (typeof otrNinja.sequenceNumber === 'number') {
+            txInput.sequenceNumber = otrNinja.sequenceNumber
+          }
         } else { // All non-foreign inputs are summed
           totalInputs += otrOutput.satoshis
         }
       }
+    }
+
+    // Set a custom lock time if provided
+    if (typeof lockTime === 'number') {
+      tx.nLockTime = lockTime
     }
 
     //  Sign inputs using type42 derived key
