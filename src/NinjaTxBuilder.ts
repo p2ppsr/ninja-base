@@ -64,7 +64,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     txOutputs: DojoCreatingTxOutputApi[],
     derivationPrefix: string,
     paymailHandle?: string,
-    lockTime?: string
+    lockTime?: number
   ): {
       tx: bsvJs.Transaction
       outputMap: Record<string, number>
