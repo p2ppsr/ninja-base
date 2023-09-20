@@ -8,7 +8,7 @@ import {
   DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi,
   CwiError, ERR_BAD_REQUEST, DojoSyncApi, DojoSyncOptionsApi, DojoSyncIdentifyParams, DojoSyncIdentifyResultApi,
   DojoSyncUpdateParams, DojoSyncUpdateResultApi, DojoSyncMergeParams, DojoSyncMergeResultApi,
-  restoreUserStateBuffers, DojoIdentityApi, SyncDojoConfigBaseApi
+  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -68,6 +68,8 @@ export class DojoExpressClient implements DojoClientApi {
 
   async stats (): Promise<DojoStatsApi> { return await this.getJson('/stats') }
 
+  async getDojoIdentity(): Promise<DojoIdentityApi> { return await this.getJson('/getDojoIdentity') }
+
   async authenticate (identityKey?: string, addIfNew?: boolean): Promise<void> {
     this._user = await this.postJson('/authenticate', { identityKey, addIfNew })
 
@@ -84,11 +86,6 @@ export class DojoExpressClient implements DojoClientApi {
 
   async verifyAuthenticated (): Promise<void> {
     if (!this.isAuthenticated) { await this.authenticate() }
-  }
-
-  async getDojoIdentity(): Promise<DojoIdentityApi> {
-    this.verifyAuthenticated()
-    return await this.postJson('/getDojoIdentity', { identityKey: this.identityKey })
   }
 
   async getSyncDojoConfig(): Promise<SyncDojoConfigBaseApi> {
@@ -126,24 +123,23 @@ export class DojoExpressClient implements DojoClientApi {
   }
 
   async syncIdentify(params: DojoSyncIdentifyParams): Promise<DojoSyncIdentifyResultApi> {
-    this.verifyAuthenticated()
-    const result:DojoSyncIdentifyResultApi = await this.postJson('/syncIdentify', { identityKey: this.identityKey, params })
-    if (result.when) {
-      result.when = new Date(result.when)
-    }
-    return result
+    const r:DojoSyncIdentifyResultApi = await this.postJson('/syncIdentify', params, true)
+    r.when = validateDate(r.when)
+    return r
   }
 
   async syncUpdate (params: DojoSyncUpdateParams): Promise<DojoSyncUpdateResultApi> {
     this.verifyAuthenticated()
     const r = await this.postJson('/syncUpdate', { identityKey: this.identityKey, params }) as DojoSyncUpdateResultApi
-    if (r.state != null) restoreUserStateBuffers(r.state)
+    if (r.state != null) restoreUserStateEntities(r.state)
+    r.since = validateDate(r.since)
     return r
   }
 
   async syncMerge (params: DojoSyncMergeParams): Promise<DojoSyncMergeResultApi> {
     this.verifyAuthenticated()
-    return await this.postJson('/syncMerge', { identityKey: this.identityKey, params })
+    const r:DojoSyncMergeResultApi = await this.postJson('/syncMerge', { identityKey: this.identityKey, params })
+    return r
   }
 
   async getCurrentPaymails (): Promise<string[]> {
@@ -168,7 +164,12 @@ export class DojoExpressClient implements DojoClientApi {
 
   async findCertificates (certifiers?: string[], types?: Record<string, string[]>): Promise<DojoCertificateApi[]> {
     this.verifyAuthenticated()
-    return await this.postJson('/findCertificate', { identityKey: this.identityKey, certifiers, types })
+    const rs:DojoCertificateApi[] = await this.postJson('/findCertificate', { identityKey: this.identityKey, certifiers, types })
+    for (const r of rs) {
+      r.created_at = validateDate(r.created_at)
+      r.updated_at = validateDate(r.updated_at)  
+    }
+    return rs
   }
 
   async getTotalOfUnspentOutputs (basket?: string): Promise<number | undefined> {
@@ -198,12 +199,18 @@ export class DojoExpressClient implements DojoClientApi {
 
   async getTransactions (options?: DojoGetTransactionsOptions): Promise<{ txs: DojoTransactionApi[], total: number }> {
     this.verifyAuthenticated()
-    return await this.postJson('/getTransactions', { identityKey: this.identityKey, options })
+    const results:{ txs: DojoTransactionApi[], total: number} = await this.postJson('/getTransactions', { identityKey: this.identityKey, options })
+    for (const r of results.txs) {
+      r.created_at = validateDate(r.created_at)
+      r.updated_at = validateDate(r.updated_at)  
+    }
+    return results
   }
 
   async getPendingTransactions (referenceNumber?: string): Promise<DojoPendingTxApi[]> {
     this.verifyAuthenticated()
-    return await this.postJson('/getPendingTransactions', { identityKey: this.identityKey, referenceNumber })
+    const rs:DojoPendingTxApi[] = await this.postJson('/getPendingTransactions', { identityKey: this.identityKey, referenceNumber })
+    return rs
   }
 
   async getEnvelopeForTransaction (txid: string): Promise<EnvelopeApi | undefined> {
@@ -213,7 +220,12 @@ export class DojoExpressClient implements DojoClientApi {
 
   async getTransactionOutputs (options?: DojoGetTransactionOutputsOptions): Promise<{ outputs: DojoOutputApi[], total: number }> {
     this.verifyAuthenticated()
-    return await this.postJson('/getTransactionOutputs', { identityKey: this.identityKey, options })
+    const results:{ outputs: DojoOutputApi[], total: number } = await this.postJson('/getTransactionOutputs', { identityKey: this.identityKey, options })
+    for (const r of results.outputs) {
+      r.created_at = validateDate(r.created_at)
+      r.updated_at = validateDate(r.updated_at)  
+    }
+    return results
   }
 
   async createTransaction (
@@ -250,7 +262,7 @@ export class DojoExpressClient implements DojoClientApi {
   async copyState (): Promise<DojoUserStateApi> {
     this.verifyAuthenticated()
     const state = await this.postJson('/copyState', { identityKey: this.identityKey }) as DojoUserStateApi
-    restoreUserStateBuffers(state)
+    restoreUserStateEntities(state)
     return state
   }
 
@@ -267,10 +279,10 @@ export class DojoExpressClient implements DojoClientApi {
     return r
   }
 
-  async postJsonOrUndefined<T, R>(path: string, params: T): Promise<R | undefined> {
+  async postJsonOrUndefined<T, R>(path: string, params: T, noAuth?: boolean): Promise<R | undefined> {
     let s: FetchStatus<R>
     try {
-      if (this.authrite) {
+      if (this.authrite && !noAuth) {
         s = await this.authrite.createSignedRequest(path, params) as FetchStatus<R>
       } else {
         const headers = {}
@@ -293,13 +305,13 @@ export class DojoExpressClient implements DojoClientApi {
     }
   }
 
-  async postJson<T, R>(path: string, params: T): Promise<R> {
-    const r = await this.postJsonOrUndefined<T, R>(path, params)
+  async postJson<T, R>(path: string, params: T, noAuth?: boolean): Promise<R> {
+    const r = await this.postJsonOrUndefined<T, R>(path, params, noAuth)
     if (r === undefined) { throw new ERR_BAD_REQUEST(`path=${path}. Value was undefined. Requested object may not exist.`) }
     return r
   }
 
-  async postJsonVoid<T>(path: string, params: T): Promise<void> {
-    await this.postJsonOrUndefined<T, void>(path, params)
+  async postJsonVoid<T>(path: string, params: T, noAuth?: boolean): Promise<void> {
+    await this.postJsonOrUndefined<T, void>(path, params, noAuth)
   }
 }
