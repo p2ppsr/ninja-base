@@ -123,6 +123,7 @@ export class DojoExpressClient implements DojoClientApi {
   }
 
   async syncIdentify(params: DojoSyncIdentifyParams): Promise<DojoSyncIdentifyResultApi> {
+    // /syncIdentify without authentication
     const r:DojoSyncIdentifyResultApi = await this.postJson('/syncIdentify', params, true)
     r.when = validateDate(r.when)
     return r
