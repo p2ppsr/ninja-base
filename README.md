@@ -90,25 +90,361 @@ export interface NinjaApi {
 
 <summary>Interface NinjaApi Details</summary>
 
-###### dojo
+##### Interface NinjaApi Property dojo
 
 The dojo user wallet database supporting this api.
 
 isAuthenticated must be true.
 
-###### authenticate
+```ts
+dojo: DojoClientApi
+```
+
+##### Interface NinjaApi Method authenticate
 
 Authenticates with configured dojo, if necessary.
 
-###### sync
+```ts
+authenticate(identityKey?: string, addIfNew?: boolean): Promise<void>
+```
 
-Sync's the dojo's state for the authenticated user with all of the configured syncDojos
+<details>
 
-This method should only be called when either a local or remote state change occurs, or may have occurred.
+<summary>Interface NinjaApi Method authenticate Details</summary>
 
-User state changes are propagated across all configured syncDojos.
+###### identityKey
 
-###### setSyncDojosByConfig
+Optional. The user's public identity key. Must be authorized to act on behalf of this user.
+
+###### addIfNew
+
+Optional. Create new user records if identityKey is unknown.
+
+</details>
+
+##### Interface NinjaApi Method createTransaction
+
+Creates a new transaction that must be processed with `processTransaction`
+after you sign it
+
+```ts
+createTransaction(params: NinjaCreateTransactionParams): Promise<DojoCreateTransactionResultApi>
+```
+
+<details>
+
+<summary>Interface NinjaApi Method createTransaction Details</summary>
+
+###### Returns
+
+The template you need to sign and process
+
+</details>
+
+##### Interface NinjaApi Method findCertificates
+
+Use this endpoint to retrieve certificates.
+
+```ts
+findCertificates(certifiers?: string[] | object, types?: Record<string, string[]>): Promise<{
+    status: "success";
+    certificates: DojoCertificateApi[];
+}>
+```
+
+<details>
+
+<summary>Interface NinjaApi Method findCertificates Details</summary>
+
+###### Returns
+
+A success object with `status: "success"` and any found certificates
+
+###### obj
+
+All parameters are given in an object
+
+</details>
+
+##### Interface NinjaApi Method getAvatar
+
+Returns the name and photo URL of the user
+
+```ts
+getAvatar(): Promise<DojoAvatarApi>
+```
+
+<details>
+
+<summary>Interface NinjaApi Method getAvatar Details</summary>
+
+###### Returns
+
+The avatar of the user
+
+</details>
+
+##### Interface NinjaApi Method getChain
+
+Returns which BSV network we are using (main or test)
+
+```ts
+getChain(): Promise<Chain>
+```
+
+##### Interface NinjaApi Method getClientChangeKeyPair
+
+Return the private / public keypair used by the Ninja client for change UTXOs
+
+```ts
+getClientChangeKeyPair(): KeyPairApi
+```
+
+##### Interface NinjaApi Method getNetOfAmounts
+
+Returns the net sum of transaction amounts belonging to authenticated user,
+incoming minus outgoing,
+and optionally matching conditions in `options`.
+
+```ts
+getNetOfAmounts(options?: DojoGetTotalOfAmountsOptions): Promise<number>
+```
+
+##### Interface NinjaApi Method getNetwork
+
+Returns which BSV network we are using (mainnet or testnet)
+
+```ts
+getNetwork(format?: "default" | "nonet"): Promise<string>
+```
+
+<details>
+
+<summary>Interface NinjaApi Method getNetwork Details</summary>
+
+###### Returns
+
+The current BSV network formatted as requested.
+
+###### format
+
+for the returned string. Either with (default) or without (nonet) a 'net' suffix.
+
+</details>
+
+##### Interface NinjaApi Method getPaymail
+
+Returns the current Paymail handle
+
+```ts
+getPaymail(): Promise<string>
+```
+
+##### Interface NinjaApi Method getPendingTransactions
+
+Returns a set of all transactions that need to be signed and submitted, or canceled
+
+```ts
+getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]>
+```
+
+##### Interface NinjaApi Method getSyncDojosByConfig
+
+Gets the currently configured syncDojos and sync options.
+
+If syncDojos are not being managed by `setSyncDojosByConfig` the returned configurations may include
+a 'dojoType' of '<custom>'.
+
+```ts
+getSyncDojosByConfig(): Promise<{
+    dojos: SyncDojoConfigBaseApi[];
+    options?: DojoSyncOptionsApi;
+}>
+```
+
+##### Interface NinjaApi Method getTotalOfAmounts
+
+Returns the sum of transaction amounts belonging to authenticated user,
+matching the given direction (which must be specified),
+and optionally matching remaining conditions in `options`.
+
+```ts
+getTotalOfAmounts(options: DojoGetTotalOfAmountsOptions): Promise<{
+    total: number;
+}>
+```
+
+##### Interface NinjaApi Method getTotalValue
+
+Returns the total of unspent outputs in satoshis. A non-negative integer.
+
+```ts
+getTotalValue(basket?: string): Promise<{
+    total: number;
+}>
+```
+
+<details>
+
+<summary>Interface NinjaApi Method getTotalValue Details</summary>
+
+###### basket
+
+defaults to 'default' if undefined
+
+</details>
+
+##### Interface NinjaApi Method getTransactionOutputs
+
+Returns a set of transaction outputs that Dojo has tracked
+
+```ts
+getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<NinjaGetTransactionOutputsResultApi[]>
+```
+
+##### Interface NinjaApi Method getTransactionWithOutputs
+
+Creates and signs a transaction with specified outputs, so that it can be processed with `processTransaction`. This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing, when you are not providing any non-Dojo inputs.
+
+Use this by default, and fall back to `createTransaction` if you need more customization.
+
+```ts
+getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaGetTxWithOutputsResultApi | NinjaGetTxWithOutputsProcessedResultApi>
+```
+
+<details>
+
+<summary>Interface NinjaApi Method getTransactionWithOutputs Details</summary>
+
+###### Returns
+
+`GetTxWithOutputsResult` if not autoProcess
+
+`GetTxWithOutputsProcessedResult` if autoProcess
+
+</details>
+
+##### Interface NinjaApi Method getTransactions
+
+Returns a set of transactions that match the criteria
+
+```ts
+getTransactions(options?: DojoGetTransactionsOptions): Promise<NinjaGetTransactionsResultApi>
+```
+
+<details>
+
+<summary>Interface NinjaApi Method getTransactions Details</summary>
+
+###### options
+
+limit defaults to 25, offset defaults to 0, addLabels defaults to true, order defaults to 'descending'
+
+</details>
+
+##### Interface NinjaApi Method processPendingTransactions
+
+Signs and processes all pending transactions, useful when recovering from an
+error or crash, or on startup. If a transaction fails to process, marks it
+as failed.
+
+```ts
+processPendingTransactions(onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler): Promise<void>
+```
+
+##### Interface NinjaApi Method processTransaction
+
+After a transaction is created (with `createTransaction` or with `getTransactionWithOutputs`),
+submit the serialized raw transaction to transaction processors for processing.
+
+```ts
+processTransaction(params: {
+    submittedTransaction: string | Buffer;
+    reference: string;
+    outputMap: Record<string, number>;
+}): Promise<DojoProcessTransactionResultApi>
+```
+
+<details>
+
+<summary>Interface NinjaApi Method processTransaction Details</summary>
+
+###### Returns
+
+`DojoProcessTransactionResultApi` with txid and status of 'completed' or 'unknown'
+
+###### params.submittedTransaction
+
+The transaction that has been created and signed
+
+###### params.reference
+
+The reference number provided by `createTransaction` or `getTransactionWithOutputs`
+
+###### params.outputMap
+
+An object whose keys are derivation prefixes
+and whose values are corresponding change output numbers from the transaction.
+
+</details>
+
+##### Interface NinjaApi Method saveCertificate
+
+Use this endpoint to store an incoming certificate.
+
+```ts
+saveCertificate(certificate: DojoCertificateApi | object): Promise<void>
+```
+
+<details>
+
+<summary>Interface NinjaApi Method saveCertificate Details</summary>
+
+###### Returns
+
+A success object with `status: "success"`
+
+###### obj
+
+All parameters are given in an object
+
+</details>
+
+##### Interface NinjaApi Method setAvatar
+
+Sets a new name and photo URL
+
+```ts
+setAvatar(name: string, photoURL: string): Promise<void>
+```
+
+<details>
+
+<summary>Interface NinjaApi Method setAvatar Details</summary>
+
+###### name
+
+A new name
+
+###### photoURL
+
+A new UHRP or HTTPS URL to a photo of the user
+
+</details>
+
+##### Interface NinjaApi Method setPaymail
+
+Changes the Paymail handle of the user.
+
+NOTE that the old handle will be available for others to use.
+
+NOTE that to prevent span, you may only do this if there is at least one unspent output under Dojo management.
+
+```ts
+setPaymail(paymail: string): Promise<void>
+```
+
+##### Interface NinjaApi Method setSyncDojosByConfig
 
 Sets the syncDojo's to be used by all users by the `sync()` function.
 
@@ -139,116 +475,100 @@ Currently supports three syncDojo configurations, each identified by its dojoTyp
   'useIdentityKey' may be set to true instead of using 'clientPrivateKey' if the cloud dojo does not use Authrite for access control.
   The cloud dojo must exists and must already be configured with matching dojoIdentityKey.
 
-###### getSyncDojosByConfig
+```ts
+setSyncDojosByConfig(syncDojoConfigs: SyncDojoConfigBaseApi[], options?: DojoSyncOptionsApi): Promise<void>
+```
 
-Gets the currently configured syncDojos and sync options.
+<details>
 
-If syncDojos are not being managed by `setSyncDojosByConfig` the returned configurations may include
-a 'dojoType' of '<custom>'.
+<summary>Interface NinjaApi Method setSyncDojosByConfig Details</summary>
 
-###### getClientChangeKeyPair
+###### syncDojoConfigs
 
-Return the private / public keypair used by the Ninja client for change UTXOs
+array of syncDojos to be used. May be empty.
 
-###### getPaymail
+###### options
 
-Returns the current Paymail handle
+place holder for future synchronization control options.
 
-###### setPaymail
+</details>
 
-Changes the Paymail handle of the user.
-
-NOTE that the old handle will be available for others to use.
-
-NOTE that to prevent span, you may only do this if there is at least one unspent output under Dojo management.
-
-###### getChain
-
-Returns which BSV network we are using (main or test)
-
-###### getNetwork
-
-Returns which BSV network we are using (mainnet or testnet)
-
-###### findCertificates
-
-Use this endpoint to retrieve certificates.
-
-###### saveCertificate
-
-Use this endpoint to store an incoming certificate.
-
-###### getTotalValue
-
-Returns the total of unspent outputs in satoshis. A non-negative integer.
-
-###### getTotalOfAmounts
-
-Returns the sum of transaction amounts belonging to authenticated user,
-matching the given direction (which must be specified),
-and optionally matching remaining conditions in `options`.
-
-###### getNetOfAmounts
-
-Returns the net sum of transaction amounts belonging to authenticated user,
-incoming minus outgoing,
-and optionally matching conditions in `options`.
-
-###### getAvatar
-
-Returns the name and photo URL of the user
-
-###### setAvatar
-
-Sets a new name and photo URL
-
-###### getTransactions
-
-Returns a set of transactions that match the criteria
-
-###### getTransactionOutputs
-
-Returns a set of transaction outputs that Dojo has tracked
-
-###### getPendingTransactions
-
-Returns a set of all transactions that need to be signed and submitted, or canceled
-
-###### updateTransactionStatus
-
-Use this endpoint to update the status of a transaction. This is useful for flagging incomplete transactions as aborted or reverting a completed transaction back into a pending status if it never got confirmed. Setting the status to "completed" or "waitingForSenderToSend" will make any selected UTXOs unavailable for spending, while any other status value will free up the UTXOs for use in other transactions.
-
-###### updateOutpointStatus
-
-Use this endpoint to update the status of one of your outputs, given as the TXID of a transaction and the vout (output index) in that transaction. This is useful for flagging transaction outpoints as spent if they were inadvertantly broadcasted or used without properly submitting them to the Dojo, or to undo the spending of an output if it was never actually spent.
-
-###### processPendingTransactions
-
-Signs and processes all pending transactions, useful when recovering from an
-error or crash, or on startup. If a transaction fails to process, marks it
-as failed.
-
-###### processTransaction
-
-After a transaction is created (with `createTransaction` or with `getTransactionWithOutputs`),
-submit the serialized raw transaction to transaction processors for processing.
-
-###### getTransactionWithOutputs
-
-Creates and signs a transaction with specified outputs, so that it can be processed with `processTransaction`. This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing, when you are not providing any non-Dojo inputs.
-
-Use this by default, and fall back to `createTransaction` if you need more customization.
-
-###### createTransaction
-
-Creates a new transaction that must be processed with `processTransaction`
-after you sign it
-
-###### submitDirectTransaction
+##### Interface NinjaApi Method submitDirectTransaction
 
 This endpoint allows a recipient to submit a transactions that was directly given to them by a sender.
 Saves the inputs and key derivation information, allowing the UTXOs to be redeemed in the future.
 Sets the transaction to completed and marks the outputs as spendable.
+
+```ts
+submitDirectTransaction(params: NinjaSubmitDirectTransactionParams): Promise<NinjaSubmitDirectTransactionResultApi>
+```
+
+##### Interface NinjaApi Method sync
+
+Sync's the dojo's state for the authenticated user with all of the configured syncDojos
+
+This method should only be called when either a local or remote state change occurs, or may have occurred.
+
+User state changes are propagated across all configured syncDojos.
+
+```ts
+sync(): Promise<void>
+```
+
+##### Interface NinjaApi Method updateOutpointStatus
+
+Use this endpoint to update the status of one of your outputs, given as the TXID of a transaction and the vout (output index) in that transaction. This is useful for flagging transaction outpoints as spent if they were inadvertantly broadcasted or used without properly submitting them to the Dojo, or to undo the spending of an output if it was never actually spent.
+
+```ts
+updateOutpointStatus(params: {
+    txid: string;
+    vout: number;
+    spendable: boolean;
+}): Promise<void>
+```
+
+<details>
+
+<summary>Interface NinjaApi Method updateOutpointStatus Details</summary>
+
+###### params.txid
+
+The TXID of the transaction that created the output
+
+###### params.vout
+
+The index of the output in the transaction
+
+###### params.spendable
+
+The true spendability status of this outpoint
+
+</details>
+
+##### Interface NinjaApi Method updateTransactionStatus
+
+Use this endpoint to update the status of a transaction. This is useful for flagging incomplete transactions as aborted or reverting a completed transaction back into a pending status if it never got confirmed. Setting the status to "completed" or "waitingForSenderToSend" will make any selected UTXOs unavailable for spending, while any other status value will free up the UTXOs for use in other transactions.
+
+```ts
+updateTransactionStatus(params: {
+    reference: string;
+    status: DojoTransactionStatusApi;
+}): Promise<void>
+```
+
+<details>
+
+<summary>Interface NinjaApi Method updateTransactionStatus Details</summary>
+
+###### params.reference
+
+The Dojo reference number for the transaction
+
+###### params.status
+
+The new status of the transaction
+
+</details>
 
 </details>
 
@@ -278,7 +598,25 @@ export interface NinjaCreateTransactionParams {
 
 <summary>Interface NinjaCreateTransactionParams Details</summary>
 
-###### inputs
+##### Interface NinjaCreateTransactionParams Property fee
+
+When the fee model is "sat/kb", this is the number of satoshis per kilobyte of block space
+that the transaction will pay.
+
+```ts
+fee: DojoFeeModelApi
+```
+
+##### Interface NinjaCreateTransactionParams Property inputSelection
+
+If Dojo needs to select more inputs beyond what you provided in the `inputs` parameter,
+this parameter describes which kinds of inputs can be selected, and from where.
+
+```ts
+inputSelection: DojoTxInputSelectionApi
+```
+
+##### Interface NinjaCreateTransactionParams Property inputs
 
 Specify any additional inputs to the transaction (if any) that are not to be provided by the Dojo.
 If you do not provide inputs here, or if they are insufficient,
@@ -287,21 +625,27 @@ To control this input selection behavior, see the `inputSelection` parameter.
 This `inputs` parameter is an object whose keys are TXIDs of input transactions,
 and whose values are their associated SPV envelopes.
 
-###### inputSelection
+```ts
+inputs: Record<string, DojoTxInputsApi>
+```
 
-If Dojo needs to select more inputs beyond what you provided in the `inputs` parameter,
-this parameter describes which kinds of inputs can be selected, and from where.
+##### Interface NinjaCreateTransactionParams Property labels
 
-###### outputs
+The labels to affix to this transaction
 
-External outputs that you will include when you create this transaction.
-These outputs can contain custom scripts as specified by recipients.
-If the inputs to the transaction go beyond what is needed to fund
-these outputs (plus the transaction fee),
-additional Dojo-managed UTXOs will be generated to collect
-the remainder (see the `outputGeneration` parameter for more on this).
+```ts
+labels: string[]
+```
 
-###### outputGeneration
+##### Interface NinjaCreateTransactionParams Property note
+
+A numan-readable note describing the transaction
+
+```ts
+note?: string
+```
+
+##### Interface NinjaCreateTransactionParams Property outputGeneration
 
 If Dojo needs to generate additional outputs for the transaction beyond what was specified,
 this object describes what kind of outputs to generate, and where they should be kept.
@@ -313,22 +657,30 @@ then uses Benford's law to distribute the satoshis across them.
 "single" just uses one output, randomly selected from the available types,
 that contains all the satoshis.
 
-###### fee
+```ts
+outputGeneration: DojoOutputGenerationApi
+```
 
-When the fee model is "sat/kb", this is the number of satoshis per kilobyte of block space
-that the transaction will pay.
+##### Interface NinjaCreateTransactionParams Property outputs
 
-###### labels
+External outputs that you will include when you create this transaction.
+These outputs can contain custom scripts as specified by recipients.
+If the inputs to the transaction go beyond what is needed to fund
+these outputs (plus the transaction fee),
+additional Dojo-managed UTXOs will be generated to collect
+the remainder (see the `outputGeneration` parameter for more on this).
 
-The labels to affix to this transaction
+```ts
+outputs: DojoCreateTxOutputApi[]
+```
 
-###### note
-
-A numan-readable note describing the transaction
-
-###### recipient
+##### Interface NinjaCreateTransactionParams Property recipient
 
 The Paymail handle for the recipient of the transaction
+
+```ts
+recipient?: string
+```
 
 </details>
 
@@ -345,6 +697,36 @@ export interface NinjaTransactionFailedApi {
     error: CwiError;
 }
 ```
+
+<details>
+
+<summary>Interface NinjaTransactionFailedApi Details</summary>
+
+##### Interface NinjaTransactionFailedApi Property error
+
+```ts
+error: CwiError
+```
+
+##### Interface NinjaTransactionFailedApi Property inputs
+
+```ts
+inputs: Record<string, DojoPendingTxInputApi>
+```
+
+##### Interface NinjaTransactionFailedApi Property isOutgoing
+
+```ts
+isOutgoing: boolean
+```
+
+##### Interface NinjaTransactionFailedApi Property reference
+
+```ts
+reference: string
+```
+
+</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
@@ -365,6 +747,66 @@ export interface NinjaTransactionProcessedApi {
 }
 ```
 
+<details>
+
+<summary>Interface NinjaTransactionProcessedApi Details</summary>
+
+##### Interface NinjaTransactionProcessedApi Property amount
+
+```ts
+amount: number
+```
+
+##### Interface NinjaTransactionProcessedApi Property derivationPrefix
+
+```ts
+derivationPrefix?: string
+```
+
+##### Interface NinjaTransactionProcessedApi Property hex
+
+```ts
+hex: string
+```
+
+##### Interface NinjaTransactionProcessedApi Property inputs
+
+```ts
+inputs: Record<string, DojoPendingTxInputApi>
+```
+
+##### Interface NinjaTransactionProcessedApi Property isOutgoing
+
+```ts
+isOutgoing: boolean
+```
+
+##### Interface NinjaTransactionProcessedApi Property outputs
+
+```ts
+outputs: DojoPendingTxOutputApi[]
+```
+
+##### Interface NinjaTransactionProcessedApi Property reference
+
+```ts
+reference: string
+```
+
+##### Interface NinjaTransactionProcessedApi Property senderIdentityKey
+
+```ts
+senderIdentityKey?: string
+```
+
+##### Interface NinjaTransactionProcessedApi Property txid
+
+```ts
+txid: string
+```
+
+</details>
+
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
 ---
@@ -383,20 +825,29 @@ export interface NinjaOutputToRedeemApi {
 
 <summary>Interface NinjaOutputToRedeemApi Details</summary>
 
-###### index
+##### Interface NinjaOutputToRedeemApi Property index
 
-Zero based output index within its transaction to spend.
+```ts
+index: number
+```
 
-###### unlockingScript
+##### Interface NinjaOutputToRedeemApi Property sequenceNumber
 
-Hex scriptcode that unlocks the satoshis.
+```ts
+sequenceNumber?: number
+```
 
-Note that you should create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
-so that the additional Dojo outputs can be added afterward without invalidating your signature.
+##### Interface NinjaOutputToRedeemApi Property spendingDescription
 
-###### sequenceNumber
+```ts
+spendingDescription?: string
+```
 
-Sequence number to use when spending
+##### Interface NinjaOutputToRedeemApi Property unlockingScript
+
+```ts
+unlockingScript: string
+```
 
 </details>
 
@@ -411,6 +862,18 @@ export interface NinjaTxInputsApi extends EnvelopeEvidenceApi {
 }
 ```
 
+<details>
+
+<summary>Interface NinjaTxInputsApi Details</summary>
+
+##### Interface NinjaTxInputsApi Property outputsToRedeem
+
+```ts
+outputsToRedeem: NinjaOutputToRedeemApi[]
+```
+
+</details>
+
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
 ---
@@ -422,6 +885,24 @@ export interface KeyPairApi {
     publicKey: string;
 }
 ```
+
+<details>
+
+<summary>Interface KeyPairApi Details</summary>
+
+##### Interface KeyPairApi Property privateKey
+
+```ts
+privateKey: string
+```
+
+##### Interface KeyPairApi Property publicKey
+
+```ts
+publicKey: string
+```
+
+</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
@@ -447,45 +928,65 @@ export interface NinjaGetTransactionsTxApi {
 
 <summary>Interface NinjaGetTransactionsTxApi Details</summary>
 
-###### txid
+##### Interface NinjaGetTransactionsTxApi Property amount
 
-The transaction ID
+```ts
+amount: number
+```
 
-###### amount
+##### Interface NinjaGetTransactionsTxApi Property created_at
 
-The number of satoshis added or removed from Dojo by this transaction
+```ts
+created_at: string
+```
 
-###### status
+##### Interface NinjaGetTransactionsTxApi Property isOutgoing
 
-The current state of the transaction. Common statuses are `completed` and `waitingForSenderToSend`.
+```ts
+isOutgoing: boolean
+```
 
-###### senderPaymail
+##### Interface NinjaGetTransactionsTxApi Property labels
 
-The Paymail handle of the person who sent the transaction
+```ts
+labels: string[]
+```
 
-###### recipientPaymail
+##### Interface NinjaGetTransactionsTxApi Property note
 
-The Paymail handle of the person who received the transaction
+```ts
+note: string
+```
 
-###### isOutgoing
+##### Interface NinjaGetTransactionsTxApi Property recipientPaymail
 
-Whether or not the transaction was created with `createTransaction`
+```ts
+recipientPaymail: string
+```
 
-###### note
+##### Interface NinjaGetTransactionsTxApi Property referenceNumber
 
-The human-readable tag for the transaction, provided by the person who initiated it
+```ts
+referenceNumber: string
+```
 
-###### created_at
+##### Interface NinjaGetTransactionsTxApi Property senderPaymail
 
-The time the transaction was registered with the Dojo
+```ts
+senderPaymail: string
+```
 
-###### referenceNumber
+##### Interface NinjaGetTransactionsTxApi Property status
 
-The Dojo reference number for the transaction
+```ts
+status: string
+```
 
-###### labels
+##### Interface NinjaGetTransactionsTxApi Property txid
 
-A set of all the labels affixed to the transaction
+```ts
+txid: string
+```
 
 </details>
 
@@ -507,13 +1008,21 @@ export interface NinjaGetTransactionsResultApi {
 
 <summary>Interface NinjaGetTransactionsResultApi Details</summary>
 
-###### totalTransactions
+##### Interface NinjaGetTransactionsResultApi Property totalTransactions
 
 The number of transactions in the complete set
 
-###### transactions
+```ts
+totalTransactions: number
+```
+
+##### Interface NinjaGetTransactionsResultApi Property transactions
 
 The specific transactions from the set that were requested, based on `limit` and `offset`
+
+```ts
+transactions: NinjaGetTransactionsTxApi[]
+```
 
 </details>
 
@@ -539,29 +1048,53 @@ export interface NinjaGetTxWithOutputsResultApi {
 
 <summary>Interface NinjaGetTxWithOutputsResultApi Details</summary>
 
-###### rawTx
-
-The serialized, signed transaction that is ready for broadcast
-
-###### txid
-
-rawTx hash as hex string
-
-###### referenceNumber
-
-The reference number that should now be provided back to `processTransaction (or `updateTransactionStatus`)
-
-###### amount
+##### Interface NinjaGetTxWithOutputsResultApi Property amount
 
 The amount of the transaction
 
-###### inputs
+```ts
+amount: number
+```
+
+##### Interface NinjaGetTxWithOutputsResultApi Property inputs
 
 This is the fully-formed `inputs` field of this transaction, as per the SPV Envelope specification.
 
-###### outputMap
+```ts
+inputs: Record<string, EnvelopeEvidenceApi>
+```
+
+##### Interface NinjaGetTxWithOutputsResultApi Property outputMap
 
 Map of change output derivationSuffix values to transaction vout indices
+
+```ts
+outputMap: Record<string, number>
+```
+
+##### Interface NinjaGetTxWithOutputsResultApi Property rawTx
+
+The serialized, signed transaction that is ready for broadcast
+
+```ts
+rawTx: string
+```
+
+##### Interface NinjaGetTxWithOutputsResultApi Property referenceNumber
+
+The reference number that should now be provided back to `processTransaction (or `updateTransactionStatus`)
+
+```ts
+referenceNumber: string
+```
+
+##### Interface NinjaGetTxWithOutputsResultApi Property txid
+
+rawTx hash as hex string
+
+```ts
+txid: string
+```
 
 </details>
 
@@ -587,29 +1120,53 @@ export interface NinjaGetTxWithOutputsProcessedResultApi {
 
 <summary>Interface NinjaGetTxWithOutputsProcessedResultApi Details</summary>
 
-###### rawTx
-
-The serialized, signed transaction that is ready for broadcast
-
-###### txid
-
-rawTx hash as hex string
-
-###### mapiResponses
-
-On 'completed' status, array of acceptance responses from mapi transaction processors.
-
-###### note
-
-...
-
-###### amount
+##### Interface NinjaGetTxWithOutputsProcessedResultApi Property amount
 
 The amount of the transaction
 
-###### inputs
+```ts
+amount: number
+```
+
+##### Interface NinjaGetTxWithOutputsProcessedResultApi Property inputs
 
 This is the fully-formed `inputs` field of this transaction, as per the SPV Envelope specification.
+
+```ts
+inputs: object
+```
+
+##### Interface NinjaGetTxWithOutputsProcessedResultApi Property mapiResponses
+
+On 'completed' status, array of acceptance responses from mapi transaction processors.
+
+```ts
+mapiResponses: MapiResponseApi[]
+```
+
+##### Interface NinjaGetTxWithOutputsProcessedResultApi Property note
+
+...
+
+```ts
+note?: string
+```
+
+##### Interface NinjaGetTxWithOutputsProcessedResultApi Property rawTx
+
+The serialized, signed transaction that is ready for broadcast
+
+```ts
+rawTx: string
+```
+
+##### Interface NinjaGetTxWithOutputsProcessedResultApi Property txid
+
+rawTx hash as hex string
+
+```ts
+txid: string
+```
 
 </details>
 
@@ -633,33 +1190,41 @@ export interface NinjaGetPendingTransactionsInstructionsApi {
 
 <summary>Interface NinjaGetPendingTransactionsInstructionsApi Details</summary>
 
-###### type
+##### Interface NinjaGetPendingTransactionsInstructionsApi Property customInstructions
 
-max length of 50
-e.g. P2PKH, custom
+```ts
+customInstructions: string | null
+```
 
-###### derivationPrefix
+##### Interface NinjaGetPendingTransactionsInstructionsApi Property derivationPrefix
 
-max length of 32
-base64 encoded
+```ts
+derivationPrefix: string | null
+```
 
-###### derivationSuffix
+##### Interface NinjaGetPendingTransactionsInstructionsApi Property derivationSuffix
 
-max length of 32
-base64 encoded
+```ts
+derivationSuffix: string | null
+```
 
-###### paymailHandle
+##### Interface NinjaGetPendingTransactionsInstructionsApi Property paymailHandle
 
-max length of 64
+```ts
+paymailHandle: string | null
+```
 
-###### senderIdentityKey
+##### Interface NinjaGetPendingTransactionsInstructionsApi Property senderIdentityKey
 
-max length of 130
-hex encoded
+```ts
+senderIdentityKey: string | null
+```
 
-###### customInstructions
+##### Interface NinjaGetPendingTransactionsInstructionsApi Property type
 
-max length of 2500
+```ts
+type: string
+```
 
 </details>
 
@@ -674,6 +1239,24 @@ export interface NinjaGetPendingTransactionsInputApi extends EnvelopeEvidenceApi
     instructions: Record<number, NinjaGetPendingTransactionsInstructionsApi>;
 }
 ```
+
+<details>
+
+<summary>Interface NinjaGetPendingTransactionsInputApi Details</summary>
+
+##### Interface NinjaGetPendingTransactionsInputApi Property instructions
+
+```ts
+instructions: Record<number, NinjaGetPendingTransactionsInstructionsApi>
+```
+
+##### Interface NinjaGetPendingTransactionsInputApi Property outputsToRedeem
+
+```ts
+outputsToRedeem: number[]
+```
+
+</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
@@ -702,34 +1285,86 @@ export interface NinjaGetPendingTransactionsTxApi {
 
 <summary>Interface NinjaGetPendingTransactionsTxApi Details</summary>
 
-###### created_at
+##### Interface NinjaGetPendingTransactionsTxApi Property amount
+
+The number of satoshis added or removed from Dojo by this transaction
+
+```ts
+amount: number
+```
+
+##### Interface NinjaGetPendingTransactionsTxApi Property created_at
 
 The time the transaction was registered with the Dojo
 
-###### provenTxId
+```ts
+created_at: string
+```
+
+##### Interface NinjaGetPendingTransactionsTxApi Property inputs
+
+parsed truncatedExternalInputs
+
+```ts
+inputs?: Record<string, NinjaGetPendingTransactionsInputApi>
+```
+
+##### Interface NinjaGetPendingTransactionsTxApi Property isOutgoing
+
+```ts
+isOutgoing: boolean
+```
+
+##### Interface NinjaGetPendingTransactionsTxApi Property provenTxId
 
 Is valid when transaction proof record exists in DojoProvenTxApi table.
 
-###### status
+```ts
+provenTxId?: number | null
+```
+
+##### Interface NinjaGetPendingTransactionsTxApi Property rawTransaction
+
+```ts
+rawTransaction: Buffer | null
+```
+
+##### Interface NinjaGetPendingTransactionsTxApi Property referenceNumber
+
+The Dojo reference number for the transaction
+
+```ts
+referenceNumber: string
+```
+
+##### Interface NinjaGetPendingTransactionsTxApi Property senderPaymail
+
+The Paymail handle of the person who sent the transaction
+
+```ts
+senderPaymail: string | undefined | null
+```
+
+##### Interface NinjaGetPendingTransactionsTxApi Property status
 
 max length of 64
 e.g. completed, failed, unprocessed, waitingForSenderToSend
 
-###### amount
+```ts
+status: DojoTransactionStatusApi
+```
 
-The number of satoshis added or removed from Dojo by this transaction
+##### Interface NinjaGetPendingTransactionsTxApi Property transactionId
 
-###### senderPaymail
+```ts
+transactionId: number
+```
 
-The Paymail handle of the person who sent the transaction
+##### Interface NinjaGetPendingTransactionsTxApi Property truncatedExternalInputs
 
-###### referenceNumber
-
-The Dojo reference number for the transaction
-
-###### inputs
-
-parsed truncatedExternalInputs
+```ts
+truncatedExternalInputs: string | null
+```
 
 </details>
 
@@ -751,13 +1386,21 @@ export interface TxRedeemableOutputApi {
 
 <summary>Interface TxRedeemableOutputApi Details</summary>
 
-###### index
+##### Interface TxRedeemableOutputApi Property index
 
 The index of the output to redeem in the transaction
 
-###### unlockingScriptLength
+```ts
+index: number
+```
+
+##### Interface TxRedeemableOutputApi Property unlockingScriptLength
 
 The byte length of the unlocking script you intend to use to unlock this output
+
+```ts
+unlockingScriptLength: number
+```
 
 </details>
 
@@ -779,13 +1422,21 @@ export interface TxOutputApi {
 
 <summary>Interface TxOutputApi Details</summary>
 
-###### satoshis
+##### Interface TxOutputApi Property satoshis
 
 The amount of satoshis that will be in the output
 
-###### script
+```ts
+satoshis: number
+```
+
+##### Interface TxOutputApi Property script
 
 The hex string representing the output locking script
+
+```ts
+script: string
+```
 
 </details>
 
@@ -811,29 +1462,53 @@ export interface NinjaGetTransactionOutputsResultApi {
 
 <summary>Interface NinjaGetTransactionOutputsResultApi Details</summary>
 
-###### txid
-
-Transaction ID of transaction that created the output
-
-###### vout
-
-Index in the transaction of the output
-
-###### amount
+##### Interface NinjaGetTransactionOutputsResultApi Property amount
 
 Number of satoshis in the output
 
-###### outputScript
+```ts
+amount: number
+```
+
+##### Interface NinjaGetTransactionOutputsResultApi Property outputScript
 
 Hex representation of output locking script
 
-###### type
+```ts
+outputScript: string
+```
+
+##### Interface NinjaGetTransactionOutputsResultApi Property spendable
+
+Whether this output is free to be spent
+
+```ts
+spendable: boolean
+```
+
+##### Interface NinjaGetTransactionOutputsResultApi Property txid
+
+Transaction ID of transaction that created the output
+
+```ts
+txid: string
+```
+
+##### Interface NinjaGetTransactionOutputsResultApi Property type
 
 The type of output, for example "P2PKH" or "P2RPH"
 
-###### spendable
+```ts
+type: string
+```
 
-Whether this output is free to be spent
+##### Interface NinjaGetTransactionOutputsResultApi Property vout
+
+Index in the transaction of the output
+
+```ts
+vout: number
+```
 
 </details>
 
@@ -851,6 +1526,42 @@ export interface NinjaSubmitDirectTransactionOutputApi {
     customInstructions?: object;
 }
 ```
+
+<details>
+
+<summary>Interface NinjaSubmitDirectTransactionOutputApi Details</summary>
+
+##### Interface NinjaSubmitDirectTransactionOutputApi Property basket
+
+```ts
+basket: string
+```
+
+##### Interface NinjaSubmitDirectTransactionOutputApi Property customInstructions
+
+```ts
+customInstructions?: object
+```
+
+##### Interface NinjaSubmitDirectTransactionOutputApi Property derivationPrefix
+
+```ts
+derivationPrefix?: string
+```
+
+##### Interface NinjaSubmitDirectTransactionOutputApi Property derivationSuffix
+
+```ts
+derivationSuffix?: string
+```
+
+##### Interface NinjaSubmitDirectTransactionOutputApi Property vout
+
+```ts
+vout: number
+```
+
+</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
@@ -876,9 +1587,43 @@ export interface NinjaSubmitDirectTransactionApi {
 
 <summary>Interface NinjaSubmitDirectTransactionApi Details</summary>
 
-###### outputs
+##### Interface NinjaSubmitDirectTransactionApi Property inputs
+
+```ts
+inputs?: Record<string, EnvelopeEvidenceApi>
+```
+
+##### Interface NinjaSubmitDirectTransactionApi Property mapiResponses
+
+```ts
+mapiResponses?: MapiResponseApi[]
+```
+
+##### Interface NinjaSubmitDirectTransactionApi Property outputs
 
 sparse array of outputs of interest where indices match vout numbers.
+
+```ts
+outputs: NinjaSubmitDirectTransactionOutputApi[]
+```
+
+##### Interface NinjaSubmitDirectTransactionApi Property proof
+
+```ts
+proof?: TscMerkleProofApi
+```
+
+##### Interface NinjaSubmitDirectTransactionApi Property rawTx
+
+```ts
+rawTx: string
+```
+
+##### Interface NinjaSubmitDirectTransactionApi Property referenceNumber
+
+```ts
+referenceNumber?: string
+```
 
 </details>
 
@@ -907,12 +1652,54 @@ export interface NinjaSubmitDirectTransactionParams {
 
 <summary>Interface NinjaSubmitDirectTransactionParams Details</summary>
 
-###### protocol
+##### Interface NinjaSubmitDirectTransactionParams Property amount
+
+```ts
+amount?: number
+```
+
+##### Interface NinjaSubmitDirectTransactionParams Property derivationPrefix
+
+A derivation prefix used for all outputs. If provided, derivation prefixes on all outputs are optional.
+
+```ts
+derivationPrefix?: string
+```
+
+##### Interface NinjaSubmitDirectTransactionParams Property labels
+
+Labels to assign to transaction.
+
+```ts
+labels: string[]
+```
+
+##### Interface NinjaSubmitDirectTransactionParams Property note
+
+Human-readable description for the transaction
+
+```ts
+note: string
+```
+
+##### Interface NinjaSubmitDirectTransactionParams Property protocol
 
 Specify the transaction submission payment protocol to use.
 Currently, the only supported protocol is that with BRFC ID "3241645161d8"
 
-###### transaction
+```ts
+protocol: string
+```
+
+##### Interface NinjaSubmitDirectTransactionParams Property senderIdentityKey
+
+Provide the identity key for the person who sent the transaction
+
+```ts
+senderIdentityKey: string
+```
+
+##### Interface NinjaSubmitDirectTransactionParams Property transaction
 
 The transaction envelope to submit, including key derivation information.
 
@@ -925,21 +1712,9 @@ transaction.outputs is an array of outputs, each containing:
 If a global `derivationPrefix` is used (recommended),
 output-specific derivation prefixes should be omitted.
 
-###### senderIdentityKey
-
-Provide the identity key for the person who sent the transaction
-
-###### note
-
-Human-readable description for the transaction
-
-###### labels
-
-Labels to assign to transaction.
-
-###### derivationPrefix
-
-A derivation prefix used for all outputs. If provided, derivation prefixes on all outputs are optional.
+```ts
+transaction: NinjaSubmitDirectTransactionApi
+```
 
 </details>
 
@@ -954,6 +1729,24 @@ export interface NinjaSubmitDirectTransactionResultApi {
     referenceNumber: string;
 }
 ```
+
+<details>
+
+<summary>Interface NinjaSubmitDirectTransactionResultApi Details</summary>
+
+##### Interface NinjaSubmitDirectTransactionResultApi Property referenceNumber
+
+```ts
+referenceNumber: string
+```
+
+##### Interface NinjaSubmitDirectTransactionResultApi Property transactionId
+
+```ts
+transactionId: number
+```
+
+</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
@@ -981,15 +1774,29 @@ export interface NinjaGetTransactionWithOutputsParams {
 
 <summary>Interface NinjaGetTransactionWithOutputsParams Details</summary>
 
-###### outputs
+##### Interface NinjaGetTransactionWithOutputsParams Property autoProcess
 
-A set of outputs to include, each with `script` and `satoshis`.
+Whether the transaction should be processed automatically
+with processTransaction. Note that this will return `mapiResponses` and `note`
+instead of referenceNumber
 
-###### labels
+default true
 
-A set of label strings to affix to the transaction
+```ts
+autoProcess?: boolean
+```
 
-###### inputs
+##### Interface NinjaGetTransactionWithOutputsParams Property feePerKb
+
+The number of satoshis to pay per KB of block space used by this transaction.
+
+default 110
+
+```ts
+feePerKb?: number
+```
+
+##### Interface NinjaGetTransactionWithOutputsParams Property inputs
 
 Input scripts to spend as part of this transaction.
 
@@ -1004,31 +1811,49 @@ and `unlockingScript` is the hex scriptcode that unlocks the satoshis.
 Note that you should create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
 so that the additional Dojo outputs can be added afterward without invalidating your signature.
 
-###### note
+```ts
+inputs?: Record<string, NinjaTxInputsApi>
+```
 
-A note about the transaction
+##### Interface NinjaGetTransactionWithOutputsParams Property labels
 
-###### lockTime
+A set of label strings to affix to the transaction
+
+```ts
+labels?: string[]
+```
+
+##### Interface NinjaGetTransactionWithOutputsParams Property lockTime
 
 A lock time for the transaction
 
-###### recipient
+```ts
+lockTime?: number
+```
+
+##### Interface NinjaGetTransactionWithOutputsParams Property note
+
+A note about the transaction
+
+```ts
+note?: string
+```
+
+##### Interface NinjaGetTransactionWithOutputsParams Property outputs
+
+A set of outputs to include, each with `script` and `satoshis`.
+
+```ts
+outputs: DojoCreateTxOutputApi[]
+```
+
+##### Interface NinjaGetTransactionWithOutputsParams Property recipient
 
 Paymail recipient for transaction
 
-###### autoProcess
-
-Whether the transaction should be processed automatically
-with processTransaction. Note that this will return `mapiResponses` and `note`
-instead of referenceNumber
-
-default true
-
-###### feePerKb
-
-The number of satoshis to pay per KB of block space used by this transaction.
-
-default 110
+```ts
+recipient?: string
+```
 
 </details>
 
@@ -1059,6 +1884,54 @@ export interface ProcessIncomingTransactionOutputApi {
 }
 ```
 
+<details>
+
+<summary>Interface ProcessIncomingTransactionOutputApi Details</summary>
+
+##### Interface ProcessIncomingTransactionOutputApi Property amount
+
+```ts
+amount?: number
+```
+
+##### Interface ProcessIncomingTransactionOutputApi Property derivationPrefix
+
+```ts
+derivationPrefix?: string
+```
+
+##### Interface ProcessIncomingTransactionOutputApi Property derivationSuffix
+
+```ts
+derivationSuffix?: string
+```
+
+##### Interface ProcessIncomingTransactionOutputApi Property paymailHandle
+
+```ts
+paymailHandle?: string
+```
+
+##### Interface ProcessIncomingTransactionOutputApi Property satoshis
+
+```ts
+satoshis?: number
+```
+
+##### Interface ProcessIncomingTransactionOutputApi Property senderIdentityKey
+
+```ts
+senderIdentityKey?: string
+```
+
+##### Interface ProcessIncomingTransactionOutputApi Property vout
+
+```ts
+vout?: number
+```
+
+</details>
+
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
 ---
@@ -1075,6 +1948,48 @@ export interface ProcessIncomingTransactionApi {
 }
 ```
 
+<details>
+
+<summary>Interface ProcessIncomingTransactionApi Details</summary>
+
+##### Interface ProcessIncomingTransactionApi Property derivationPrefix
+
+```ts
+derivationPrefix?: string
+```
+
+##### Interface ProcessIncomingTransactionApi Property inputs
+
+```ts
+inputs?: Record<string, ProcessIncomingTransactionInputApi>
+```
+
+##### Interface ProcessIncomingTransactionApi Property outputs
+
+```ts
+outputs: ProcessIncomingTransactionOutputApi[]
+```
+
+##### Interface ProcessIncomingTransactionApi Property rawTransaction
+
+```ts
+rawTransaction?: string
+```
+
+##### Interface ProcessIncomingTransactionApi Property rawTx
+
+```ts
+rawTx?: string
+```
+
+##### Interface ProcessIncomingTransactionApi Property referenceNumber
+
+```ts
+referenceNumber?: string
+```
+
+</details>
+
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
 ---
@@ -1088,6 +2003,36 @@ export interface ProcessIncomingTransactionResultApi {
     senderIdentityKey?: string;
 }
 ```
+
+<details>
+
+<summary>Interface ProcessIncomingTransactionResultApi Details</summary>
+
+##### Interface ProcessIncomingTransactionResultApi Property amount
+
+```ts
+amount: number
+```
+
+##### Interface ProcessIncomingTransactionResultApi Property derivationPrefix
+
+```ts
+derivationPrefix?: string
+```
+
+##### Interface ProcessIncomingTransactionResultApi Property senderIdentityKey
+
+```ts
+senderIdentityKey?: string
+```
+
+##### Interface ProcessIncomingTransactionResultApi Property txid
+
+```ts
+txid: string
+```
+
+</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
@@ -1104,6 +2049,42 @@ export interface DojoTxBuilderInputApi {
 }
 ```
 
+<details>
+
+<summary>Interface DojoTxBuilderInputApi Details</summary>
+
+##### Interface DojoTxBuilderInputApi Property satoshis
+
+```ts
+satoshis: number
+```
+
+##### Interface DojoTxBuilderInputApi Property script
+
+```ts
+script?: string
+```
+
+##### Interface DojoTxBuilderInputApi Property scriptLength
+
+```ts
+scriptLength: number
+```
+
+##### Interface DojoTxBuilderInputApi Property txid
+
+```ts
+txid: string
+```
+
+##### Interface DojoTxBuilderInputApi Property vout
+
+```ts
+vout: number
+```
+
+</details>
+
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
 ---
@@ -1118,6 +2099,42 @@ export interface DojoTxBuilderOutputApi {
     change: boolean;
 }
 ```
+
+<details>
+
+<summary>Interface DojoTxBuilderOutputApi Details</summary>
+
+##### Interface DojoTxBuilderOutputApi Property change
+
+```ts
+change: boolean
+```
+
+##### Interface DojoTxBuilderOutputApi Property index
+
+```ts
+index: number
+```
+
+##### Interface DojoTxBuilderOutputApi Property satoshis
+
+```ts
+satoshis: number
+```
+
+##### Interface DojoTxBuilderOutputApi Property script
+
+```ts
+script: string
+```
+
+##### Interface DojoTxBuilderOutputApi Property vout
+
+```ts
+vout: number
+```
+
+</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
@@ -1151,6 +2168,24 @@ export interface DojoExpressClientOptions {
 }
 ```
 
+<details>
+
+<summary>Interface DojoExpressClientOptions Details</summary>
+
+##### Interface DojoExpressClientOptions Property authrite
+
+```ts
+authrite?: AuthriteClient
+```
+
+##### Interface DojoExpressClientOptions Property identityKey
+
+```ts
+identityKey?: string
+```
+
+</details>
+
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
 ---
@@ -1178,6 +2213,35 @@ export interface NinjaV1Params {
     };
 }
 ```
+
+<details>
+
+<summary>Interface NinjaV1Params Details</summary>
+
+##### Interface NinjaV1Params Property config
+
+```ts
+config?: {
+    dojoURL: string;
+}
+```
+
+##### Interface NinjaV1Params Property privateKey
+
+```ts
+privateKey?: string
+```
+
+##### Interface NinjaV1Params Property taalApiKeys
+
+```ts
+taalApiKeys?: {
+    test: string;
+    main: string;
+}
+```
+
+</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
