@@ -57,7 +57,7 @@
   "dependencies": {
     "authrite-js": "^0.2.16",
     "authrite-utils": "^0.1.16",
-    "babbage-bsv": "^0.1.1",
+    "babbage-bsv": "^0.2.1",
     "cwi-base": "^0.3.23",
     "dotenv": "^8.2.0",
     "ejs": "^3.1.3",
