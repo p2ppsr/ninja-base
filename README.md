@@ -2896,6 +2896,7 @@ export class DojoExpressClient implements DojoClientApi {
         outputs: DojoOutputApi[];
         total: number;
     }> 
+    async getTransactionLabels(options?: DojoGetTransactionLabels, txid?: string): Promise<string[] | undefined> 
     async createTransaction(inputs: Record<string, DojoTxInputsApi>, inputSelection: DojoTxInputSelectionApi | undefined, outputs: DojoCreateTxOutputApi[], outputGeneration?: DojoOutputGenerationApi, feeModel?: DojoFeeModelApi, labels?: string[] | undefined, note?: string | undefined, recipient?: string | undefined): Promise<DojoCreateTransactionResultApi> 
     async processTransaction(rawTx: string | Buffer, reference: string, outputMap: Record<string, number>): Promise<DojoProcessTransactionResultApi> 
     async submitDirectTransaction(protocol: string, transaction: DojoSubmitDirectTransactionApi, senderIdentityKey: string, note: string, labels: string[], derivationPrefix?: string): Promise<DojoSubmitDirectTransactionResultApi> 
@@ -3056,6 +3057,12 @@ async getTotalOfAmounts(direction: "incoming" | "outgoing", options?: DojoGetTot
 
 ```ts
 async getTotalOfUnspentOutputs(basket?: string): Promise<number | undefined> 
+```
+
+##### Class DojoExpressClient Method getTransactionLabels
+
+```ts
+async getTransactionLabels(options?: DojoGetTransactionLabels, txid?: string): Promise<string[] | undefined> 
 ```
 
 ##### Class DojoExpressClient Method getTransactionOutputs

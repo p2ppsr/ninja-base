@@ -8,7 +8,7 @@ import {
   DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi,
   CwiError, ERR_BAD_REQUEST, DojoSyncApi, DojoSyncOptionsApi, DojoSyncIdentifyParams, DojoSyncIdentifyResultApi,
   DojoSyncUpdateParams, DojoSyncUpdateResultApi, DojoSyncMergeParams, DojoSyncMergeResultApi,
-  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate
+  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate, DojoGetTransactionLabels
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -227,6 +227,11 @@ export class DojoExpressClient implements DojoClientApi {
       r.updated_at = validateDate(r.updated_at)  
     }
     return results
+  }
+
+  async getTransactionLabels (options?: DojoGetTransactionLabels, txid?: string): Promise<string[] | undefined> {
+    this.verifyAuthenticated()
+    return await this.postJson('/getTransactionLabels', { identityKey: this.identityKey, txid, options })
   }
 
   async createTransaction (
