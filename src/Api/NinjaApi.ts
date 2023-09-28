@@ -1,7 +1,10 @@
 import {
   Chain, CwiError, DojoAvatarApi, DojoCertificateApi, DojoClientApi, EnvelopeEvidenceApi,
   DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions, DojoGetTransactionsOptions,
-  MapiResponseApi, DojoTransactionStatusApi, TscMerkleProofApi, DojoPendingTxApi, DojoTxInputsApi, DojoTxInputSelectionApi, DojoCreateTxOutputApi, DojoOutputGenerationApi, DojoFeeModelApi, DojoPendingTxInputApi, DojoPendingTxOutputApi, DojoCreateTransactionResultApi, DojoProcessTransactionResultApi, SyncDojoConfigBaseApi, DojoSyncOptionsApi
+  MapiResponseApi, DojoTransactionStatusApi, TscMerkleProofApi, DojoPendingTxApi, DojoTxInputsApi,
+  DojoTxInputSelectionApi, DojoCreateTxOutputApi, DojoOutputGenerationApi, DojoFeeModelApi,
+  DojoPendingTxInputApi, DojoPendingTxOutputApi, DojoCreateTransactionResultApi,
+  DojoProcessTransactionResultApi, SyncDojoConfigBaseApi, DojoSyncOptionsApi, EnvelopeApi
 } from 'cwi-base'
 
 /**
@@ -578,30 +581,38 @@ export interface TxOutputApi {
  *
  */
 export interface NinjaGetTransactionOutputsResultApi {
-  /**
-     * Transaction ID of transaction that created the output
-      */
-  txid: string
-  /**
-     * Index in the transaction of the output
-     */
-  vout: number
-  /**
-     * Number of satoshis in the output
-     */
-  amount: number
-  /**
-     * Hex representation of output locking script
-     */
-  outputScript: string
-  /**
-     * The type of output, for example "P2PKH" or "P2RPH"
-     */
-  type: string
-  /**
-     * Whether this output is free to be spent
-     */
-  spendable: boolean
+   /**
+    * Transaction ID of transaction that created the output
+    */
+   txid: string
+   /**
+    * Index in the transaction of the output
+    */
+   vout: number
+   /**
+    * Number of satoshis in the output
+    */
+   amount: number
+   /**
+    * Hex representation of output locking script
+    */
+   outputScript: string
+   /**
+    * The type of output, for example "P2PKH" or "P2RPH"
+    */
+   type: string
+   /**
+    * Whether this output is free to be spent
+    */
+   spendable: boolean,
+   /**
+    * When requested and available, output validity support envelope.
+    */
+   envelope?: EnvelopeApi,
+   /**
+    * When envelope requested, any custom instructions associated with this output.
+    */
+   customInstructions?: string
 }
 
 export interface NinjaSubmitDirectTransactionOutputApi {
