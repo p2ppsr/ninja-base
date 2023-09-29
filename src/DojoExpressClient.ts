@@ -229,9 +229,14 @@ export class DojoExpressClient implements DojoClientApi {
     return results
   }
 
-  async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<DojoTxLabelApi[] | undefined> {
+  async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<{ labels: DojoTxLabelApi[], total: number }> {
     this.verifyAuthenticated()
-    return await this.postJson('/getTransactionLabels', { identityKey: this.identityKey, options })
+    const results:{ labels: DojoTxLabelApi[], total: number} = await this.postJson('/getTransactionLabels', { identityKey: this.identityKey, options })
+    for (const r of results.labels) {
+      r.created_at = validateDate(r.created_at)
+      r.updated_at = validateDate(r.updated_at)  
+    }
+    return results
   }
 
   async createTransaction (
