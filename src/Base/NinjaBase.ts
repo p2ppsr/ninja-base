@@ -29,6 +29,7 @@ import {
 
 import { processPendingTransactions } from './processPendingTransactions'
 import { getTransactionWithOutputs } from './getTransactionWithOutputs'
+import { submitDirectTransaction } from './submitDirectTransaction'
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain
@@ -248,7 +249,8 @@ export class NinjaBase implements NinjaApi {
         outputScript: asString(x.outputScript || ''),
         type: x.type,
         spendable: x.spendable,
-        envelope: x.envelope
+        envelope: x.envelope,
+        customInstructions: options?.includeEnvelope ? (x.customInstructions || undefined) : undefined
       }))
     return gtors
   }
@@ -301,14 +303,9 @@ export class NinjaBase implements NinjaApi {
 
   async submitDirectTransaction (params: NinjaSubmitDirectTransactionParams): Promise<NinjaSubmitDirectTransactionResultApi> {
     await this.verifyDojoAuthenticated()
-    const r = await this.dojo.submitDirectTransaction(
-      params.protocol,
-      params.transaction,
-      params.senderIdentityKey,
-      params.note,
-      params.labels,
-      params.derivationPrefix
-    )
+    
+    const r = await submitDirectTransaction(this, params)
+    
     return r
   }
 }
