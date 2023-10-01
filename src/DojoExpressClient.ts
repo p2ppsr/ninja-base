@@ -3,12 +3,12 @@ import {
   Chain, DojoAvatarApi, DojoCertificateApi, DojoClientApi, DojoClientUserApi, DojoCreateTransactionResultApi,
   DojoCreateTxOutputApi, DojoFeeModelApi, DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions,
   DojoGetTransactionsOptions, DojoOutputApi, DojoOutputGenerationApi, DojoPendingTxApi, DojoStatsApi,
-  DojoSubmitDirectTransactionApi, DojoSubmitDirectTransactionResultApi, DojoTransactionApi, DojoTransactionStatusApi,
+  DojoSubmitDirectTransactionApi, DojoSubmitDirectTransactionResultApi, DojoTransactionStatusApi,
   DojoTxInputSelectionApi, DojoTxInputsApi, ERR_CHAIN, ERR_INTERNAL, ERR_UNAUTHORIZED, EnvelopeApi,
   DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi,
   CwiError, ERR_BAD_REQUEST, DojoSyncApi, DojoSyncOptionsApi, DojoSyncIdentifyParams, DojoSyncIdentifyResultApi,
   DojoSyncUpdateParams, DojoSyncUpdateResultApi, DojoSyncMergeParams, DojoSyncMergeResultApi,
-  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate, DojoGetTransactionLabelsOptions, DojoTxLabelApi
+  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate, DojoGetTransactionLabelsOptions, DojoTxLabelApi, DojoTransactionApiExtended
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -198,9 +198,9 @@ export class DojoExpressClient implements DojoClientApi {
     await this.postJsonVoid('/updateTransactionStatus', { identityKey: this.identityKey, reference, status })
   }
 
-  async getTransactions (options?: DojoGetTransactionsOptions): Promise<{ txs: DojoTransactionApi[], total: number }> {
+  async getTransactions (options?: DojoGetTransactionsOptions): Promise<{ txs: DojoTransactionApiExtended[], total: number }> {
     this.verifyAuthenticated()
-    const results:{ txs: DojoTransactionApi[], total: number} = await this.postJson('/getTransactions', { identityKey: this.identityKey, options })
+    const results:{ txs: DojoTransactionApiExtended[], total: number} = await this.postJson('/getTransactions', { identityKey: this.identityKey, options })
     for (const r of results.txs) {
       r.created_at = validateDate(r.created_at)
       r.updated_at = validateDate(r.updated_at)  
