@@ -2116,6 +2116,7 @@ export class DojoExpressClient implements DojoClientApi {
         outputs: DojoOutputApi[];
         total: number;
     }> 
+    async getTransactionLabels(options?: DojoGetTransactionLabels, txid?: string): Promise<string[] | undefined> 
     async createTransaction(inputs: Record<string, DojoTxInputsApi>, inputSelection: DojoTxInputSelectionApi | undefined, outputs: DojoCreateTxOutputApi[], outputGeneration?: DojoOutputGenerationApi, feeModel?: DojoFeeModelApi, labels?: string[] | undefined, note?: string | undefined, recipient?: string | undefined): Promise<DojoCreateTransactionResultApi> 
     async processTransaction(rawTx: string | Buffer, reference: string, outputMap: Record<string, number>): Promise<DojoProcessTransactionResultApi> 
     async submitDirectTransaction(protocol: string, transaction: DojoSubmitDirectTransactionApi, senderIdentityKey: string, note: string, labels: string[], derivationPrefix?: string): Promise<DojoSubmitDirectTransactionResultApi> 
@@ -2138,6 +2139,258 @@ Only vaild if this dojo was created as a syncDojo by setSyncDojosByConfig
 
 ```ts
 syncDojoConfig?: SyncDojoConfigBaseApi
+```
+
+##### Class DojoExpressClient Method authenticate
+
+```ts
+async authenticate(identityKey?: string, addIfNew?: boolean): Promise<void> 
+```
+
+##### Class DojoExpressClient Method copyState
+
+```ts
+async copyState(): Promise<DojoUserStateApi> 
+```
+
+##### Class DojoExpressClient Method createDojoExpressClientOptions
+
+```ts
+static createDojoExpressClientOptions(): DojoExpressClientOptions 
+```
+
+##### Class DojoExpressClient Method createTransaction
+
+```ts
+async createTransaction(inputs: Record<string, DojoTxInputsApi>, inputSelection: DojoTxInputSelectionApi | undefined, outputs: DojoCreateTxOutputApi[], outputGeneration?: DojoOutputGenerationApi, feeModel?: DojoFeeModelApi, labels?: string[] | undefined, note?: string | undefined, recipient?: string | undefined): Promise<DojoCreateTransactionResultApi> 
+```
+
+##### Class DojoExpressClient Method findCertificates
+
+```ts
+async findCertificates(certifiers?: string[], types?: Record<string, string[]>): Promise<DojoCertificateApi[]> 
+```
+
+##### Class DojoExpressClient Method getAvatar
+
+```ts
+async getAvatar(): Promise<DojoAvatarApi> 
+```
+
+##### Class DojoExpressClient Method getChain
+
+```ts
+async getChain(): Promise<Chain> 
+```
+
+##### Class DojoExpressClient Method getCurrentPaymails
+
+```ts
+async getCurrentPaymails(): Promise<string[]> 
+```
+
+##### Class DojoExpressClient Method getDojoIdentity
+
+```ts
+async getDojoIdentity(): Promise<DojoIdentityApi> 
+```
+
+##### Class DojoExpressClient Method getEnvelopeForTransaction
+
+```ts
+async getEnvelopeForTransaction(txid: string): Promise<EnvelopeApi | undefined> 
+```
+
+##### Class DojoExpressClient Method getJson
+
+```ts
+async getJson<T>(path: string): Promise<T> 
+```
+
+##### Class DojoExpressClient Method getJsonOrUndefined
+
+```ts
+async getJsonOrUndefined<T>(path: string): Promise<T | undefined> 
+```
+
+##### Class DojoExpressClient Method getNetOfAmounts
+
+```ts
+async getNetOfAmounts(options?: DojoGetTotalOfAmountsOptions): Promise<number> 
+```
+
+##### Class DojoExpressClient Method getPendingTransactions
+
+```ts
+async getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]> 
+```
+
+##### Class DojoExpressClient Method getSyncDojoConfig
+
+```ts
+async getSyncDojoConfig(): Promise<SyncDojoConfigBaseApi> 
+```
+
+##### Class DojoExpressClient Method getSyncDojos
+
+```ts
+getSyncDojos(): {
+    dojos: DojoSyncApi[];
+    options: DojoSyncOptionsApi;
+} 
+```
+
+##### Class DojoExpressClient Method getSyncDojosByConfig
+
+```ts
+async getSyncDojosByConfig(): Promise<{
+    dojos: SyncDojoConfigBaseApi[];
+    options?: DojoSyncOptionsApi | undefined;
+}> 
+```
+
+##### Class DojoExpressClient Method getTotalOfAmounts
+
+```ts
+async getTotalOfAmounts(direction: "incoming" | "outgoing", options?: DojoGetTotalOfAmountsOptions): Promise<number> 
+```
+
+##### Class DojoExpressClient Method getTotalOfUnspentOutputs
+
+```ts
+async getTotalOfUnspentOutputs(basket?: string): Promise<number | undefined> 
+```
+
+##### Class DojoExpressClient Method getTransactionLabels
+
+```ts
+async getTransactionLabels(options?: DojoGetTransactionLabels, txid?: string): Promise<string[] | undefined> 
+```
+
+##### Class DojoExpressClient Method getTransactionOutputs
+
+```ts
+async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<{
+    outputs: DojoOutputApi[];
+    total: number;
+}> 
+```
+
+##### Class DojoExpressClient Method getTransactions
+
+```ts
+async getTransactions(options?: DojoGetTransactionsOptions): Promise<{
+    txs: DojoTransactionApi[];
+    total: number;
+}> 
+```
+
+##### Class DojoExpressClient Method getUser
+
+```ts
+getUser(): DojoClientUserApi 
+```
+
+##### Class DojoExpressClient Method postJson
+
+```ts
+async postJson<T, R>(path: string, params: T, noAuth?: boolean): Promise<R> 
+```
+
+##### Class DojoExpressClient Method postJsonOrUndefined
+
+```ts
+async postJsonOrUndefined<T, R>(path: string, params: T, noAuth?: boolean): Promise<R | undefined> 
+```
+
+##### Class DojoExpressClient Method postJsonVoid
+
+```ts
+async postJsonVoid<T>(path: string, params: T, noAuth?: boolean): Promise<void> 
+```
+
+##### Class DojoExpressClient Method processTransaction
+
+```ts
+async processTransaction(rawTx: string | Buffer, reference: string, outputMap: Record<string, number>): Promise<DojoProcessTransactionResultApi> 
+```
+
+##### Class DojoExpressClient Method saveCertificate
+
+```ts
+async saveCertificate(certificate: DojoCertificateApi): Promise<number> 
+```
+
+##### Class DojoExpressClient Method setAvatar
+
+```ts
+async setAvatar(avatar: DojoAvatarApi): Promise<void> 
+```
+
+##### Class DojoExpressClient Method setSyncDojos
+
+```ts
+setSyncDojos(dojos: DojoSyncApi[], syncOptions?: DojoSyncOptionsApi | undefined): void 
+```
+
+##### Class DojoExpressClient Method setSyncDojosByConfig
+
+```ts
+async setSyncDojosByConfig(syncDojoConfigs: SyncDojoConfigBaseApi[], options?: DojoSyncOptionsApi | undefined): Promise<void> 
+```
+
+##### Class DojoExpressClient Method stats
+
+```ts
+async stats(): Promise<DojoStatsApi> 
+```
+
+##### Class DojoExpressClient Method submitDirectTransaction
+
+```ts
+async submitDirectTransaction(protocol: string, transaction: DojoSubmitDirectTransactionApi, senderIdentityKey: string, note: string, labels: string[], derivationPrefix?: string): Promise<DojoSubmitDirectTransactionResultApi> 
+```
+
+##### Class DojoExpressClient Method sync
+
+```ts
+async sync(): Promise<void> 
+```
+
+##### Class DojoExpressClient Method syncIdentify
+
+```ts
+async syncIdentify(params: DojoSyncIdentifyParams): Promise<DojoSyncIdentifyResultApi> 
+```
+
+##### Class DojoExpressClient Method syncMerge
+
+```ts
+async syncMerge(params: DojoSyncMergeParams): Promise<DojoSyncMergeResultApi> 
+```
+
+##### Class DojoExpressClient Method syncUpdate
+
+```ts
+async syncUpdate(params: DojoSyncUpdateParams): Promise<DojoSyncUpdateResultApi> 
+```
+
+##### Class DojoExpressClient Method updateOutpointStatus
+
+```ts
+async updateOutpointStatus(txid: string, vout: number, spendable: boolean): Promise<void> 
+```
+
+##### Class DojoExpressClient Method updateTransactionStatus
+
+```ts
+async updateTransactionStatus(reference: string, status: DojoTransactionStatusApi): Promise<void> 
+```
+
+##### Class DojoExpressClient Method verifyAuthenticated
+
+```ts
+async verifyAuthenticated(): Promise<void> 
 ```
 
 </details>
