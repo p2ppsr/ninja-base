@@ -235,6 +235,7 @@ export class DojoExpressClient implements DojoClientApi {
     for (const r of results.labels) {
       r.created_at = validateDate(r.created_at)
       r.updated_at = validateDate(r.updated_at)  
+      r.whenLastUsed = validateDate(r.whenLastUsed)
     }
     return results
   }
