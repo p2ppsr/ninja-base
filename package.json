@@ -30,8 +30,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "tolocal": "npm i ../cwi-base --silent && npm run build",
-    "tonpm": "npm run tonone && npm i cwi-base --silent && npm run build",
+    "tolocal": "npm i ../cwi-base --silent",
+    "tonpm": "npm run tonone && npm i cwi-base --silent",
     "tonone": "npm remove cwi-base --silent"
   },
   "devDependencies": {
@@ -57,7 +57,7 @@
     "authrite-js": "^0.2.16",
     "authrite-utils": "^0.1.17",
     "babbage-bsv": "^0.2.1",
-    "cwi-base": "^0.3.36",
+    "cwi-base": "^0.3.37",
     "dotenv": "^16.3.1",
     "ejs": "^3.1.3",
     "node-fetch": "^2.6.12",
