@@ -4,7 +4,7 @@ import {
   MapiResponseApi, DojoTransactionStatusApi, TscMerkleProofApi, DojoPendingTxApi, DojoTxInputsApi,
   DojoTxInputSelectionApi, DojoCreateTxOutputApi, DojoOutputGenerationApi, DojoFeeModelApi,
   DojoPendingTxInputApi, DojoPendingTxOutputApi, DojoCreateTransactionResultApi,
-  DojoProcessTransactionResultApi, SyncDojoConfigBaseApi, DojoSyncOptionsApi, EnvelopeApi
+  DojoProcessTransactionResultApi, SyncDojoConfigBaseApi, DojoSyncOptionsApi, EnvelopeApi, DojoOutputTagApi, DojoTxLabelApi
 } from 'cwi-base'
 
 /**
@@ -247,6 +247,27 @@ export interface NinjaApi {
      *
      */
   submitDirectTransaction(params: NinjaSubmitDirectTransactionParams) : Promise<NinjaSubmitDirectTransactionResultApi>
+
+   /**
+    * Deletes a certificate.
+    *
+    * @param partial The partial certificate data identifying the certificate to delete.
+    */
+   deleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number>;
+
+   /**
+    * Deletes an output tag.
+    *
+    * @param partial The partial output tag data identifying the tag to delete.
+    */
+   deleteOutputTag(partial: Partial<DojoOutputTagApi>): Promise<number>;
+
+   /**
+    * Deletes a transaction label.
+    *
+    * @param partial The partial transaction label data identifying the label to delete.
+    */
+   deleteTxLabel(partial: Partial<DojoTxLabelApi>): Promise<number>;
 }
 
 /**
