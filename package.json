@@ -49,7 +49,7 @@
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
     "ts-standard": "^12.0.2",
-    "ts2md": "^0.1.12",
+    "ts2md": "^0.1.15",
     "typescript": "^5.2.2",
     "utxoninja": "^0.2.49"
   },
