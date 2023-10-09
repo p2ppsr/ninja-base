@@ -351,14 +351,17 @@ export class DojoExpressClient implements DojoClientApi {
     this.verifyAuthenticated()
     return await this.postJson('/labelTransaction', { identityKey: this.identityKey, txid, label })
   }
+
   async unlabelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> {
     this.verifyAuthenticated()
     return await this.postJson('/unlabelTransaction', { identityKey: this.identityKey, txid, label })
   }
+
   async tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> {
     this.verifyAuthenticated()
     return await this.postJson('/tagOutput', { identityKey: this.identityKey, partial, tag })
   }
+
   async untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> {
     this.verifyAuthenticated()
     return await this.postJson('/untagOutput', { identityKey: this.identityKey, partial, tag })
