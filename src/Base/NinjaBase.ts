@@ -19,7 +19,7 @@ import {
   DojoTxInputSelectionApi,
   DojoTxInputsApi,
   bsv,
-  ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString, verifyTruthy, ERR_BAD_REQUEST, DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl, DojoOutputTagApi, DojoTxLabelApi,
+  ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString, verifyTruthy, ERR_BAD_REQUEST, DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl, DojoOutputTagApi, DojoTxLabelApi, DojoOutputBasketApi,
 } from 'cwi-base'
 
 import {
@@ -316,6 +316,12 @@ export class NinjaBase implements NinjaApi {
   async deleteTxLabel(partial: Partial<DojoTxLabelApi>): Promise<number> {
     await this.verifyDojoAuthenticated()
     const r = await this.dojo.deleteTxLabel(partial)
+    return r
+  }
+
+  async deleteOutputBasket(partial: Partial<DojoOutputBasketApi>): Promise<number> {
+    await this.verifyDojoAuthenticated()
+    const r = await this.dojo.deleteOutputBasket(partial)
     return r
   }
 

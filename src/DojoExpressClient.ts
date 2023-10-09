@@ -8,7 +8,7 @@ import {
   DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi,
   CwiError, ERR_BAD_REQUEST, DojoSyncApi, DojoSyncOptionsApi, DojoSyncIdentifyParams, DojoSyncIdentifyResultApi,
   DojoSyncUpdateParams, DojoSyncUpdateResultApi, DojoSyncMergeParams, DojoSyncMergeResultApi,
-  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate, DojoGetTransactionLabelsOptions, DojoTxLabelApi, DojoOutputTagApi,
+  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate, DojoGetTransactionLabelsOptions, DojoTxLabelApi, DojoOutputTagApi, DojoOutputBasketApi,
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -340,5 +340,10 @@ export class DojoExpressClient implements DojoClientApi {
   async deleteTxLabel(partial: Partial<DojoTxLabelApi>): Promise<number> {
     this.verifyAuthenticated()
     return await this.postJson('/deleteTxLabel', { identityKey: this.identityKey, partial })
+  }
+
+  async deleteOutputBasket(partial: Partial<DojoOutputBasketApi>): Promise<number> {
+    this.verifyAuthenticated()
+    return await this.postJson('/deleteOutputBasket', { identityKey: this.identityKey, partial })
   }
 }
