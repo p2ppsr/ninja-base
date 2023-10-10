@@ -19,7 +19,7 @@ import {
   DojoTxInputSelectionApi,
   DojoTxInputsApi,
   bsv,
-  ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString, verifyTruthy, ERR_BAD_REQUEST, DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl, DojoOutputTagApi, DojoTxLabelApi, DojoOutputBasketApi,
+  ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString, verifyTruthy, ERR_BAD_REQUEST, DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl, DojoOutputTagApi, DojoTxLabelApi, DojoOutputApi,
 } from 'cwi-base'
 
 import {
@@ -307,19 +307,19 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
-  async deleteOutputTag(partial: Partial<DojoOutputTagApi>): Promise<number> {
+  async untagOutput(partial: Partial<DojoOutputTagApi>): Promise<number> {
     await this.verifyDojoAuthenticated()
     const r = await this.dojo.deleteOutputTag(partial)
     return r
   }
 
-  async deleteTxLabel(partial: Partial<DojoTxLabelApi>): Promise<number> {
+  async unlabelTransaction(partial: Partial<DojoTxLabelApi>): Promise<number> {
     await this.verifyDojoAuthenticated()
     const r = await this.dojo.deleteTxLabel(partial)
     return r
   }
 
-  async deleteOutputBasket(partial: Partial<DojoOutputBasketApi>): Promise<number> {
+  async unbasketOutput(partial: Partial<DojoOutputApi>): Promise<number> {
     await this.verifyDojoAuthenticated()
     const r = await this.dojo.deleteOutputBasket(partial)
     return r
