@@ -366,9 +366,4 @@ export class DojoExpressClient implements DojoClientApi {
     this.verifyAuthenticated()
     return await this.postJson('/untagOutput', { identityKey: this.identityKey, partial, tag })
   }
-
-  async unbasketOutput(partial: Partial<DojoOutputApi>, basket: string): Promise<void> {
-    this.verifyAuthenticated()
-    return await this.postJson('/unbasketOutput', { identityKey: this.identityKey, partial, basket })
-  }
 }
