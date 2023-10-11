@@ -327,24 +327,24 @@ export class DojoExpressClient implements DojoClientApi {
     await this.postJsonOrUndefined<T, void>(path, params, noAuth)
   }
 
-  async deleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number> {
+  async softDeleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number> {
     this.verifyAuthenticated()
-    return await this.postJson('/deleteCertificate', { identityKey: this.identityKey, partial })
+    return await this.postJson('/softDeleteCertificate', { identityKey: this.identityKey, partial })
   }
 
-  async deleteOutputTag(partial: Partial<DojoOutputTagApi>): Promise<number> {
+  async softDeleteOutputTag(partial: Partial<DojoOutputTagApi>): Promise<number> {
     this.verifyAuthenticated()
-    return await this.postJson('/deleteOutputTag', { identityKey: this.identityKey, partial })
+    return await this.postJson('/softDeleteOutputTag', { identityKey: this.identityKey, partial })
   }
 
-  async deleteTxLabel(partial: Partial<DojoTxLabelApi>): Promise<number> {
+  async softDeleteTxLabel(partial: Partial<DojoTxLabelApi>): Promise<number> {
     this.verifyAuthenticated()
-    return await this.postJson('/deleteTxLabel', { identityKey: this.identityKey, partial })
+    return await this.postJson('/softDeleteTxLabel', { identityKey: this.identityKey, partial })
   }
 
-  async deleteOutputBasket(partial: Partial<DojoOutputBasketApi>): Promise<number> {
+  async softDeleteOutputBasket(partial: Partial<DojoOutputBasketApi>): Promise<number> {
     this.verifyAuthenticated()
-    return await this.postJson('/deleteOutputBasket', { identityKey: this.identityKey, partial })
+    return await this.postJson('/softDeleteOutputBasket', { identityKey: this.identityKey, partial })
   }
 
   async labelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> {

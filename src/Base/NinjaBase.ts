@@ -306,7 +306,7 @@ export class NinjaBase implements NinjaApi {
 
   async deleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number> {
     await this.verifyDojoAuthenticated()
-    const r = await this.dojo.deleteCertificate(partial)
+    const r = await this.dojo.softDeleteCertificate(partial)
     return r
   }
 
