@@ -248,9 +248,9 @@ export interface NinjaApi {
   submitDirectTransaction(params: NinjaSubmitDirectTransactionParams) : Promise<NinjaSubmitDirectTransactionResultApi>
 
    /**
-    * Deletes a certificate.
+    * Soft deletes a certificate.
     *
-    * @param partial The partial certificate data identifying the certificate to delete.
+    * @param partial The partial certificate data identifying the certificate to soft delete.
     */
    deleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number>;
 
@@ -318,6 +318,10 @@ export interface NinjaApi {
      * @param partial unique output identifier as a partial pattern. 
      */
     unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void>
+    /**
+     * If you have to ask you shouldn't be calling this method...
+     */
+    defenestrateOutput(partial: Partial<DojoOutputApi>): Promise<void>
 }
 
 /**

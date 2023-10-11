@@ -330,6 +330,10 @@ export class NinjaBase implements NinjaApi {
     await this.dojo.untagOutput(partial, tag)
   }
     
+  async defenestrateOutput(partial: Partial<DojoOutputApi>): Promise<void> {
+    await this.unbasketOutput(partial)
+  }
+
   async unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void> {
     await this.verifyDojoAuthenticated()
     await this.dojo.unbasketOutput(partial)
