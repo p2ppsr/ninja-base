@@ -4,7 +4,7 @@ import {
   MapiResponseApi, DojoTransactionStatusApi, TscMerkleProofApi, DojoPendingTxApi, DojoTxInputsApi,
   DojoTxInputSelectionApi, DojoCreateTxOutputApi, DojoOutputGenerationApi, DojoFeeModelApi,
   DojoPendingTxInputApi, DojoPendingTxOutputApi, DojoCreateTransactionResultApi,
-  DojoProcessTransactionResultApi, SyncDojoConfigBaseApi, DojoSyncOptionsApi, EnvelopeApi, DojoOutputTagApi, DojoTxLabelApi, DojoOutputBasketApi
+  DojoProcessTransactionResultApi, SyncDojoConfigBaseApi, DojoSyncOptionsApi, EnvelopeApi, DojoOutputTagApi, DojoTxLabelApi, DojoOutputApi
 } from 'cwi-base'
 
 /**
@@ -260,21 +260,21 @@ export interface NinjaApi {
     *
     * @param partial The partial output tag data identifying the tag to delete.
     */
-   deleteOutputTag(partial: Partial<DojoOutputTagApi>): Promise<number>;
+   untagOutput(partial: Partial<DojoOutputTagApi>): Promise<number>;
 
    /**
     * Deletes a transaction label.
     *
     * @param partial The partial transaction label data identifying the label to delete.
     */
-   deleteTxLabel(partial: Partial<DojoTxLabelApi>): Promise<number>;
+   unlabelTransaction(partial: Partial<DojoTxLabelApi>): Promise<number>;
 
    /**
     * Deletes an output basket.
     *
     * @param partial The partial output basket data identifying the basket to delete.
     */
-   deleteOutputBasket(partial: Partial<DojoOutputBasketApi>): Promise<number>;
+   unbasketOutput(partial: Partial<DojoOutputApi>): Promise<number>;
 }
 
 /**
