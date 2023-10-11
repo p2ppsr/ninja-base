@@ -4,7 +4,7 @@ import {
   MapiResponseApi, DojoTransactionStatusApi, TscMerkleProofApi, DojoPendingTxApi, DojoTxInputsApi,
   DojoTxInputSelectionApi, DojoCreateTxOutputApi, DojoOutputGenerationApi, DojoFeeModelApi,
   DojoPendingTxInputApi, DojoPendingTxOutputApi, DojoCreateTransactionResultApi,
-  DojoProcessTransactionResultApi, SyncDojoConfigBaseApi, DojoSyncOptionsApi, EnvelopeApi, DojoOutputTagApi, DojoTxLabelApi, DojoOutputApi
+  DojoProcessTransactionResultApi, SyncDojoConfigBaseApi, DojoSyncOptionsApi, EnvelopeApi, DojoOutputApi, DojoTransactionApi
 } from 'cwi-base'
 
 /**
@@ -244,7 +244,6 @@ export interface NinjaApi {
      * This endpoint allows a recipient to submit a transactions that was directly given to them by a sender.
      * Saves the inputs and key derivation information, allowing the UTXOs to be redeemed in the future.
      * Sets the transaction to completed and marks the outputs as spendable.
-     *
      */
   submitDirectTransaction(params: NinjaSubmitDirectTransactionParams) : Promise<NinjaSubmitDirectTransactionResultApi>
 
@@ -255,26 +254,70 @@ export interface NinjaApi {
     */
    deleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number>;
 
-   /**
-    * Deletes an output tag.
-    *
-    * @param partial The partial output tag data identifying the tag to delete.
-    */
-   untagOutput(partial: Partial<DojoOutputTagApi>): Promise<number>;
+    /**
+     * Labels a transaction
+     * 
+     * Validates user is authenticated, txid matches an exsiting user transaction, and label value.
+     * 
+     * Creates new label if necessary.
+     * 
+     * Adds label to transaction if not already labeled.
+     * Note: previously if transaction was already labeled, an error was thrown.
+     * 
+     * @param txid unique transaction identifier, either transactionId, txid, or a partial pattern.
+     * @param label the label to be added, will be created if it doesn't already exist
+     */
 
-   /**
-    * Deletes a transaction label.
-    *
-    * @param partial The partial transaction label data identifying the label to delete.
-    */
-   unlabelTransaction(partial: Partial<DojoTxLabelApi>): Promise<number>;
+    labelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void>
 
-   /**
-    * Deletes an output basket.
-    *
-    * @param partial The partial output basket data identifying the basket to delete.
-    */
-   unbasketOutput(partial: Partial<DojoOutputApi>): Promise<number>;
+    /**
+     * Removes a label from a transaction
+     * 
+     * Validates user is authenticated, txid matches an exsiting user transaction, and label already exits.
+     * 
+     * Does nothing if transaction is not labeled.
+     * 
+     * @param txid unique transaction identifier, either transactionId, txid, or a partial pattern.
+     * @param label the label to be removed
+     */
+    unlabelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void>
+
+    /**
+     * Tags an output
+     * 
+     * Validates user is authenticated, partial identifies a single output, and tag value.
+     * 
+     * Creates new tag if necessary.
+     * 
+     * Adds tag to output if not already tagged.
+     * 
+     * @param partial unique output identifier as a partial pattern. 
+     * @param tag the tag to add, will be created if it doesn't already exist
+     */
+    tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void>
+
+    /**
+     * Removes a tag from an output
+     * 
+     * Validates user is authenticated, partial identifies a single output, and tag already exits.
+     * 
+     * Does nothing if output is not tagged.
+     * 
+     * @param partial unique output identifier as a partial pattern. 
+     * @param tag the tag to be removed from the output
+     */
+    untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void>
+    
+    /**
+     * Removes the uniquely identified output's basket assignment.
+     * 
+     * The output will no longer belong to any basket.
+     * 
+     * This is typically only useful for outputs that are no longer usefull.
+     *
+     * @param partial unique output identifier as a partial pattern. 
+     */
+    unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void>
 }
 
 /**

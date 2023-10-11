@@ -19,7 +19,7 @@ import {
   DojoTxInputSelectionApi,
   DojoTxInputsApi,
   bsv,
-  ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString, verifyTruthy, ERR_BAD_REQUEST, DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl, DojoOutputTagApi, DojoTxLabelApi, DojoOutputApi, DojoOutputBasketApi,
+  ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString, verifyTruthy, ERR_BAD_REQUEST, DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl, DojoOutputTagApi, DojoTxLabelApi, DojoOutputApi, DojoOutputBasketApi, verifyId, DojoTransactionApi,
 } from 'cwi-base'
 
 import {
@@ -33,6 +33,7 @@ import { submitDirectTransaction } from './submitDirectTransaction'
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain
+  userId?: number
   _keyPair: KeyPairApi | undefined
   _isDojoAuthenticated: boolean
 
@@ -70,6 +71,8 @@ export class NinjaBase implements NinjaApi {
     identityKey ||= this.getClientChangeKeyPair().publicKey
 
     await this.dojo.authenticate(identityKey, addIfNew)
+    const user = await this.dojo.getUser()
+    this.userId = verifyId(user.userId)
     this._isDojoAuthenticated = true
   }
 
@@ -307,22 +310,29 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
-  async untagOutput(partial: Partial<DojoOutputTagApi>): Promise<number> {
+  async labelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> {
     await this.verifyDojoAuthenticated()
-    const r = await this.dojo.deleteOutputTag(partial)
-    return r
+    await this.dojo.labelTransaction(txid, label)
   }
 
-  async unlabelTransaction(partial: Partial<DojoTxLabelApi>): Promise<number> {
+  async unlabelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> {
     await this.verifyDojoAuthenticated()
-    const r = await this.dojo.deleteTxLabel(partial)
-    return r
+    await this.dojo.unlabelTransaction(txid, label)
   }
 
-  async unbasketOutput(partial: Partial<DojoOutputBasketApi>): Promise<number> {
+  async tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> {
     await this.verifyDojoAuthenticated()
-    const r = await this.dojo.deleteOutputBasket(partial)
-    return r
+    await this.dojo.tagOutput(partial, tag)
+  }
+
+  async untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> {
+    await this.verifyDojoAuthenticated()
+    await this.dojo.untagOutput(partial, tag)
+  }
+    
+  async unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void> {
+    await this.verifyDojoAuthenticated()
+    await this.dojo.unbasketOutput(partial)
   }
 
   async submitDirectTransaction (params: NinjaSubmitDirectTransactionParams): Promise<NinjaSubmitDirectTransactionResultApi> {
