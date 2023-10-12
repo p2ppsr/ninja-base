@@ -1,5 +1,11 @@
 # Ninja 2023-10-12 Release Update
 
+Changes:
+1. [Get User's Transaction Labels](#1-get-users-transaction-labels)
+2. [Optionally Get Tx Inputs and Outputs](#2-optionaly-get-tx-inputs-and-outputs)
+3. [Delete Certificate and Remove Output From Basket](#3-delete-certificate-and-remove-output-from-basket)
+4. [Add Output Tags](#4-add-output-tags)
+
 ## 1. Get User's Transaction Labels
 
 ### Original Requirement
