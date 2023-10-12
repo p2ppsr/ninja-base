@@ -4,7 +4,7 @@ import {
   MapiResponseApi, DojoTransactionStatusApi, TscMerkleProofApi, DojoPendingTxApi, DojoTxInputsApi,
   DojoTxInputSelectionApi, DojoCreateTxOutputApi, DojoOutputGenerationApi, DojoFeeModelApi,
   DojoPendingTxInputApi, DojoPendingTxOutputApi, DojoCreateTransactionResultApi,
-  DojoProcessTransactionResultApi, SyncDojoConfigBaseApi, DojoSyncOptionsApi, EnvelopeApi, DojoOutputApi, DojoTransactionApi
+  DojoProcessTransactionResultApi, SyncDojoConfigBaseApi, DojoSyncOptionsApi, EnvelopeApi, DojoOutputApi, DojoTransactionApi, DojoGetTransactionLabelsOptions, DojoTxLabelApi
 } from 'cwi-base'
 
 /**
@@ -178,6 +178,13 @@ export interface NinjaApi {
      * Returns a set of transaction outputs that Dojo has tracked
      */
   getTransactionOutputs(options?: DojoGetTransactionOutputsOptions) : Promise<NinjaGetTransactionOutputsResultApi[]>
+
+   /**
+      * Returns transaction labels matching options and total matching count available.
+      *
+      * @param options limit defaults to 25, offset defaults to 0, order defaults to 'descending'
+      */
+   getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<{ labels: DojoTxLabelApi[], total: number }>
 
   /**
      * Returns a set of all transactions that need to be signed and submitted, or canceled
@@ -472,7 +479,77 @@ export interface NinjaGetTransactionsTxApi {
   /**
      * A set of all the labels affixed to the transaction
      */
-  labels: string[]
+  labels: string[],
+  inputs?: NinjaGetTransactionsTxInputApi[],
+  outputs?: NinjaGetTransactionsTxOutputApi[],
+}
+
+/**
+ *
+ */
+export interface NinjaGetTransactionsTxInputApi {
+   /**
+    * Transaction ID of transaction that created the output
+    */
+   txid: string
+   /**
+    * Index in the transaction of the output
+    */
+   vout: number
+   /**
+    * Number of satoshis in the output
+    */
+   amount: number
+   /**
+    * Hex representation of output locking script
+    */
+   outputScript: string
+   /**
+    * The type of output, for example "P2PKH" or "P2RPH"
+    */
+   type: string
+   /**
+    * Whether this output is free to be spent
+    */
+   spendable: boolean,
+   /**
+    * Spending description for this transaction input
+    */
+   spendingDescription?: string
+}
+
+/**
+ *
+ */
+export interface NinjaGetTransactionsTxOutputApi {
+   /**
+    * Transaction ID of transaction that created the output
+    */
+   txid: string
+   /**
+    * Index in the transaction of the output
+    */
+   vout: number
+   /**
+    * Number of satoshis in the output
+    */
+   amount: number
+   /**
+    * Hex representation of output locking script
+    */
+   outputScript: string
+   /**
+    * The type of output, for example "P2PKH" or "P2RPH"
+    */
+   type: string
+   /**
+    * Whether this output is free to be spent
+    */
+   spendable: boolean,
+   /**
+    * Output description
+    */
+   description?: string
 }
 
 /**

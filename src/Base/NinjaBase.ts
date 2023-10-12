@@ -19,7 +19,7 @@ import {
   DojoTxInputSelectionApi,
   DojoTxInputsApi,
   bsv,
-  ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString, verifyTruthy, ERR_BAD_REQUEST, DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl, DojoOutputTagApi, DojoTxLabelApi, DojoOutputApi, DojoOutputBasketApi, verifyId, DojoTransactionApi,
+  ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString, verifyTruthy, ERR_BAD_REQUEST, DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl, DojoOutputTagApi, DojoTxLabelApi, DojoOutputApi, DojoOutputBasketApi, verifyId, DojoTransactionApi, DojoGetTransactionLabelsOptions,
 } from 'cwi-base'
 
 import {
@@ -223,7 +223,25 @@ export class NinjaBase implements NinjaApi {
         note: t.note || '',
         created_at: t.created_at instanceof Date ? t.created_at.toISOString() : t.created_at || '',
         referenceNumber: t.referenceNumber || '',
-        labels: t.labels || []
+        labels: t.labels || [],
+        inputs: t.inputs ? t.inputs.map(x => ({
+          txid: x.txid || '',
+          vout: x.vout || 0,
+          amount: x.amount || 0,
+          outputScript: asString(x.outputScript || ''),
+          type: x.type,
+          spendable: x.spendable,
+          spendingDescription: x.spendingDescription || undefined
+        })) : undefined,
+        outputs: t.outputs ? t.outputs.map(x => ({
+          txid: x.txid || '',
+          vout: x.vout || 0,
+          amount: x.amount || 0,
+          outputScript: asString(x.outputScript || ''),
+          type: x.type,
+          spendable: x.spendable,
+          description: x.description || undefined
+        })) : undefined
       }))
     }
     return rr
@@ -256,6 +274,12 @@ export class NinjaBase implements NinjaApi {
         customInstructions: options?.includeEnvelope ? (x.customInstructions || undefined) : undefined
       }))
     return gtors
+  }
+
+  async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<{ labels: DojoTxLabelApi[], total: number }> {
+    await this.verifyDojoAuthenticated()
+    const r = await this.dojo.getTransactionLabels(options)
+    return r
   }
 
   async processTransaction (params: {
