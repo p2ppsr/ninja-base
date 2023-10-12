@@ -81,6 +81,13 @@ export interface NinjaApi {
     getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaGetTxWithOutputsResultApi | NinjaGetTxWithOutputsProcessedResultApi>;
     createTransaction(params: NinjaCreateTransactionParams): Promise<DojoCreateTransactionResultApi>;
     submitDirectTransaction(params: NinjaSubmitDirectTransactionParams): Promise<NinjaSubmitDirectTransactionResultApi>;
+    deleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number>;
+    labelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void>;
+    unlabelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void>;
+    tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void>;
+    untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void>;
+    unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void>;
+    defenestrateOutput(partial: Partial<DojoOutputApi>): Promise<void>;
 }
 ```
 
@@ -125,6 +132,27 @@ createTransaction(params: NinjaCreateTransactionParams): Promise<DojoCreateTrans
 Returns
 
 The template you need to sign and process
+
+##### Method defenestrateOutput
+
+If you have to ask you shouldn't be calling this method...
+
+```ts
+defenestrateOutput(partial: Partial<DojoOutputApi>): Promise<void>
+```
+
+##### Method deleteCertificate
+
+Soft deletes a certificate.
+
+```ts
+deleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number>
+```
+
+Argument Details
+
++ **partial**
+  + The partial certificate data identifying the certificate to soft delete.
 
 ##### Method findCertificates
 
@@ -295,6 +323,28 @@ Argument Details
 + **options**
   + limit defaults to 25, offset defaults to 0, addLabels defaults to true, order defaults to 'descending'
 
+##### Method labelTransaction
+
+Labels a transaction
+
+Validates user is authenticated, txid matches an exsiting user transaction, and label value.
+
+Creates new label if necessary.
+
+Adds label to transaction if not already labeled.
+Note: previously if transaction was already labeled, an error was thrown.
+
+```ts
+labelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void>
+```
+
+Argument Details
+
++ **txid**
+  + unique transaction identifier, either transactionId, txid, or a partial pattern.
++ **label**
+  + the label to be added, will be created if it doesn't already exist
+
 ##### Method processPendingTransactions
 
 Signs and processes all pending transactions, useful when recovering from an
@@ -445,6 +495,82 @@ User state changes are propagated across all configured syncDojos.
 ```ts
 sync(): Promise<void>
 ```
+
+##### Method tagOutput
+
+Tags an output
+
+Validates user is authenticated, partial identifies a single output, and tag value.
+
+Creates new tag if necessary.
+
+Adds tag to output if not already tagged.
+
+```ts
+tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void>
+```
+
+Argument Details
+
++ **partial**
+  + unique output identifier as a partial pattern.
++ **tag**
+  + the tag to add, will be created if it doesn't already exist
+
+##### Method unbasketOutput
+
+Removes the uniquely identified output's basket assignment.
+
+The output will no longer belong to any basket.
+
+This is typically only useful for outputs that are no longer usefull.
+
+```ts
+unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void>
+```
+
+Argument Details
+
++ **partial**
+  + unique output identifier as a partial pattern.
+
+##### Method unlabelTransaction
+
+Removes a label from a transaction
+
+Validates user is authenticated, txid matches an exsiting user transaction, and label already exits.
+
+Does nothing if transaction is not labeled.
+
+```ts
+unlabelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void>
+```
+
+Argument Details
+
++ **txid**
+  + unique transaction identifier, either transactionId, txid, or a partial pattern.
++ **label**
+  + the label to be removed
+
+##### Method untagOutput
+
+Removes a tag from an output
+
+Validates user is authenticated, partial identifies a single output, and tag already exits.
+
+Does nothing if output is not tagged.
+
+```ts
+untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void>
+```
+
+Argument Details
+
++ **partial**
+  + unique output identifier as a partial pattern.
++ **tag**
+  + the tag to be removed from the output
 
 ##### Method updateOutpointStatus
 
@@ -1996,6 +2122,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export class NinjaBase implements NinjaApi {
     chain?: Chain;
+    userId?: number;
     _keyPair: KeyPairApi | undefined;
     _isDojoAuthenticated: boolean;
     constructor(public dojo: DojoClientApi, clientPrivateKey?: string, public authrite?: AuthriteClient) 
@@ -2054,6 +2181,13 @@ export class NinjaBase implements NinjaApi {
         feePerKb?: number | undefined;
     }): Promise<NinjaGetTxWithOutputsResultApi | NinjaGetTxWithOutputsProcessedResultApi> 
     async createTransaction(params: NinjaCreateTransactionParams): Promise<DojoCreateTransactionResultApi> 
+    async deleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number> 
+    async labelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> 
+    async unlabelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> 
+    async tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> 
+    async untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> 
+    async defenestrateOutput(partial: Partial<DojoOutputApi>): Promise<void> 
+    async unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void> 
     async submitDirectTransaction(params: NinjaSubmitDirectTransactionParams): Promise<NinjaSubmitDirectTransactionResultApi> 
 }
 ```
@@ -2129,6 +2263,15 @@ export class DojoExpressClient implements DojoClientApi {
     async postJsonOrUndefined<T, R>(path: string, params: T, noAuth?: boolean): Promise<R | undefined> 
     async postJson<T, R>(path: string, params: T, noAuth?: boolean): Promise<R> 
     async postJsonVoid<T>(path: string, params: T, noAuth?: boolean): Promise<void> 
+    async softDeleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number> 
+    async softDeleteOutputTag(partial: Partial<DojoOutputTagApi>): Promise<number> 
+    async softDeleteTxLabel(partial: Partial<DojoTxLabelApi>): Promise<number> 
+    async softDeleteOutputBasket(partial: Partial<DojoOutputBasketApi>): Promise<number> 
+    async labelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> 
+    async unlabelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> 
+    async tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> 
+    async untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> 
+    async unbasketOutput(partial: Partial<DojoOutputApi>, basket: string): Promise<void> 
 }
 ```
 

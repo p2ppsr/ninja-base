@@ -49,7 +49,6 @@
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
     "ts-standard": "^12.0.2",
-    "ts2md": "^0.1.15",
     "typescript": "^5.2.2",
     "utxoninja": "^0.2.49"
   },
@@ -61,6 +60,7 @@
     "dotenv": "^16.3.1",
     "ejs": "^3.1.3",
     "node-fetch": "^2.6.12",
-    "sendover": "^1.1.9"
+    "sendover": "^1.1.9",
+    "ts2md": "^0.1.17"
   }
 }
