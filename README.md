@@ -11,17 +11,18 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
-| [DojoExpressClientOptions](#interface-dojoexpressclientoptions) | [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi) | [NinjaTransactionFailedApi](#interface-ninjatransactionfailedapi) |
-| [DojoTxBuilderBaseOptions](#interface-dojotxbuilderbaseoptions) | [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams) | [NinjaTransactionProcessedApi](#interface-ninjatransactionprocessedapi) |
-| [DojoTxBuilderInputApi](#interface-dojotxbuilderinputapi) | [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi) | [NinjaTxBuilderOptions](#interface-ninjatxbuilderoptions) |
-| [DojoTxBuilderOptions](#interface-dojotxbuilderoptions) | [NinjaGetTransactionsTxApi](#interface-ninjagettransactionstxapi) | [NinjaTxInputsApi](#interface-ninjatxinputsapi) |
-| [DojoTxBuilderOutputApi](#interface-dojotxbuilderoutputapi) | [NinjaGetTxWithOutputsProcessedResultApi](#interface-ninjagettxwithoutputsprocessedresultapi) | [NinjaV1Params](#interface-ninjav1params) |
-| [KeyPairApi](#interface-keypairapi) | [NinjaGetTxWithOutputsResultApi](#interface-ninjagettxwithoutputsresultapi) | [ProcessIncomingTransactionApi](#interface-processincomingtransactionapi) |
-| [NinjaApi](#interface-ninjaapi) | [NinjaOutputToRedeemApi](#interface-ninjaoutputtoredeemapi) | [ProcessIncomingTransactionInputApi](#interface-processincomingtransactioninputapi) |
-| [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams) | [NinjaSubmitDirectTransactionApi](#interface-ninjasubmitdirecttransactionapi) | [ProcessIncomingTransactionOutputApi](#interface-processincomingtransactionoutputapi) |
-| [NinjaGetPendingTransactionsInputApi](#interface-ninjagetpendingtransactionsinputapi) | [NinjaSubmitDirectTransactionOutputApi](#interface-ninjasubmitdirecttransactionoutputapi) | [ProcessIncomingTransactionResultApi](#interface-processincomingtransactionresultapi) |
-| [NinjaGetPendingTransactionsInstructionsApi](#interface-ninjagetpendingtransactionsinstructionsapi) | [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams) | [TxOutputApi](#interface-txoutputapi) |
-| [NinjaGetPendingTransactionsTxApi](#interface-ninjagetpendingtransactionstxapi) | [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi) | [TxRedeemableOutputApi](#interface-txredeemableoutputapi) |
+| [DojoExpressClientOptions](#interface-dojoexpressclientoptions) | [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams) | [NinjaTransactionFailedApi](#interface-ninjatransactionfailedapi) |
+| [DojoTxBuilderBaseOptions](#interface-dojotxbuilderbaseoptions) | [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi) | [NinjaTransactionProcessedApi](#interface-ninjatransactionprocessedapi) |
+| [DojoTxBuilderInputApi](#interface-dojotxbuilderinputapi) | [NinjaGetTransactionsTxApi](#interface-ninjagettransactionstxapi) | [NinjaTxBuilderOptions](#interface-ninjatxbuilderoptions) |
+| [DojoTxBuilderOptions](#interface-dojotxbuilderoptions) | [NinjaGetTransactionsTxInputApi](#interface-ninjagettransactionstxinputapi) | [NinjaTxInputsApi](#interface-ninjatxinputsapi) |
+| [DojoTxBuilderOutputApi](#interface-dojotxbuilderoutputapi) | [NinjaGetTransactionsTxOutputApi](#interface-ninjagettransactionstxoutputapi) | [NinjaV1Params](#interface-ninjav1params) |
+| [KeyPairApi](#interface-keypairapi) | [NinjaGetTxWithOutputsProcessedResultApi](#interface-ninjagettxwithoutputsprocessedresultapi) | [ProcessIncomingTransactionApi](#interface-processincomingtransactionapi) |
+| [NinjaApi](#interface-ninjaapi) | [NinjaGetTxWithOutputsResultApi](#interface-ninjagettxwithoutputsresultapi) | [ProcessIncomingTransactionInputApi](#interface-processincomingtransactioninputapi) |
+| [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams) | [NinjaOutputToRedeemApi](#interface-ninjaoutputtoredeemapi) | [ProcessIncomingTransactionOutputApi](#interface-processincomingtransactionoutputapi) |
+| [NinjaGetPendingTransactionsInputApi](#interface-ninjagetpendingtransactionsinputapi) | [NinjaSubmitDirectTransactionApi](#interface-ninjasubmitdirecttransactionapi) | [ProcessIncomingTransactionResultApi](#interface-processincomingtransactionresultapi) |
+| [NinjaGetPendingTransactionsInstructionsApi](#interface-ninjagetpendingtransactionsinstructionsapi) | [NinjaSubmitDirectTransactionOutputApi](#interface-ninjasubmitdirecttransactionoutputapi) | [TxOutputApi](#interface-txoutputapi) |
+| [NinjaGetPendingTransactionsTxApi](#interface-ninjagetpendingtransactionstxapi) | [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams) | [TxRedeemableOutputApi](#interface-txredeemableoutputapi) |
+| [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi) | [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
@@ -62,6 +63,10 @@ export interface NinjaApi {
     setAvatar(name: string, photoURL: string): Promise<void>;
     getTransactions(options?: DojoGetTransactionsOptions): Promise<NinjaGetTransactionsResultApi>;
     getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<NinjaGetTransactionOutputsResultApi[]>;
+    getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<{
+        labels: DojoTxLabelApi[];
+        total: number;
+    }>;
     getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]>;
     updateTransactionStatus(params: {
         reference: string;
@@ -285,6 +290,22 @@ Argument Details
 
 + **basket**
   + defaults to 'default' if undefined
+
+##### Method getTransactionLabels
+
+Returns transaction labels matching options and total matching count available.
+
+```ts
+getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<{
+    labels: DojoTxLabelApi[];
+    total: number;
+}>
+```
+
+Argument Details
+
++ **options**
+  + limit defaults to 25, offset defaults to 0, order defaults to 'descending'
 
 ##### Method getTransactionOutputs
 
@@ -843,6 +864,8 @@ export interface NinjaGetTransactionsTxApi {
     created_at: string;
     referenceNumber: string;
     labels: string[];
+    inputs?: NinjaGetTransactionsTxInputApi[];
+    outputs?: NinjaGetTransactionsTxOutputApi[];
 }
 ```
 
@@ -928,6 +951,164 @@ The transaction ID
 
 ```ts
 txid: string
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
+
+---
+#### Interface: NinjaGetTransactionsTxInputApi
+
+```ts
+export interface NinjaGetTransactionsTxInputApi {
+    txid: string;
+    vout: number;
+    amount: number;
+    outputScript: string;
+    type: string;
+    spendable: boolean;
+    spendingDescription?: string;
+}
+```
+
+<details>
+
+<summary>Interface NinjaGetTransactionsTxInputApi Details</summary>
+
+##### Property amount
+
+Number of satoshis in the output
+
+```ts
+amount: number
+```
+
+##### Property outputScript
+
+Hex representation of output locking script
+
+```ts
+outputScript: string
+```
+
+##### Property spendable
+
+Whether this output is free to be spent
+
+```ts
+spendable: boolean
+```
+
+##### Property spendingDescription
+
+Spending description for this transaction input
+
+```ts
+spendingDescription?: string
+```
+
+##### Property txid
+
+Transaction ID of transaction that created the output
+
+```ts
+txid: string
+```
+
+##### Property type
+
+The type of output, for example "P2PKH" or "P2RPH"
+
+```ts
+type: string
+```
+
+##### Property vout
+
+Index in the transaction of the output
+
+```ts
+vout: number
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
+
+---
+#### Interface: NinjaGetTransactionsTxOutputApi
+
+```ts
+export interface NinjaGetTransactionsTxOutputApi {
+    txid: string;
+    vout: number;
+    amount: number;
+    outputScript: string;
+    type: string;
+    spendable: boolean;
+    description?: string;
+}
+```
+
+<details>
+
+<summary>Interface NinjaGetTransactionsTxOutputApi Details</summary>
+
+##### Property amount
+
+Number of satoshis in the output
+
+```ts
+amount: number
+```
+
+##### Property description
+
+Output description
+
+```ts
+description?: string
+```
+
+##### Property outputScript
+
+Hex representation of output locking script
+
+```ts
+outputScript: string
+```
+
+##### Property spendable
+
+Whether this output is free to be spent
+
+```ts
+spendable: boolean
+```
+
+##### Property txid
+
+Transaction ID of transaction that created the output
+
+```ts
+txid: string
+```
+
+##### Property type
+
+The type of output, for example "P2PKH" or "P2RPH"
+
+```ts
+type: string
+```
+
+##### Property vout
+
+Index in the transaction of the output
+
+```ts
+vout: number
 ```
 
 </details>
@@ -2166,6 +2347,10 @@ export class NinjaBase implements NinjaApi {
     async getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]> 
     async processPendingTransactions(onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler): Promise<void> 
     async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<NinjaGetTransactionOutputsResultApi[]> 
+    async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<{
+        labels: DojoTxLabelApi[];
+        total: number;
+    }> 
     async processTransaction(params: {
         submittedTransaction: string | Buffer;
         reference: string;
