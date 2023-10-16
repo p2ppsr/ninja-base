@@ -17,7 +17,7 @@
     "composite": true,
     "noImplicitOverride": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules", "jest.config.ts"],
   "references": [
      { "path": "../cwi-base" }
