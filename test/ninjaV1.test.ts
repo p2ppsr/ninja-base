@@ -1,14 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Chain } from 'cwi-base'
-import { Dojo } from '@cwi/dojo-core'
-import { NinjaApi } from '../src/Api/NinjaApi'
-import { NinjaBase } from '../src/Base/NinjaBase'
+import { DojoGetTotalOfAmountsOptions, DojoGetTransactionsOptions } from 'cwi-base'
 
 import bsv from 'babbage-bsv'
 import { default as NinjaV1 } from 'utxoninja'
-
-import { promises as fsp } from 'fs'
-import { DojoGetTotalOfAmountsOptions, DojoGetTransactionsOptions } from '@cwi/dojo-base'
 
 /**
  * Tests to obtain legacy data from v1 Ninja / Dojo for format and content verification.
