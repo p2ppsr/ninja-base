@@ -269,6 +269,7 @@ export class NinjaBase implements NinjaApi {
         amount: x.amount || 0,
         outputScript: asString(x.outputScript || ''),
         type: x.type,
+        purpose: x.purpose,
         spendable: x.spendable,
         envelope: x.envelope,
         customInstructions: options?.includeEnvelope ? (x.customInstructions || undefined) : undefined
