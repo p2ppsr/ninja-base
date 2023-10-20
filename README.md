@@ -1540,6 +1540,8 @@ export interface NinjaGetTransactionOutputsResultApi {
     spendable: boolean;
     envelope?: EnvelopeApi;
     customInstructions?: string;
+    basket?: string;
+    tags?: string[];
 }
 ```
 
@@ -1553,6 +1555,14 @@ Number of satoshis in the output
 
 ```ts
 amount: number
+```
+
+##### Property basket
+
+If `includeBasket` option is true, name of basket to which this output belongs.
+
+```ts
+basket?: string
 ```
 
 ##### Property customInstructions
@@ -1585,6 +1595,14 @@ Whether this output is free to be spent
 
 ```ts
 spendable: boolean
+```
+
+##### Property tags
+
+If `includeTags` option is true, tags assigned to this output.
+
+```ts
+tags?: string[]
 ```
 
 ##### Property txid
@@ -2431,10 +2449,7 @@ export class DojoExpressClient implements DojoClientApi {
     }> 
     async getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]> 
     async getEnvelopeForTransaction(txid: string): Promise<EnvelopeApi | undefined> 
-    async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<{
-        outputs: DojoOutputApi[];
-        total: number;
-    }> 
+    async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<DojoGetTransactionOutputsResultApi> 
     async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<{
         labels: DojoTxLabelApi[];
         total: number;

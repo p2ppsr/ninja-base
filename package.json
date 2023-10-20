@@ -1,6 +1,6 @@
 {
   "name": "ninja-base",
-  "version": "0.2.41",
+  "version": "0.2.43",
   "description": "Base level functions, classes, interfaces for Ninja",
   "author": "Peer-to-peer Privacy Systems Research LLC",
   "license": "PROPRIETARY",
@@ -57,7 +57,7 @@
     "authrite-js": "^0.2.16",
     "authrite-utils": "^0.1.17",
     "babbage-bsv": "^0.2.1",
-    "cwi-base": "^0.3.39",
+    "cwi-base": "^0.3.41",
     "dotenv": "^16.3.1",
     "node-fetch": "^2.6.12",
     "sendover": "^1.1.9",

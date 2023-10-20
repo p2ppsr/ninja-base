@@ -269,9 +269,12 @@ export class NinjaBase implements NinjaApi {
         amount: x.amount || 0,
         outputScript: asString(x.outputScript || ''),
         type: x.type,
+        purpose: x.purpose,
         spendable: x.spendable,
         envelope: x.envelope,
-        customInstructions: options?.includeEnvelope ? (x.customInstructions || undefined) : undefined
+        customInstructions: options?.includeEnvelope ? (x.customInstructions || undefined) : undefined,
+        basket: x.basket ? x.basket.name : undefined,
+        tags: x.tags ? x.tags.map(t => t.tag) : undefined
       }))
     return gtors
   }
