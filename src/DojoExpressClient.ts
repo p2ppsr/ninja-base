@@ -8,7 +8,7 @@ import {
   DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi,
   CwiError, ERR_BAD_REQUEST, DojoSyncApi, DojoSyncOptionsApi, DojoSyncIdentifyParams, DojoSyncIdentifyResultApi,
   DojoSyncUpdateParams, DojoSyncUpdateResultApi, DojoSyncMergeParams, DojoSyncMergeResultApi,
-  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate, DojoGetTransactionLabelsOptions, DojoTxLabelApi, DojoOutputTagApi, DojoOutputBasketApi,
+  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate, DojoGetTransactionLabelsOptions, DojoTxLabelApi, DojoOutputTagApi, DojoOutputBasketApi, DojoGetTransactionOutputsResultApi,
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -219,12 +219,22 @@ export class DojoExpressClient implements DojoClientApi {
     return await this.postJson('/getEnvelopeForTransaction', { identityKey: this.identityKey, txid })
   }
 
-  async getTransactionOutputs (options?: DojoGetTransactionOutputsOptions): Promise<{ outputs: DojoOutputApi[], total: number }> {
+  async getTransactionOutputs (options?: DojoGetTransactionOutputsOptions): Promise<DojoGetTransactionOutputsResultApi> {
     this.verifyAuthenticated()
-    const results:{ outputs: DojoOutputApi[], total: number } = await this.postJson('/getTransactionOutputs', { identityKey: this.identityKey, options })
+    const results: DojoGetTransactionOutputsResultApi = await this.postJson('/getTransactionOutputs', { identityKey: this.identityKey, options })
     for (const r of results.outputs) {
       r.created_at = validateDate(r.created_at)
       r.updated_at = validateDate(r.updated_at)  
+      if (r.basket) {
+        r.basket.created_at = validateDate(r.basket.created_at)
+        r.basket.updated_at = validateDate(r.basket.updated_at)  
+      }
+      if (r.tags) {
+        for (const t of r.tags) {
+          t.created_at = validateDate(t.created_at)
+          t.updated_at = validateDate(t.updated_at)  
+        }
+      }
     }
     return results
   }

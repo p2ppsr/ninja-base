@@ -765,6 +765,14 @@ export interface NinjaGetTransactionOutputsResultApi {
     * When envelope requested, any custom instructions associated with this output.
     */
    customInstructions?: string
+   /**
+    * If `includeBasket` option is true, name of basket to which this output belongs.
+    */
+   basket?: string
+   /**
+    * If `includeTags` option is true, tags assigned to this output.
+    */
+   tags?: string[]
 }
 
 export interface NinjaSubmitDirectTransactionOutputApi {
