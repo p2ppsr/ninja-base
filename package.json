@@ -50,6 +50,7 @@
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
     "ts-standard": "^12.0.2",
+    "ts2md": "^0.1.20",
     "typescript": "^5.2.2",
     "utxoninja": "^0.2.49"
   },
@@ -60,7 +61,6 @@
     "cwi-base": "^0.3.41",
     "dotenv": "^16.3.1",
     "node-fetch": "^2.6.12",
-    "sendover": "^1.1.9",
-    "ts2md": "^0.1.17"
+    "sendover": "^1.1.9"
   }
 }
