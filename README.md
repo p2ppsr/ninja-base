@@ -5,6 +5,7 @@ Base level functions, classes, interfaces for Ninja
 ## API
 
 <!--#region ts2md-api-merged-here-->
+
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
 ### Interfaces
