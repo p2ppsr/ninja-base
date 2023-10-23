@@ -56,6 +56,10 @@ export class DojoExpressClient implements DojoClientApi {
     this.authrite = options?.authrite
   }
 
+  async destroy(): Promise<void> {
+    // Nothing to destroy
+  }
+
   //
   // HTTP API FUNCTIONS
   //
