@@ -231,7 +231,9 @@ export class NinjaBase implements NinjaApi {
           outputScript: asString(x.outputScript || ''),
           type: x.type,
           spendable: x.spendable,
-          spendingDescription: x.spendingDescription || undefined
+          spendingDescription: x.spendingDescription || undefined,
+          basket: x.basket ? x.basket.name : undefined,
+          tags: x.tags ? x.tags.map(t => t.tag) : undefined
         })) : undefined,
         outputs: t.outputs ? t.outputs.map(x => ({
           txid: x.txid || '',
@@ -240,7 +242,9 @@ export class NinjaBase implements NinjaApi {
           outputScript: asString(x.outputScript || ''),
           type: x.type,
           spendable: x.spendable,
-          description: x.description || undefined
+          description: x.description || undefined,
+          basket: x.basket ? x.basket.name : undefined,
+          tags: x.tags ? x.tags.map(t => t.tag) : undefined
         })) : undefined
       }))
     }

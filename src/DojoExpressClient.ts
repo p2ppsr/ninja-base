@@ -8,7 +8,7 @@ import {
   DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi,
   CwiError, ERR_BAD_REQUEST, DojoSyncApi, DojoSyncOptionsApi, DojoSyncIdentifyParams, DojoSyncIdentifyResultApi,
   DojoSyncUpdateParams, DojoSyncUpdateResultApi, DojoSyncMergeParams, DojoSyncMergeResultApi,
-  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate, DojoGetTransactionLabelsOptions, DojoTxLabelApi, DojoOutputTagApi, DojoOutputBasketApi, DojoGetTransactionOutputsResultApi,
+  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate, DojoGetTransactionLabelsOptions, DojoTxLabelApi, DojoOutputTagApi, DojoOutputBasketApi, DojoGetTransactionOutputsResultApi, DojoGetTransactionsResultApi, DojoGetTransactionLabelsResultApi,
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -198,7 +198,7 @@ export class DojoExpressClient implements DojoClientApi {
     await this.postJsonVoid('/updateTransactionStatus', { identityKey: this.identityKey, reference, status })
   }
 
-  async getTransactions (options?: DojoGetTransactionsOptions): Promise<{ txs: DojoTransactionApi[], total: number }> {
+  async getTransactions (options?: DojoGetTransactionsOptions): Promise<DojoGetTransactionsResultApi> {
     this.verifyAuthenticated()
     const results:{ txs: DojoTransactionApi[], total: number} = await this.postJson('/getTransactions', { identityKey: this.identityKey, options })
     for (const r of results.txs) {
@@ -239,7 +239,7 @@ export class DojoExpressClient implements DojoClientApi {
     return results
   }
 
-  async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<{ labels: DojoTxLabelApi[], total: number }> {
+  async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<DojoGetTransactionLabelsResultApi> {
     this.verifyAuthenticated()
     const results:{ labels: DojoTxLabelApi[], total: number} = await this.postJson('/getTransactionLabels', { identityKey: this.identityKey, options })
     for (const r of results.labels) {
