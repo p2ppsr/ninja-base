@@ -2444,17 +2444,11 @@ export class DojoExpressClient implements DojoClientApi {
     async getTotalOfAmounts(direction: "incoming" | "outgoing", options?: DojoGetTotalOfAmountsOptions): Promise<number> 
     async getNetOfAmounts(options?: DojoGetTotalOfAmountsOptions): Promise<number> 
     async updateTransactionStatus(reference: string, status: DojoTransactionStatusApi): Promise<void> 
-    async getTransactions(options?: DojoGetTransactionsOptions): Promise<{
-        txs: DojoTransactionApi[];
-        total: number;
-    }> 
+    async getTransactions(options?: DojoGetTransactionsOptions): Promise<DojoGetTransactionsResultApi> 
     async getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]> 
     async getEnvelopeForTransaction(txid: string): Promise<EnvelopeApi | undefined> 
     async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<DojoGetTransactionOutputsResultApi> 
-    async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<{
-        labels: DojoTxLabelApi[];
-        total: number;
-    }> 
+    async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<DojoGetTransactionLabelsResultApi> 
     async createTransaction(inputs: Record<string, DojoTxInputsApi>, inputSelection: DojoTxInputSelectionApi | undefined, outputs: DojoCreateTxOutputApi[], outputGeneration?: DojoOutputGenerationApi, feeModel?: DojoFeeModelApi, labels?: string[] | undefined, note?: string | undefined, recipient?: string | undefined): Promise<DojoCreateTransactionResultApi> 
     async processTransaction(rawTx: string | Buffer, reference: string, outputMap: Record<string, number>): Promise<DojoProcessTransactionResultApi> 
     async submitDirectTransaction(protocol: string, transaction: DojoSubmitDirectTransactionApi, senderIdentityKey: string, note: string, labels: string[], derivationPrefix?: string): Promise<DojoSubmitDirectTransactionResultApi> 
