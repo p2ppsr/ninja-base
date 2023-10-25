@@ -2413,6 +2413,7 @@ export class DojoExpressClient implements DojoClientApi {
     get isAuthenticated(): boolean 
     syncDojoConfig?: SyncDojoConfigBaseApi;
     constructor(public chain: Chain, public serviceUrl: string, options?: DojoExpressClientOptions) 
+    async destroy(): Promise<void> 
     async getChain(): Promise<Chain> 
     async stats(): Promise<DojoStatsApi> 
     async getDojoIdentity(): Promise<DojoIdentityApi> 
