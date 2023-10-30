@@ -223,20 +223,64 @@ export interface NinjaApi {
      * @param params.reference The reference number provided by `createTransaction` or `getTransactionWithOutputs`
      * @param params.outputMap An object whose keys are derivation prefixes
      *  and whose values are corresponding change output numbers from the transaction.
+     * @param params.inputs Inputs to spend as part of this transaction (only used for doublespend processing)
      *
      * @returns `DojoProcessTransactionResultApi` with txid and status of 'completed' or 'unknown'
      */
-  processTransaction(params: { submittedTransaction: string | Buffer, reference: string, outputMap: Record<string, number> }) : Promise<DojoProcessTransactionResultApi>
+  processTransaction(params: {
+    submittedTransaction: string | Buffer
+    reference: string
+    outputMap: Record<string, number>
+    inputs?: Record<string, EnvelopeEvidenceApi>
+  }) : Promise<DojoProcessTransactionResultApi>
 
   /**
-     * Creates and signs a transaction with specified outputs, so that it can be processed with `processTransaction`. This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing, when you are not providing any non-Dojo inputs.
+     * Creates and signs a transaction with specified outputs and (by default) processes it.
+     * 
+     * By setting `params.autoProcess` to false, it can be processed with `processTransaction`.
      *
+     * This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing,
+     * when you are not providing any non-Dojo inputs.
+     *
+     * Consider using either createTransactionWithOutputs or processTransactionWithOutputs
+     * when `params.autoProcess` does not need to change at runtime.
+     * 
      * Use this by default, and fall back to `createTransaction` if you need more customization.
      *
      * @returns `GetTxWithOutputsResult` if not autoProcess
      * @returns `GetTxWithOutputsProcessedResult` if autoProcess
      */
-  getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams) : Promise<NinjaGetTxWithOutputsResultApi | NinjaGetTxWithOutputsProcessedResultApi>
+  getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams) : Promise<NinjaTransactionWithOutputsResultApi>
+
+  /**
+     * Creates and signs a transaction with specified outputs.
+     * 
+     * It can be processed with `processTransaction`.
+     * 
+     * This function ignores `params.autoProcess`
+     *
+     * This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing,
+     * when you are not providing any non-Dojo inputs.
+     *
+     * Use this by default, and fall back to `createTransaction` if you need more customization.
+     *
+     * @returns `GetTxWithOutputsResult` if not autoProcess
+     */
+  createTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams) : Promise<NinjaTransactionWithOutputsResultApi>
+
+  /**
+     * Creates and signs a transaction with specified outputs and processes it.
+     * 
+     * This function ignores `params.autoProcess`
+     *
+     * This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing,
+     * when you are not providing any non-Dojo inputs.
+     *
+     * Use this by default, and fall back to `createTransaction` if you need more customization.
+     *
+     * @returns `GetTxWithOutputsProcessedResult` if autoProcess
+     */
+  processTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams) : Promise<NinjaTransactionWithOutputsResultApi>
 
   /**
      * Creates a new transaction that must be processed with `processTransaction`
@@ -569,19 +613,15 @@ export interface NinjaGetTransactionsResultApi {
 /**
  *
  */
-export interface NinjaGetTxWithOutputsResultApi {
+export interface NinjaTransactionWithOutputsResultApi {
   /**
-     * The serialized, signed transaction that is ready for broadcast
+     * The serialized, signed transaction that is ready for broadcast, or has been broadcast.
      */
   rawTx: string
   /**
      * rawTx hash as hex string
      */
   txid: string
-  /**
-     * The reference number that should now be provided back to `processTransaction (or `updateTransactionStatus`)
-     */
-  referenceNumber: string
   /**
      * The amount of the transaction
      */
@@ -591,39 +631,21 @@ export interface NinjaGetTxWithOutputsResultApi {
      */
   inputs: Record<string, EnvelopeEvidenceApi>
   /**
+   * 
+   */
+  note?: string
+  /**
+     * The reference number that should now be provided back to `processTransaction (or `updateTransactionStatus`)
+     */
+  referenceNumber: string
+  /**
      * Map of change output derivationSuffix values to transaction vout indices
      */
   outputMap: Record<string, number>
-}
-
-/**
- *
- */
-export interface NinjaGetTxWithOutputsProcessedResultApi {
   /**
-     * The serialized, signed transaction that is ready for broadcast
+     * If processed, array of acceptance responses from mapi transaction processors.
      */
-  rawTx: string
-  /**
-     * rawTx hash as hex string
-     */
-  txid: string
-  /**
-     * On 'completed' status, array of acceptance responses from mapi transaction processors.
-     */
-  mapiResponses: MapiResponseApi[]
-  /**
-     * ...
-     */
-  note?: string
-  /**
-     * The amount of the transaction
-     */
-  amount: number
-  /**
-     * This is the fully-formed `inputs` field of this transaction, as per the SPV Envelope specification.
-     */
-  inputs: object
+  mapiResponses?: MapiResponseApi[]
 }
 
 export interface NinjaGetPendingTransactionsInstructionsApi {
@@ -777,7 +799,8 @@ export interface NinjaGetTransactionOutputsResultApi {
 
 export interface NinjaSubmitDirectTransactionOutputApi {
   vout: number
-  basket: string
+  satoshis: number
+  basket?: string
   derivationPrefix?: string
   derivationSuffix?: string
   customInstructions?: object
@@ -792,8 +815,8 @@ export interface NinjaSubmitDirectTransactionApi {
   mapiResponses?: MapiResponseApi[]
   proof?: TscMerkleProofApi
   /**
-     * sparse array of outputs of interest where indices match vout numbers.
-     */
+   * sparse array of outputs of interest where indices match vout numbers.
+   */
   outputs: NinjaSubmitDirectTransactionOutputApi[]
   referenceNumber?: string
 }
@@ -831,7 +854,7 @@ export interface NinjaSubmitDirectTransactionParams {
   /**
      * Labels to assign to transaction.
      */
-  labels: string[]
+  labels?: string[]
   /**
      * A derivation prefix used for all outputs. If provided, derivation prefixes on all outputs are optional.
      */

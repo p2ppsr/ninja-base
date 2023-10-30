@@ -8,7 +8,7 @@ import {
   DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi,
   CwiError, ERR_BAD_REQUEST, DojoSyncApi, DojoSyncOptionsApi, DojoSyncIdentifyParams, DojoSyncIdentifyResultApi,
   DojoSyncUpdateParams, DojoSyncUpdateResultApi, DojoSyncMergeParams, DojoSyncMergeResultApi,
-  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate, DojoGetTransactionLabelsOptions, DojoTxLabelApi, DojoOutputTagApi, DojoOutputBasketApi, DojoGetTransactionOutputsResultApi, DojoGetTransactionsResultApi, DojoGetTransactionLabelsResultApi,
+  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate, DojoGetTransactionLabelsOptions, DojoTxLabelApi, DojoOutputTagApi, DojoOutputBasketApi, DojoGetTransactionOutputsResultApi, DojoGetTransactionsResultApi, DojoGetTransactionLabelsResultApi, DojoSubmitDirectTransactionParams, DojoCreateTransactionParams,
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -254,18 +254,10 @@ export class DojoExpressClient implements DojoClientApi {
     return results
   }
 
-  async createTransaction (
-    inputs: Record<string, DojoTxInputsApi>,
-    inputSelection: DojoTxInputSelectionApi | undefined,
-    outputs: DojoCreateTxOutputApi[],
-    outputGeneration?: DojoOutputGenerationApi,
-    feeModel?: DojoFeeModelApi,
-    labels?: string[] | undefined,
-    note?: string | undefined,
-    recipient?: string | undefined
-  ): Promise<DojoCreateTransactionResultApi> {
+  async createTransaction (params: DojoCreateTransactionParams)
+  : Promise<DojoCreateTransactionResultApi> {
     this.verifyAuthenticated()
-    return await this.postJson('/createTransaction', { identityKey: this.identityKey, inputs, inputSelection, outputs, outputGeneration, feeModel, labels, note, recipient })
+    return await this.postJson('/createTransaction', { identityKey: this.identityKey, params })
   }
 
   async processTransaction (rawTx: string | Buffer, reference: string, outputMap: Record<string, number>): Promise<DojoProcessTransactionResultApi> {
@@ -273,16 +265,10 @@ export class DojoExpressClient implements DojoClientApi {
     return await this.postJson('/processTransaction', { identityKey: this.identityKey, rawTx: asString(rawTx), reference, outputMap })
   }
 
-  async submitDirectTransaction (
-    protocol: string,
-    transaction: DojoSubmitDirectTransactionApi,
-    senderIdentityKey: string,
-    note: string,
-    labels: string[],
-    derivationPrefix?: string
-  ): Promise<DojoSubmitDirectTransactionResultApi> {
+  async submitDirectTransaction (params: DojoSubmitDirectTransactionParams)
+  : Promise<DojoSubmitDirectTransactionResultApi> {
     this.verifyAuthenticated()
-    return await this.postJson('/submitDirectTransaction', { identityKey: this.identityKey, protocol, transaction, senderIdentityKey, note, labels, derivationPrefix })
+    return await this.postJson('/submitDirectTransaction', { identityKey: this.identityKey, params })
   }
 
   async copyState (): Promise<DojoUserStateApi> {

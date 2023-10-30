@@ -3,32 +3,37 @@
 import { AuthriteClient } from 'authrite-js'
 
 import {
-  Chain, DojoAvatarApi, DojoCertificateApi,
+  bsv, Chain,
+  ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, ERR_BAD_REQUEST,
+  asString, verifyTruthy, verifyId,
+  DojoAvatarApi, DojoCertificateApi,
   DojoClientApi,
   DojoCreateTransactionResultApi,
-  DojoCreateTxOutputApi,
-  DojoFeeModelApi,
   DojoGetTotalOfAmountsOptions,
   DojoGetTransactionOutputsOptions,
   DojoGetTransactionsOptions,
-  DojoOutputGenerationApi,
   DojoPendingTxApi,
   DojoProcessTransactionResultApi,
-  DojoSubmitDirectTransactionResultApi,
   DojoTransactionStatusApi,
-  DojoTxInputSelectionApi,
-  DojoTxInputsApi,
-  bsv,
-  ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, asString, verifyTruthy, ERR_BAD_REQUEST, DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl, DojoOutputTagApi, DojoTxLabelApi, DojoOutputApi, DojoOutputBasketApi, verifyId, DojoTransactionApi, DojoGetTransactionLabelsOptions,
+  DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl, DojoOutputTagApi,
+  DojoTxLabelApi, DojoOutputApi, DojoTransactionApi,
+  DojoGetTransactionLabelsOptions, EnvelopeEvidenceApi, CwiError,
 } from 'cwi-base'
 
 import {
-  KeyPairApi, NinjaApi, NinjaCreateTransactionParams, NinjaGetTransactionOutputsResultApi, NinjaGetTransactionsResultApi, NinjaGetTxWithOutputsProcessedResultApi, NinjaGetTxWithOutputsResultApi, NinjaSubmitDirectTransactionParams, NinjaSubmitDirectTransactionResultApi, NinjaTransactionFailedHandler, NinjaTransactionProcessedHandler,
-  NinjaTxInputsApi
+  KeyPairApi, NinjaApi, NinjaCreateTransactionParams, NinjaGetTransactionOutputsResultApi,
+  NinjaGetTransactionWithOutputsParams, NinjaGetTransactionsResultApi,
+  NinjaSubmitDirectTransactionParams, NinjaSubmitDirectTransactionResultApi,
+  NinjaTransactionFailedHandler, NinjaTransactionProcessedHandler,
+  NinjaTransactionWithOutputsResultApi,
 } from '../Api/NinjaApi'
 
 import { processPendingTransactions } from './processPendingTransactions'
-import { getTransactionWithOutputs } from './getTransactionWithOutputs'
+import {
+  createTransactionWithOutputs,
+  processTransactionWithOutputs,
+  getTransactionWithOutputs
+} from './getTransactionWithOutputs'
 import { submitDirectTransaction } from './submitDirectTransaction'
 
 export class NinjaBase implements NinjaApi {
@@ -290,48 +295,58 @@ export class NinjaBase implements NinjaApi {
   }
 
   async processTransaction (params: {
+    inputs?: Record<string, EnvelopeEvidenceApi>
     submittedTransaction: string | Buffer
     reference: string
     outputMap: Record<string, number>
   }): Promise<DojoProcessTransactionResultApi> {
+    try {
+      await this.verifyDojoAuthenticated()
+      const r = await this.dojo.processTransaction(params.submittedTransaction, params.reference, params.outputMap)
+      return r
+    } catch (eu: unknown) {
+      const error = CwiError.fromUnknown(eu)
+
+      // Free up UTXOs since the transaction failed before throwing the error
+      // Unless there was a double spend error
+      if (params.reference) {
+        try {
+          await this.updateTransactionStatus({
+            reference: params.reference,
+            status: 'failed'
+          })
+        } catch (e) { /* ignore, we still need the code below */ }
+      }
+      
+      // In ninja v1, double spend processing occurred here which directly uses whatsonchain
+      // services to ultimately...
+      // 1. call `updateOutpointStatus` setting spendable false on UTXO's confirmed to have been spent
+      // 2. Update the envelope for the spending transaction
+      throw error
+    }
+  }
+
+  async getTransactionWithOutputs (params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> {
     await this.verifyDojoAuthenticated()
-    const r = await this.dojo.processTransaction(params.submittedTransaction, params.reference, params.outputMap)
+    const r = await getTransactionWithOutputs(this, params)
     return r
   }
 
-  async getTransactionWithOutputs (params: {
-    outputs: DojoCreateTxOutputApi[]
-    labels?: string[]
-    inputs?: Record<string, NinjaTxInputsApi>
-    note?: string
-    recipient?: string
-    autoProcess?: boolean | undefined
-    feePerKb?: number | undefined
-  }): Promise<NinjaGetTxWithOutputsResultApi | NinjaGetTxWithOutputsProcessedResultApi> {
+  async createTransactionWithOutputs (params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> {
     await this.verifyDojoAuthenticated()
-    const r = await getTransactionWithOutputs(this,
-      params.outputs,
-      params.labels,
-      params.inputs,
-      params.note,
-      params.recipient,
-      params.autoProcess,
-      params.feePerKb)
+    const r = await createTransactionWithOutputs(this, params)
+    return r
+  }
+
+  async processTransactionWithOutputs (params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> {
+    await this.verifyDojoAuthenticated()
+    const r = await processTransactionWithOutputs(this, params)
     return r
   }
 
   async createTransaction (params: NinjaCreateTransactionParams): Promise<DojoCreateTransactionResultApi> {
     await this.verifyDojoAuthenticated()
-    const r = await this.dojo.createTransaction(
-      params.inputs,
-      params.inputSelection,
-      params.outputs,
-      params.outputGeneration,
-      params.fee,
-      params.labels,
-      params.note,
-      params.recipient
-    )
+    const r = await this.dojo.createTransaction(params)
     return r
   }
 

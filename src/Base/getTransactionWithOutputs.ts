@@ -1,20 +1,26 @@
 import { NinjaBase } from './NinjaBase'
-import { NinjaGetTxWithOutputsProcessedResultApi, NinjaGetTxWithOutputsResultApi, NinjaTxInputsApi } from '../Api/NinjaApi'
+import {
+  NinjaGetTransactionWithOutputsParams,
+  NinjaTransactionWithOutputsResultApi,
+} from '../Api/NinjaApi'
 import { NinjaTxBuilder } from '../NinjaTxBuilder'
-import { DojoCreateTxOutputApi, DojoTxInputsApi } from 'cwi-base'
+import { DojoTxInputsApi } from 'cwi-base'
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-export async function getTransactionWithOutputs (
-  ninja: NinjaBase,
-  outputs: DojoCreateTxOutputApi[],
-  labels?: string[],
-  inputs?: Record<string, NinjaTxInputsApi>,
-  note?: string,
-  recipient?: string,
-  autoProcess?: boolean,
-  feePerKb?: number,
-  lockTime?: number
-): Promise<NinjaGetTxWithOutputsResultApi | NinjaGetTxWithOutputsProcessedResultApi> {
+export async function createTransactionWithOutputs (ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams)
+: Promise<NinjaTransactionWithOutputsResultApi>
+{
+  const {
+    outputs,
+    labels,
+    note,
+    recipient,
+    feePerKb,
+    lockTime
+  } = params
+  let {
+    inputs
+  } = params
+
   const dojo = ninja.dojo
   inputs ||= {}
 
@@ -29,16 +35,14 @@ export async function getTransactionWithOutputs (
     }))
   }])))
 
-  const createResult = await dojo.createTransaction(
-    dojoInputs,
-    undefined,
+  const createResult = await dojo.createTransaction({
+    inputs: dojoInputs,
     outputs,
-    undefined,
-    { model: 'sat/kb', value: feePerKb },
+    feeModel: { model: 'sat/kb', value: feePerKb },
     labels,
     note,
     recipient
-  )
+  })
 
   const { tx, outputMap, amount } = NinjaTxBuilder.buildJsTxFromCreateTransactionResult(ninja, inputs, createResult, lockTime)
 
@@ -56,30 +60,41 @@ export async function getTransactionWithOutputs (
 
   const rawTx = tx.uncheckedSerialize()
 
-  // Return an SPV Envelope
-  if (!autoProcess) {
-    return {
-      rawTx,
-      txid: tx.id,
-      referenceNumber,
-      amount,
-      inputs: sanitizedInputs,
-      outputMap
-    }
-  }
-
-  const r = await ninja.processTransaction({
-    submittedTransaction: rawTx,
-    reference: referenceNumber,
-    outputMap
-  })
-
   return {
     rawTx,
     txid: tx.id,
-    mapiResponses: r.mapiResponses,
-    note,
     amount,
-    inputs: sanitizedInputs
+    inputs: sanitizedInputs,
+    note,
+    referenceNumber,
+    outputMap,
   }
+}
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
+export async function processTransactionWithOutputs (ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams)
+: Promise<NinjaTransactionWithOutputsResultApi>
+{
+  const cr = await createTransactionWithOutputs(ninja, params)
+
+  const pr = await ninja.processTransaction({
+    submittedTransaction: cr.rawTx,
+    reference: cr.referenceNumber,
+    outputMap: cr.outputMap
+  })
+
+  return {
+    ...cr,
+    mapiResponses: pr.mapiResponses,
+  }
+}
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
+export async function getTransactionWithOutputs (ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams)
+: Promise<NinjaTransactionWithOutputsResultApi>
+{
+  if (params.autoProcess === false)
+    return await createTransactionWithOutputs(ninja, params)
+
+  return await processTransactionWithOutputs(ninja, params)
 }

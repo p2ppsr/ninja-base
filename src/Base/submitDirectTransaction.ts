@@ -25,7 +25,7 @@ export async function submitDirectTransaction (ninja: NinjaBase, params: NinjaSu
     }
   }
 
-  const submitResult = await ninja.dojo.submitDirectTransaction(protocol, transaction, senderIdentityKey, note, labels, derivationPrefix)
+  const submitResult = await ninja.dojo.submitDirectTransaction(params)
 
   return submitResult
 }

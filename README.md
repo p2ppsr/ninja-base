@@ -12,18 +12,18 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
-| [DojoExpressClientOptions](#interface-dojoexpressclientoptions) | [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams) | [NinjaTransactionFailedApi](#interface-ninjatransactionfailedapi) |
-| [DojoTxBuilderBaseOptions](#interface-dojotxbuilderbaseoptions) | [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi) | [NinjaTransactionProcessedApi](#interface-ninjatransactionprocessedapi) |
-| [DojoTxBuilderInputApi](#interface-dojotxbuilderinputapi) | [NinjaGetTransactionsTxApi](#interface-ninjagettransactionstxapi) | [NinjaTxBuilderOptions](#interface-ninjatxbuilderoptions) |
-| [DojoTxBuilderOptions](#interface-dojotxbuilderoptions) | [NinjaGetTransactionsTxInputApi](#interface-ninjagettransactionstxinputapi) | [NinjaTxInputsApi](#interface-ninjatxinputsapi) |
-| [DojoTxBuilderOutputApi](#interface-dojotxbuilderoutputapi) | [NinjaGetTransactionsTxOutputApi](#interface-ninjagettransactionstxoutputapi) | [NinjaV1Params](#interface-ninjav1params) |
-| [KeyPairApi](#interface-keypairapi) | [NinjaGetTxWithOutputsProcessedResultApi](#interface-ninjagettxwithoutputsprocessedresultapi) | [ProcessIncomingTransactionApi](#interface-processincomingtransactionapi) |
-| [NinjaApi](#interface-ninjaapi) | [NinjaGetTxWithOutputsResultApi](#interface-ninjagettxwithoutputsresultapi) | [ProcessIncomingTransactionInputApi](#interface-processincomingtransactioninputapi) |
-| [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams) | [NinjaOutputToRedeemApi](#interface-ninjaoutputtoredeemapi) | [ProcessIncomingTransactionOutputApi](#interface-processincomingtransactionoutputapi) |
-| [NinjaGetPendingTransactionsInputApi](#interface-ninjagetpendingtransactionsinputapi) | [NinjaSubmitDirectTransactionApi](#interface-ninjasubmitdirecttransactionapi) | [ProcessIncomingTransactionResultApi](#interface-processincomingtransactionresultapi) |
-| [NinjaGetPendingTransactionsInstructionsApi](#interface-ninjagetpendingtransactionsinstructionsapi) | [NinjaSubmitDirectTransactionOutputApi](#interface-ninjasubmitdirecttransactionoutputapi) | [TxOutputApi](#interface-txoutputapi) |
-| [NinjaGetPendingTransactionsTxApi](#interface-ninjagetpendingtransactionstxapi) | [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams) | [TxRedeemableOutputApi](#interface-txredeemableoutputapi) |
-| [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi) | [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi) |  |
+| [DojoExpressClientOptions](#interface-dojoexpressclientoptions) | [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams) | [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi) |
+| [DojoTxBuilderBaseOptions](#interface-dojotxbuilderbaseoptions) | [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi) | [NinjaTxBuilderOptions](#interface-ninjatxbuilderoptions) |
+| [DojoTxBuilderInputApi](#interface-dojotxbuilderinputapi) | [NinjaGetTransactionsTxApi](#interface-ninjagettransactionstxapi) | [NinjaTxInputsApi](#interface-ninjatxinputsapi) |
+| [DojoTxBuilderOptions](#interface-dojotxbuilderoptions) | [NinjaGetTransactionsTxInputApi](#interface-ninjagettransactionstxinputapi) | [NinjaV1Params](#interface-ninjav1params) |
+| [DojoTxBuilderOutputApi](#interface-dojotxbuilderoutputapi) | [NinjaGetTransactionsTxOutputApi](#interface-ninjagettransactionstxoutputapi) | [ProcessIncomingTransactionApi](#interface-processincomingtransactionapi) |
+| [KeyPairApi](#interface-keypairapi) | [NinjaOutputToRedeemApi](#interface-ninjaoutputtoredeemapi) | [ProcessIncomingTransactionInputApi](#interface-processincomingtransactioninputapi) |
+| [NinjaApi](#interface-ninjaapi) | [NinjaSubmitDirectTransactionApi](#interface-ninjasubmitdirecttransactionapi) | [ProcessIncomingTransactionOutputApi](#interface-processincomingtransactionoutputapi) |
+| [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams) | [NinjaSubmitDirectTransactionOutputApi](#interface-ninjasubmitdirecttransactionoutputapi) | [ProcessIncomingTransactionResultApi](#interface-processincomingtransactionresultapi) |
+| [NinjaGetPendingTransactionsInputApi](#interface-ninjagetpendingtransactionsinputapi) | [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams) | [TxOutputApi](#interface-txoutputapi) |
+| [NinjaGetPendingTransactionsInstructionsApi](#interface-ninjagetpendingtransactionsinstructionsapi) | [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi) | [TxRedeemableOutputApi](#interface-txredeemableoutputapi) |
+| [NinjaGetPendingTransactionsTxApi](#interface-ninjagetpendingtransactionstxapi) | [NinjaTransactionFailedApi](#interface-ninjatransactionfailedapi) |  |
+| [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi) | [NinjaTransactionProcessedApi](#interface-ninjatransactionprocessedapi) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
@@ -83,8 +83,11 @@ export interface NinjaApi {
         submittedTransaction: string | Buffer;
         reference: string;
         outputMap: Record<string, number>;
+        inputs?: Record<string, EnvelopeEvidenceApi>;
     }): Promise<DojoProcessTransactionResultApi>;
-    getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaGetTxWithOutputsResultApi | NinjaGetTxWithOutputsProcessedResultApi>;
+    getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi>;
+    createTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi>;
+    processTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi>;
     createTransaction(params: NinjaCreateTransactionParams): Promise<DojoCreateTransactionResultApi>;
     submitDirectTransaction(params: NinjaSubmitDirectTransactionParams): Promise<NinjaSubmitDirectTransactionResultApi>;
     deleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number>;
@@ -138,6 +141,27 @@ createTransaction(params: NinjaCreateTransactionParams): Promise<DojoCreateTrans
 Returns
 
 The template you need to sign and process
+
+##### Method createTransactionWithOutputs
+
+Creates and signs a transaction with specified outputs.
+
+It can be processed with `processTransaction`.
+
+This function ignores `params.autoProcess`
+
+This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing,
+when you are not providing any non-Dojo inputs.
+
+Use this by default, and fall back to `createTransaction` if you need more customization.
+
+```ts
+createTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi>
+```
+
+Returns
+
+`GetTxWithOutputsResult` if not autoProcess
 
 ##### Method defenestrateOutput
 
@@ -318,12 +342,20 @@ getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<Ninja
 
 ##### Method getTransactionWithOutputs
 
-Creates and signs a transaction with specified outputs, so that it can be processed with `processTransaction`. This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing, when you are not providing any non-Dojo inputs.
+Creates and signs a transaction with specified outputs and (by default) processes it.
+
+By setting `params.autoProcess` to false, it can be processed with `processTransaction`.
+
+This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing,
+when you are not providing any non-Dojo inputs.
+
+Consider using either createTransactionWithOutputs or processTransactionWithOutputs
+when `params.autoProcess` does not need to change at runtime.
 
 Use this by default, and fall back to `createTransaction` if you need more customization.
 
 ```ts
-getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaGetTxWithOutputsResultApi | NinjaGetTxWithOutputsProcessedResultApi>
+getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi>
 ```
 
 Returns
@@ -387,6 +419,7 @@ processTransaction(params: {
     submittedTransaction: string | Buffer;
     reference: string;
     outputMap: Record<string, number>;
+    inputs?: Record<string, EnvelopeEvidenceApi>;
 }): Promise<DojoProcessTransactionResultApi>
 ```
 
@@ -403,6 +436,27 @@ Argument Details
 + **params.outputMap**
   + An object whose keys are derivation prefixes
 and whose values are corresponding change output numbers from the transaction.
++ **params.inputs**
+  + Inputs to spend as part of this transaction (only used for doublespend processing)
+
+##### Method processTransactionWithOutputs
+
+Creates and signs a transaction with specified outputs and processes it.
+
+This function ignores `params.autoProcess`
+
+This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing,
+when you are not providing any non-Dojo inputs.
+
+Use this by default, and fall back to `createTransaction` if you need more customization.
+
+```ts
+processTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi>
+```
+
+Returns
+
+`GetTxWithOutputsProcessedResult` if autoProcess
 
 ##### Method saveCertificate
 
@@ -1151,22 +1205,24 @@ transactions: NinjaGetTransactionsTxApi[]
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
 ---
-#### Interface: NinjaGetTxWithOutputsResultApi
+#### Interface: NinjaTransactionWithOutputsResultApi
 
 ```ts
-export interface NinjaGetTxWithOutputsResultApi {
+export interface NinjaTransactionWithOutputsResultApi {
     rawTx: string;
     txid: string;
-    referenceNumber: string;
     amount: number;
     inputs: Record<string, EnvelopeEvidenceApi>;
+    note?: string;
+    referenceNumber: string;
     outputMap: Record<string, number>;
+    mapiResponses?: MapiResponseApi[];
 }
 ```
 
 <details>
 
-<summary>Interface NinjaGetTxWithOutputsResultApi Details</summary>
+<summary>Interface NinjaTransactionWithOutputsResultApi Details</summary>
 
 ##### Property amount
 
@@ -1184,6 +1240,14 @@ This is the fully-formed `inputs` field of this transaction, as per the SPV Enve
 inputs: Record<string, EnvelopeEvidenceApi>
 ```
 
+##### Property mapiResponses
+
+If processed, array of acceptance responses from mapi transaction processors.
+
+```ts
+mapiResponses?: MapiResponseApi[]
+```
+
 ##### Property outputMap
 
 Map of change output derivationSuffix values to transaction vout indices
@@ -1194,7 +1258,7 @@ outputMap: Record<string, number>
 
 ##### Property rawTx
 
-The serialized, signed transaction that is ready for broadcast
+The serialized, signed transaction that is ready for broadcast, or has been broadcast.
 
 ```ts
 rawTx: string
@@ -1206,76 +1270,6 @@ The reference number that should now be provided back to `processTransaction (or
 
 ```ts
 referenceNumber: string
-```
-
-##### Property txid
-
-rawTx hash as hex string
-
-```ts
-txid: string
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
-
----
-#### Interface: NinjaGetTxWithOutputsProcessedResultApi
-
-```ts
-export interface NinjaGetTxWithOutputsProcessedResultApi {
-    rawTx: string;
-    txid: string;
-    mapiResponses: MapiResponseApi[];
-    note?: string;
-    amount: number;
-    inputs: object;
-}
-```
-
-<details>
-
-<summary>Interface NinjaGetTxWithOutputsProcessedResultApi Details</summary>
-
-##### Property amount
-
-The amount of the transaction
-
-```ts
-amount: number
-```
-
-##### Property inputs
-
-This is the fully-formed `inputs` field of this transaction, as per the SPV Envelope specification.
-
-```ts
-inputs: object
-```
-
-##### Property mapiResponses
-
-On 'completed' status, array of acceptance responses from mapi transaction processors.
-
-```ts
-mapiResponses: MapiResponseApi[]
-```
-
-##### Property note
-
-...
-
-```ts
-note?: string
-```
-
-##### Property rawTx
-
-The serialized, signed transaction that is ready for broadcast
-
-```ts
-rawTx: string
 ```
 
 ##### Property txid
@@ -1640,7 +1634,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export interface NinjaSubmitDirectTransactionOutputApi {
     vout: number;
-    basket: string;
+    satoshis: number;
+    basket?: string;
     derivationPrefix?: string;
     derivationSuffix?: string;
     customInstructions?: object;
@@ -1692,7 +1687,7 @@ export interface NinjaSubmitDirectTransactionParams {
     transaction: NinjaSubmitDirectTransactionApi;
     senderIdentityKey: string;
     note: string;
-    labels: string[];
+    labels?: string[];
     derivationPrefix?: string;
     amount?: number;
 }
@@ -1715,7 +1710,7 @@ derivationPrefix?: string
 Labels to assign to transaction.
 
 ```ts
-labels: string[]
+labels?: string[]
 ```
 
 ##### Property note
@@ -2371,19 +2366,14 @@ export class NinjaBase implements NinjaApi {
         total: number;
     }> 
     async processTransaction(params: {
+        inputs?: Record<string, EnvelopeEvidenceApi>;
         submittedTransaction: string | Buffer;
         reference: string;
         outputMap: Record<string, number>;
     }): Promise<DojoProcessTransactionResultApi> 
-    async getTransactionWithOutputs(params: {
-        outputs: DojoCreateTxOutputApi[];
-        labels?: string[];
-        inputs?: Record<string, NinjaTxInputsApi>;
-        note?: string;
-        recipient?: string;
-        autoProcess?: boolean | undefined;
-        feePerKb?: number | undefined;
-    }): Promise<NinjaGetTxWithOutputsResultApi | NinjaGetTxWithOutputsProcessedResultApi> 
+    async getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
+    async createTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
+    async processTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
     async createTransaction(params: NinjaCreateTransactionParams): Promise<DojoCreateTransactionResultApi> 
     async deleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number> 
     async labelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> 
@@ -2450,9 +2440,9 @@ export class DojoExpressClient implements DojoClientApi {
     async getEnvelopeForTransaction(txid: string): Promise<EnvelopeApi | undefined> 
     async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<DojoGetTransactionOutputsResultApi> 
     async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<DojoGetTransactionLabelsResultApi> 
-    async createTransaction(inputs: Record<string, DojoTxInputsApi>, inputSelection: DojoTxInputSelectionApi | undefined, outputs: DojoCreateTxOutputApi[], outputGeneration?: DojoOutputGenerationApi, feeModel?: DojoFeeModelApi, labels?: string[] | undefined, note?: string | undefined, recipient?: string | undefined): Promise<DojoCreateTransactionResultApi> 
+    async createTransaction(params: DojoCreateTransactionParams): Promise<DojoCreateTransactionResultApi> 
     async processTransaction(rawTx: string | Buffer, reference: string, outputMap: Record<string, number>): Promise<DojoProcessTransactionResultApi> 
-    async submitDirectTransaction(protocol: string, transaction: DojoSubmitDirectTransactionApi, senderIdentityKey: string, note: string, labels: string[], derivationPrefix?: string): Promise<DojoSubmitDirectTransactionResultApi> 
+    async submitDirectTransaction(params: DojoSubmitDirectTransactionParams): Promise<DojoSubmitDirectTransactionResultApi> 
     async copyState(): Promise<DojoUserStateApi> 
     async getJsonOrUndefined<T>(path: string): Promise<T | undefined> 
     async getJson<T>(path: string): Promise<T> 
@@ -2530,10 +2520,12 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | |
 | --- |
+| [createTransactionWithOutputs](#function-createtransactionwithoutputs) |
 | [getTransactionWithOutputs](#function-gettransactionwithoutputs) |
 | [invoice3241645161d8](#function-invoice3241645161d8) |
 | [processIncomingTransaction](#function-processincomingtransaction) |
 | [processPendingTransactions](#function-processpendingtransactions) |
+| [processTransactionWithOutputs](#function-processtransactionwithoutputs) |
 | [submitDirectTransaction](#function-submitdirecttransaction) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
@@ -2597,10 +2589,28 @@ export async function processPendingTransactions(ninja: NinjaBase, onTransaction
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
 
 ---
+#### Function: createTransactionWithOutputs
+
+```ts
+export async function createTransactionWithOutputs(ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
+
+---
+#### Function: processTransactionWithOutputs
+
+```ts
+export async function processTransactionWithOutputs(ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
+
+---
 #### Function: getTransactionWithOutputs
 
 ```ts
-export async function getTransactionWithOutputs(ninja: NinjaBase, outputs: DojoCreateTxOutputApi[], labels?: string[], inputs?: Record<string, NinjaTxInputsApi>, note?: string, recipient?: string, autoProcess?: boolean, feePerKb?: number, lockTime?: number): Promise<NinjaGetTxWithOutputsResultApi | NinjaGetTxWithOutputsProcessedResultApi> 
+export async function getTransactionWithOutputs(ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types)
