@@ -6,9 +6,11 @@
  * @returns
  */
 export function invoice3241645161d8 (prefix: string, suffix: string, paymail?: string): string {
-  const protocol = '2-3241645161d8'
+  const protocol = invoice3241645161d8Protocol
   const invoice = paymail
     ? `${protocol}-${paymail} ${prefix} ${suffix}`
     : `${protocol}-${prefix} ${suffix}`
   return invoice
 }
+
+export const invoice3241645161d8Protocol = '2-3241645161d8'
