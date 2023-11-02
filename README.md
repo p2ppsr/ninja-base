@@ -2723,7 +2723,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 #### Type: NinjaOutgoingTransactionHandler
 
 ```ts
-export type NinjaOutgoingTransactionHandler = (tx: DojoPendingTxApi) => Promise<void>
+export type NinjaOutgoingTransactionHandler = (tx: DojoPendingTxApi) => Promise<boolean>
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
