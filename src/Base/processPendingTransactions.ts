@@ -1,5 +1,5 @@
 import { NinjaOutgoingTransactionHandler, NinjaTransactionFailedApi, NinjaTransactionFailedHandler, NinjaTransactionProcessedApi, NinjaTransactionProcessedHandler } from '../Api/NinjaApi'
-import { ProcessIncomingTransactionResultApi, processIncomingTransaction } from './processIncomingTransaction'
+import { processIncomingTransaction } from './processIncomingTransaction'
 import { NinjaBase } from './NinjaBase'
 import { CwiError, asString } from 'cwi-base'
 
