@@ -1,6 +1,7 @@
 import { NinjaBase } from './NinjaBase'
 import {
   NinjaGetTransactionWithOutputsParams,
+  NinjaSignCreatedTransactionParams,
   NinjaTransactionWithOutputsResultApi,
 } from '../Api/NinjaApi'
 import { NinjaTxBuilder } from '../NinjaTxBuilder'
@@ -43,6 +44,16 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
     note,
     recipient
   })
+
+  const signResult = await signCreatedTransaction(ninja, { inputs, note, lockTime, createResult })
+
+  return signResult
+}
+
+export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSignCreatedTransactionParams)
+: Promise<NinjaTransactionWithOutputsResultApi>
+{
+  const { inputs, note, lockTime, createResult } = params
 
   const { tx, outputMap, amount } = NinjaTxBuilder.buildJsTxFromCreateTransactionResult(ninja, inputs, createResult, lockTime)
 

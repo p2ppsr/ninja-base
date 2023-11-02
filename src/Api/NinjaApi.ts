@@ -435,6 +435,7 @@ export interface NinjaCreateTransactionParams {
 
 export type NinjaTransactionFailedHandler = (args: NinjaTransactionFailedApi) => Promise<void>
 export type NinjaTransactionProcessedHandler = (args: NinjaTransactionProcessedApi) => Promise<void>
+export type NinjaOutgoingTransactionHandler = (tx: DojoPendingTxApi) => Promise<void>
 
 export interface NinjaTransactionFailedApi {
   inputs: Record<string, DojoPendingTxInputApi>
@@ -865,6 +866,34 @@ export interface NinjaSubmitDirectTransactionParams {
 export interface NinjaSubmitDirectTransactionResultApi {
   transactionId: number
   referenceNumber: string
+}
+
+export interface NinjaSignCreatedTransactionParams {
+  /**
+     * Input scripts to spend as part of this transaction.
+     *
+     * This is an object whose keys are TXIDs and whose values are Everett-style
+     * transaction envelopes that contain an additional field called `outputsToRedeem`.
+     *
+     * This is an array of objects, each containing `index` and `unlockingScript` properties.
+     *
+     * The `index` property is the output number in the transaction you are spending,
+     * and `unlockingScript` is the hex scriptcode that unlocks the satoshis.
+     *
+     * Note that you should create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
+     * so that the additional Dojo outputs can be added afterward without invalidating your signature.
+     */
+  inputs: Record<string, NinjaTxInputsApi>
+  /**
+     * A note about the transaction
+     */
+   note?: string
+   /**
+     * A lock time for the transaction
+     */
+   lockTime?: number
+   
+   createResult: DojoCreateTransactionResultApi
 }
 
 /**
