@@ -12,18 +12,18 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
-| [DojoExpressClientOptions](#interface-dojoexpressclientoptions) | [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams) | [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi) |
-| [DojoTxBuilderBaseOptions](#interface-dojotxbuilderbaseoptions) | [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi) | [NinjaTxBuilderOptions](#interface-ninjatxbuilderoptions) |
-| [DojoTxBuilderInputApi](#interface-dojotxbuilderinputapi) | [NinjaGetTransactionsTxApi](#interface-ninjagettransactionstxapi) | [NinjaTxInputsApi](#interface-ninjatxinputsapi) |
-| [DojoTxBuilderOptions](#interface-dojotxbuilderoptions) | [NinjaGetTransactionsTxInputApi](#interface-ninjagettransactionstxinputapi) | [NinjaV1Params](#interface-ninjav1params) |
-| [DojoTxBuilderOutputApi](#interface-dojotxbuilderoutputapi) | [NinjaGetTransactionsTxOutputApi](#interface-ninjagettransactionstxoutputapi) | [ProcessIncomingTransactionApi](#interface-processincomingtransactionapi) |
-| [KeyPairApi](#interface-keypairapi) | [NinjaOutputToRedeemApi](#interface-ninjaoutputtoredeemapi) | [ProcessIncomingTransactionInputApi](#interface-processincomingtransactioninputapi) |
-| [NinjaApi](#interface-ninjaapi) | [NinjaSubmitDirectTransactionApi](#interface-ninjasubmitdirecttransactionapi) | [ProcessIncomingTransactionOutputApi](#interface-processincomingtransactionoutputapi) |
-| [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams) | [NinjaSubmitDirectTransactionOutputApi](#interface-ninjasubmitdirecttransactionoutputapi) | [ProcessIncomingTransactionResultApi](#interface-processincomingtransactionresultapi) |
-| [NinjaGetPendingTransactionsInputApi](#interface-ninjagetpendingtransactionsinputapi) | [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams) | [TxOutputApi](#interface-txoutputapi) |
-| [NinjaGetPendingTransactionsInstructionsApi](#interface-ninjagetpendingtransactionsinstructionsapi) | [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi) | [TxRedeemableOutputApi](#interface-txredeemableoutputapi) |
-| [NinjaGetPendingTransactionsTxApi](#interface-ninjagetpendingtransactionstxapi) | [NinjaTransactionFailedApi](#interface-ninjatransactionfailedapi) |  |
-| [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi) | [NinjaTransactionProcessedApi](#interface-ninjatransactionprocessedapi) |  |
+| [DojoExpressClientOptions](#interface-dojoexpressclientoptions) | [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams) | [NinjaTransactionProcessedApi](#interface-ninjatransactionprocessedapi) |
+| [DojoTxBuilderBaseOptions](#interface-dojotxbuilderbaseoptions) | [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi) | [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi) |
+| [DojoTxBuilderInputApi](#interface-dojotxbuilderinputapi) | [NinjaGetTransactionsTxApi](#interface-ninjagettransactionstxapi) | [NinjaTxBuilderOptions](#interface-ninjatxbuilderoptions) |
+| [DojoTxBuilderOptions](#interface-dojotxbuilderoptions) | [NinjaGetTransactionsTxInputApi](#interface-ninjagettransactionstxinputapi) | [NinjaTxInputsApi](#interface-ninjatxinputsapi) |
+| [DojoTxBuilderOutputApi](#interface-dojotxbuilderoutputapi) | [NinjaGetTransactionsTxOutputApi](#interface-ninjagettransactionstxoutputapi) | [NinjaV1Params](#interface-ninjav1params) |
+| [KeyPairApi](#interface-keypairapi) | [NinjaOutputToRedeemApi](#interface-ninjaoutputtoredeemapi) | [ProcessIncomingTransactionApi](#interface-processincomingtransactionapi) |
+| [NinjaApi](#interface-ninjaapi) | [NinjaSignCreatedTransactionParams](#interface-ninjasigncreatedtransactionparams) | [ProcessIncomingTransactionInputApi](#interface-processincomingtransactioninputapi) |
+| [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams) | [NinjaSubmitDirectTransactionApi](#interface-ninjasubmitdirecttransactionapi) | [ProcessIncomingTransactionOutputApi](#interface-processincomingtransactionoutputapi) |
+| [NinjaGetPendingTransactionsInputApi](#interface-ninjagetpendingtransactionsinputapi) | [NinjaSubmitDirectTransactionOutputApi](#interface-ninjasubmitdirecttransactionoutputapi) | [ProcessIncomingTransactionResultApi](#interface-processincomingtransactionresultapi) |
+| [NinjaGetPendingTransactionsInstructionsApi](#interface-ninjagetpendingtransactionsinstructionsapi) | [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams) | [TxOutputApi](#interface-txoutputapi) |
+| [NinjaGetPendingTransactionsTxApi](#interface-ninjagetpendingtransactionstxapi) | [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi) | [TxRedeemableOutputApi](#interface-txredeemableoutputapi) |
+| [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi) | [NinjaTransactionFailedApi](#interface-ninjatransactionfailedapi) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -1772,6 +1772,61 @@ export interface NinjaSubmitDirectTransactionResultApi {
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+#### Interface: NinjaSignCreatedTransactionParams
+
+```ts
+export interface NinjaSignCreatedTransactionParams {
+    inputs: Record<string, NinjaTxInputsApi>;
+    note?: string;
+    lockTime?: number;
+    createResult: DojoCreateTransactionResultApi;
+}
+```
+
+<details>
+
+<summary>Interface NinjaSignCreatedTransactionParams Details</summary>
+
+##### Property inputs
+
+Input scripts to spend as part of this transaction.
+
+This is an object whose keys are TXIDs and whose values are Everett-style
+transaction envelopes that contain an additional field called `outputsToRedeem`.
+
+This is an array of objects, each containing `index` and `unlockingScript` properties.
+
+The `index` property is the output number in the transaction you are spending,
+and `unlockingScript` is the hex scriptcode that unlocks the satoshis.
+
+Note that you should create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
+so that the additional Dojo outputs can be added afterward without invalidating your signature.
+
+```ts
+inputs: Record<string, NinjaTxInputsApi>
+```
+
+##### Property lockTime
+
+A lock time for the transaction
+
+```ts
+lockTime?: number
+```
+
+##### Property note
+
+A note about the transaction
+
+```ts
+note?: string
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 #### Interface: NinjaGetTransactionWithOutputsParams
 
 Input parameters to getTransactionWithOutputs method.
@@ -2526,6 +2581,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [processIncomingTransaction](#function-processincomingtransaction) |
 | [processPendingTransactions](#function-processpendingtransactions) |
 | [processTransactionWithOutputs](#function-processtransactionwithoutputs) |
+| [signCreatedTransaction](#function-signcreatedtransaction) |
 | [submitDirectTransaction](#function-submitdirecttransaction) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
@@ -2583,7 +2639,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 #### Function: processPendingTransactions
 
 ```ts
-export async function processPendingTransactions(ninja: NinjaBase, onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler): Promise<void> 
+export async function processPendingTransactions(ninja: NinjaBase, onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler, onOutgoingTransaction?: NinjaOutgoingTransactionHandler): Promise<void> 
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
@@ -2593,6 +2649,15 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export async function createTransactionWithOutputs(ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Function: signCreatedTransaction
+
+```ts
+export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSignCreatedTransactionParams): Promise<NinjaTransactionWithOutputsResultApi> 
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
@@ -2629,6 +2694,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | |
 | --- |
+| [NinjaOutgoingTransactionHandler](#type-ninjaoutgoingtransactionhandler) |
 | [NinjaTransactionFailedHandler](#type-ninjatransactionfailedhandler) |
 | [NinjaTransactionProcessedHandler](#type-ninjatransactionprocessedhandler) |
 
@@ -2649,6 +2715,15 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export type NinjaTransactionProcessedHandler = (args: NinjaTransactionProcessedApi) => Promise<void>
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Type: NinjaOutgoingTransactionHandler
+
+```ts
+export type NinjaOutgoingTransactionHandler = (tx: DojoPendingTxApi) => Promise<void>
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)

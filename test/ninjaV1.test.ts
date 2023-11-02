@@ -10,7 +10,7 @@ import { default as NinjaV1 } from 'utxoninja'
  * NOTE: Stageline Metanet Client must be running to enable Ninja's use of Authrite.
  * Permission requests must also be granted.
  */
-describe('ninjaV1.test', () => {
+describe.skip('ninjaV1.test', () => {
     let ninjaV1: NinjaV1
     
     beforeAll(async () => {
