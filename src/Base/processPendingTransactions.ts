@@ -31,14 +31,18 @@ arbitrary transactions and forwarding them to Ninja for signing.
 The Ninja `signCreatedTransaction` and `processTransaction` methods may be useful.
          */
 
+        let handled = false
         if (onOutgoingTransaction) {
           try {
-            await onOutgoingTransaction(ptx)
+            handled = await onOutgoingTransaction(ptx)
           } catch (e: unknown) {
             console.error('onOutgoingTransaction callback threw', e)
           }
         } else {
           console.log(`processPendingTransactions outgoing transaction reference ${ptx.referenceNumber} ignored`)
+        }
+        if (!handled) {
+          await ninja.dojo.updateTransactionStatus(ptx.referenceNumber, 'failed')
         }
 
       } else {

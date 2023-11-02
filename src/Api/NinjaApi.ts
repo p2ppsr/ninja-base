@@ -435,7 +435,10 @@ export interface NinjaCreateTransactionParams {
 
 export type NinjaTransactionFailedHandler = (args: NinjaTransactionFailedApi) => Promise<void>
 export type NinjaTransactionProcessedHandler = (args: NinjaTransactionProcessedApi) => Promise<void>
-export type NinjaOutgoingTransactionHandler = (tx: DojoPendingTxApi) => Promise<void>
+/**
+ * @returns true if tx has been handled, false to proceed and update status to 'failed'
+ */
+export type NinjaOutgoingTransactionHandler = (tx: DojoPendingTxApi) => Promise<boolean>
 
 export interface NinjaTransactionFailedApi {
   inputs: Record<string, DojoPendingTxInputApi>
