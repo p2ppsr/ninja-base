@@ -31,7 +31,6 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "tolocal": "npm i ../cwi-base --silent",
     "tonpm": "npm run tonone && npm i cwi-base --silent",
     "tonone": "npm remove cwi-base --silent"
   },
