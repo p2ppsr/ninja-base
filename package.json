@@ -50,14 +50,13 @@
     "ts-node": "^10.9.1",
     "ts-standard": "^12.0.2",
     "ts2md": "^0.1.22",
-    "typescript": "^5.2.2",
-    "utxoninja": "^0.2.49"
+    "typescript": "^5.2.2"
   },
   "dependencies": {
     "authrite-js": "^0.3.1",
     "authrite-utils": "^0.2.0",
     "babbage-bsv": "^0.2.1",
-    "cwi-base": "^0.3.55",
+    "cwi-base": "^0.3.56",
     "dotenv": "^16.3.1",
     "node-fetch": "^2.6.12",
     "sendover": "^1.1.9"
