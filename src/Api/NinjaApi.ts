@@ -947,9 +947,16 @@ export interface NinjaGetTransactionWithOutputsParams {
      */
   autoProcess?: boolean
   /**
-     * The number of satoshis to pay per KB of block space used by this transaction.
-     *
-     * default 110
+     * Optional. The number of satoshis to pay per KB of block space used by this transaction.
+     * 
+     * If both feeModel and feePerKb are specified, feeModel takes precendence
      */
   feePerKb?: number
+
+  /**
+     * Optional. The fee model used by this transaction.
+     * 
+     * If both feeModel and feePerKb are specified, feeModel takes precendence
+     */
+  feeModel?: DojoFeeModelApi
 }

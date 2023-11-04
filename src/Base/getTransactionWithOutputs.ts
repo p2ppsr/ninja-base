@@ -16,6 +16,7 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
     note,
     recipient,
     feePerKb,
+    feeModel,
     lockTime
   } = params
   let {
@@ -39,7 +40,7 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
   const createResult = await dojo.createTransaction({
     inputs: dojoInputs,
     outputs,
-    feeModel: { model: 'sat/kb', value: feePerKb },
+    feeModel: feeModel || (feePerKb ? { model: 'sat/kb', value: feePerKb } : undefined),
     labels,
     note,
     recipient
