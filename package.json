@@ -1,6 +1,6 @@
 {
   "name": "ninja-base",
-  "version": "0.2.61",
+  "version": "0.2.62",
   "description": "Base level functions, classes, interfaces for Ninja",
   "author": "Peer-to-peer Privacy Systems Research LLC",
   "license": "PROPRIETARY",
