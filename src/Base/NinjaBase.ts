@@ -35,6 +35,7 @@ import {
   getTransactionWithOutputs
 } from './getTransactionWithOutputs'
 import { submitDirectTransaction } from './submitDirectTransaction'
+import { DojoExpressClient } from '../DojoExpressClient'
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain
@@ -51,6 +52,17 @@ export class NinjaBase implements NinjaApi {
       this._keyPair = {
         privateKey: clientPrivateKey,
         publicKey: identityPublicKey
+      }
+      
+      if (dojo instanceof DojoExpressClient && clientPrivateKey) {
+        // Support delayed initialization of authrite with privateKey for use by DojoExpressClient to
+        // communicate with DojoExpress.
+        const dec = dojo as DojoExpressClient
+        if (!dojo.options.authrite) {
+          const authrite = new AuthriteClient(dojo.serviceUrl, { clientPrivateKey })
+          dojo.options.authrite = authrite
+          dojo.authrite = authrite
+        }
       }
     }
 

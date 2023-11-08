@@ -51,6 +51,14 @@ export class DojoExpressClient implements DojoClientApi {
    */
   syncDojoConfig?: SyncDojoConfigBaseApi
 
+  /**
+   * The authrite options setting may be left undefined if it will be created
+   * by NinjaBase.
+   * 
+   * @param chain 
+   * @param serviceUrl 
+   * @param options 
+   */
   constructor (public chain: Chain, public serviceUrl: string, options?: DojoExpressClientOptions) {
     this.options ||= DojoExpressClient.createDojoExpressClientOptions()
     this.authrite = options?.authrite
