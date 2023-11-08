@@ -114,19 +114,21 @@ export class DojoExpressClient implements DojoClientApi {
   }
 
   setSyncDojos (dojos: DojoSyncApi[], syncOptions?: DojoSyncOptionsApi | undefined): void {
+    if (!dojos || dojos.length === 0) return
     throw new ERR_BAD_REQUEST('DojoExpressClient does not support setSyncDojos.')
   }
 
   getSyncDojos (): { dojos: DojoSyncApi[], options: DojoSyncOptionsApi } {
-    throw new ERR_BAD_REQUEST('DojoExpressClient does not support getSyncDojos.')
+    return { dojos: [], options: {} }
   }
 
   async setSyncDojosByConfig(syncDojoConfigs: SyncDojoConfigBaseApi[], options?: DojoSyncOptionsApi | undefined): Promise<void> {
+    if (!syncDojoConfigs || syncDojoConfigs.length === 0) return
     throw new ERR_BAD_REQUEST('DojoExpressClient does not support setSyncDojosByConfig.')
   }
 
   async getSyncDojosByConfig(): Promise<{ dojos: SyncDojoConfigBaseApi[]; options?: DojoSyncOptionsApi | undefined }> {
-    throw new ERR_BAD_REQUEST('DojoExpressClient does not support getSyncDojosByConfig.')
+    return { dojos: [], options: {} }
   }
 
   async sync (): Promise<void> {
