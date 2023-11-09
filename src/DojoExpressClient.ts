@@ -183,7 +183,7 @@ export class DojoExpressClient implements DojoClientApi {
 
   async findCertificates (certifiers?: string[], types?: Record<string, string[]>): Promise<DojoCertificateApi[]> {
     this.verifyAuthenticated()
-    const rs:DojoCertificateApi[] = await this.postJson('/findCertificate', { identityKey: this.identityKey, certifiers, types })
+    const rs:DojoCertificateApi[] = await this.postJson('/findCertificates', { identityKey: this.identityKey, certifiers, types })
     for (const r of rs) {
       r.created_at = validateDate(r.created_at)
       r.updated_at = validateDate(r.updated_at)  
