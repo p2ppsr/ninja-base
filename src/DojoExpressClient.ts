@@ -64,6 +64,10 @@ export class DojoExpressClient implements DojoClientApi {
     this.authrite = options?.authrite
   }
 
+  isDojoExpressClient(): boolean {
+    return true
+  }
+
   async destroy(): Promise<void> {
     // Nothing to destroy
   }

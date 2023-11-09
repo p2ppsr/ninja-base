@@ -54,14 +54,14 @@ export class NinjaBase implements NinjaApi {
         publicKey: identityPublicKey
       }
       
-      if (dojo instanceof DojoExpressClient && clientPrivateKey) {
+      if (dojo.isDojoExpressClient() && clientPrivateKey) {
         // Support delayed initialization of authrite with privateKey for use by DojoExpressClient to
         // communicate with DojoExpress.
         const dec = dojo as DojoExpressClient
-        if (!dojo.options.authrite) {
-          const authrite = new AuthriteClient(dojo.serviceUrl, { clientPrivateKey })
-          dojo.options.authrite = authrite
-          dojo.authrite = authrite
+        if (!dec.options.authrite || !dec.authrite) {
+          const authrite = new AuthriteClient(dec.serviceUrl, { clientPrivateKey })
+          dec.options.authrite = authrite
+          dec.authrite = authrite
         }
       }
     }
