@@ -279,7 +279,8 @@ export class NinjaBase implements NinjaApi {
     await processPendingTransactions(this, onTransactionProcessed, onTransactionFailed)
   }
 
-  async getTransactionOutputs (options?: DojoGetTransactionOutputsOptions): Promise<NinjaGetTransactionOutputsResultApi[]> {
+  async getTransactionOutputs (options?: DojoGetTransactionOutputsOptions)
+  : Promise<NinjaGetTransactionOutputsResultApi[]> {
     await this.verifyDojoAuthenticated()
     const r = await this.dojo.getTransactionOutputs(options)
     const gtors: NinjaGetTransactionOutputsResultApi[] = r.outputs
