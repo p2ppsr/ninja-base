@@ -237,7 +237,10 @@ export interface NinjaApi {
   /**
      * Creates and signs a transaction with specified outputs and (by default) processes it.
      * 
-     * By setting `params.autoProcess` to false, it can be processed with `processTransaction`.
+     * By setting `params.autoProcess` to false, it can be processed later with `processTransaction`.
+     * 
+     * If `params.autoProcess` is true (the default), `processTransaction` is called automatically
+     * and merged results are returned.
      *
      * This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing,
      * when you are not providing any non-Dojo inputs.
@@ -246,39 +249,34 @@ export interface NinjaApi {
      * when `params.autoProcess` does not need to change at runtime.
      * 
      * Use this by default, and fall back to `createTransaction` if you need more customization.
-     *
-     * @returns `GetTxWithOutputsResult` if not autoProcess
-     * @returns `GetTxWithOutputsProcessedResult` if autoProcess
      */
   getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams) : Promise<NinjaTransactionWithOutputsResultApi>
 
   /**
+     * This method is equivalent to `getTransactionWithOutputs` with `params.autoProcess` false.
+     * This function ignores `params.autoProcess`
+     *
      * Creates and signs a transaction with specified outputs.
      * 
-     * It can be processed with `processTransaction`.
+     * It can be processed later with `processTransaction`.
      * 
-     * This function ignores `params.autoProcess`
      *
      * This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing,
      * when you are not providing any non-Dojo inputs.
      *
      * Use this by default, and fall back to `createTransaction` if you need more customization.
-     *
-     * @returns `GetTxWithOutputsResult` if not autoProcess
      */
   createTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams) : Promise<NinjaTransactionWithOutputsResultApi>
 
   /**
-     * Creates and signs a transaction with specified outputs and processes it.
-     * 
+     * This method is equivalent to `getTransactionWithOutputs` with `params.autoProcess` true.
      * This function ignores `params.autoProcess`
      *
-     * This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing,
-     * when you are not providing any non-Dojo inputs.
+     * Creates and signs a transaction with specified outputs and processes it.
      *
+     * This is a higher-level wrapper around `createTransaction` and `processTransaction`
+     * so that you do not need to manually handle signing, when you are not providing any non-Dojo inputs.
      * Use this by default, and fall back to `createTransaction` if you need more customization.
-     *
-     * @returns `GetTxWithOutputsProcessedResult` if autoProcess
      */
   processTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams) : Promise<NinjaTransactionWithOutputsResultApi>
 
