@@ -106,7 +106,7 @@ export async function processIncomingTransaction (
     }
 
     if (updateStatus && ptx.referenceNumber) {
-      await dojo.updateTransactionStatus(ptx.referenceNumber, 'completed')
+      await dojo.updateTransactionStatus(ptx.referenceNumber, 'unproven')
     }
 
     if (!derivationPrefix) throw new ERR_INTERNAL('processIncomingTransaction without derivationPrefix')
@@ -134,7 +134,7 @@ export async function processIncomingTransaction (
     }
 
     if (updateStatus && ptx.referenceNumber) {
-      await dojo.updateTransactionStatus(ptx.referenceNumber, 'completed')
+      await dojo.updateTransactionStatus(ptx.referenceNumber, 'unproven')
     }
 
     const returnValue = {

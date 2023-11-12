@@ -4,7 +4,9 @@ import {
   MapiResponseApi, DojoTransactionStatusApi, TscMerkleProofApi, DojoPendingTxApi, DojoTxInputsApi,
   DojoTxInputSelectionApi, DojoCreateTxOutputApi, DojoOutputGenerationApi, DojoFeeModelApi,
   DojoPendingTxInputApi, DojoPendingTxOutputApi, DojoCreateTransactionResultApi,
-  DojoProcessTransactionResultApi, SyncDojoConfigBaseApi, DojoSyncOptionsApi, EnvelopeApi, DojoOutputApi, DojoTransactionApi, DojoGetTransactionLabelsOptions, DojoTxLabelApi
+  DojoProcessTransactionResultApi, SyncDojoConfigBaseApi, DojoSyncOptionsApi,
+  EnvelopeApi, DojoOutputApi, DojoTransactionApi, DojoGetTransactionLabelsOptions,
+  DojoTxLabelApi, DojoProcessTransactionParams
 } from 'cwi-base'
 
 /**
@@ -192,7 +194,10 @@ export interface NinjaApi {
   getPendingTransactions(referenceNumber?: string) : Promise<DojoPendingTxApi[]>
 
   /**
-     * Use this endpoint to update the status of a transaction. This is useful for flagging incomplete transactions as aborted or reverting a completed transaction back into a pending status if it never got confirmed. Setting the status to "completed" or "waitingForSenderToSend" will make any selected UTXOs unavailable for spending, while any other status value will free up the UTXOs for use in other transactions.
+     * Use this endpoint to update the status of a transaction. This is useful for flagging incomplete transactions as aborted
+     * or reverting a completed transaction back into a pending status if it never got confirmed. Setting the status to "completed"
+     * or "unproven" will make any input UTXOs unavailable for spending,
+     * while any other status value will free up the UTXOs for use in other transactions.
      *
      * @param params.reference The Dojo reference number for the transaction
      * @param params.status The new status of the transaction
@@ -219,20 +224,9 @@ export interface NinjaApi {
      * After a transaction is created (with `createTransaction` or with `getTransactionWithOutputs`),
      * submit the serialized raw transaction to transaction processors for processing.
      *
-     * @param params.submittedTransaction The transaction that has been created and signed
-     * @param params.reference The reference number provided by `createTransaction` or `getTransactionWithOutputs`
-     * @param params.outputMap An object whose keys are derivation prefixes
-     *  and whose values are corresponding change output numbers from the transaction.
-     * @param params.inputs Inputs to spend as part of this transaction (only used for doublespend processing)
-     *
      * @returns `DojoProcessTransactionResultApi` with txid and status of 'completed' or 'unknown'
      */
-  processTransaction(params: {
-    submittedTransaction: string | Buffer
-    reference: string
-    outputMap: Record<string, number>
-    inputs?: Record<string, EnvelopeEvidenceApi>
-  }) : Promise<DojoProcessTransactionResultApi>
+  processTransaction(params: DojoProcessTransactionParams) : Promise<DojoProcessTransactionResultApi>
 
   /**
      * Creates and signs a transaction with specified outputs and (by default) processes it.
@@ -495,7 +489,7 @@ export interface NinjaGetTransactionsTxApi {
      */
   amount: number
   /**
-     * The current state of the transaction. Common statuses are `completed` and `waitingForSenderToSend`.
+     * The current state of the transaction. Common statuses are `completed` and `unproven`.
      */
   status: string
   /**
@@ -701,7 +695,7 @@ export interface NinjaGetPendingTransactionsTxApi {
   provenTxId?: number | null
   /**
      * max length of 64
-     * e.g. completed, failed, unprocessed, waitingForSenderToSend
+     * e.g. completed, failed, unprocessed, unproven, unsigned
      */
   status: DojoTransactionStatusApi
   isOutgoing: boolean
@@ -957,4 +951,35 @@ export interface NinjaGetTransactionWithOutputsParams {
      * If both feeModel and feePerKb are specified, feeModel takes precendence
      */
   feeModel?: DojoFeeModelApi
+
+   /**
+    * Set to true for normal, high performance operation and offline
+    * operation if running locally.
+    *
+    * Always validates `submittedTransaction` and remaining inputs.
+    *
+    * If true, creates a self-signed MapiResponse for the transaction
+    * and queues it for repeated broadcast attempts and proof validation.
+    * The `status` of the transaction will be set to `unproven`.
+    * 
+    * If not true, attempts one broadcast and fails the transaction
+    * if it is not accepted by at least one external transaction processor.
+    * If it is accepted, status is set to `unproven'.
+    * The transaction may still fail at a later time if a merkle
+    * proof is not confirmed.
+    *
+    * The transaction status will be set to `completed` or `failed`
+    * depending on the success or failure of broadcast attempts
+    * and Chaintracks validation of a merkle proof.
+    * 
+    * When status is set to `unproven` or `completed`:
+    * - Inputs are confirmed to be spendable false, spentBy this transaction.
+    * - Outputs are set to spendable true unless already spent (spentBy is non-null).
+    *
+    * If the transaction fails, status is set to `failed`:
+    * - Inputs are returned to spendable true, spentBy null
+    * - Outputs are set to spendable false
+    * - If spentBy is non-null, failure propagates to that transaction.
+    */
+   acceptDelayedBroadcast?: boolean
 }

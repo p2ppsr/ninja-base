@@ -8,7 +8,7 @@ import {
   DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi,
   CwiError, ERR_BAD_REQUEST, DojoSyncApi, DojoSyncOptionsApi, DojoSyncIdentifyParams, DojoSyncIdentifyResultApi,
   DojoSyncUpdateParams, DojoSyncUpdateResultApi, DojoSyncMergeParams, DojoSyncMergeResultApi,
-  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate, DojoGetTransactionLabelsOptions, DojoTxLabelApi, DojoOutputTagApi, DojoOutputBasketApi, DojoGetTransactionOutputsResultApi, DojoGetTransactionsResultApi, DojoGetTransactionLabelsResultApi, DojoSubmitDirectTransactionParams, DojoCreateTransactionParams,
+  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate, DojoGetTransactionLabelsOptions, DojoTxLabelApi, DojoOutputTagApi, DojoOutputBasketApi, DojoGetTransactionOutputsResultApi, DojoGetTransactionsResultApi, DojoGetTransactionLabelsResultApi, DojoSubmitDirectTransactionParams, DojoCreateTransactionParams, DojoProcessTransactionParams,
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -274,9 +274,10 @@ export class DojoExpressClient implements DojoClientApi {
     return await this.postJson('/createTransaction', { identityKey: this.identityKey, params })
   }
 
-  async processTransaction (rawTx: string | Buffer, reference: string, outputMap: Record<string, number>): Promise<DojoProcessTransactionResultApi> {
+  async processTransaction (params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> {
     this.verifyAuthenticated()
-    return await this.postJson('/processTransaction', { identityKey: this.identityKey, rawTx: asString(rawTx), reference, outputMap })
+    params.submittedTransaction = asString(params.submittedTransaction)
+    return await this.postJson('/processTransaction', { identityKey: this.identityKey, params })
   }
 
   async submitDirectTransaction (params: DojoSubmitDirectTransactionParams)

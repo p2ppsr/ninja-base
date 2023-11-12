@@ -17,7 +17,7 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
     recipient,
     feePerKb,
     feeModel,
-    lockTime
+    lockTime,
   } = params
   let {
     inputs
@@ -43,7 +43,7 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
     feeModel: feeModel || (feePerKb ? { model: 'sat/kb', value: feePerKb } : undefined),
     labels,
     note,
-    recipient
+    recipient,
   })
 
   const signResult = await signCreatedTransaction(ninja, { inputs, note, lockTime, createResult })
@@ -92,7 +92,8 @@ export async function processTransactionWithOutputs (ninja: NinjaBase, params: N
   const pr = await ninja.processTransaction({
     submittedTransaction: cr.rawTx,
     reference: cr.referenceNumber,
-    outputMap: cr.outputMap
+    outputMap: cr.outputMap,
+    acceptDelayedBroadcast: params.acceptDelayedBroadcast
   })
 
   return {
