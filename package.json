@@ -56,7 +56,7 @@
     "authrite-js": "^0.3.2",
     "authrite-utils": "^0.2.0",
     "babbage-bsv": "^0.2.1",
-    "cwi-base": "^0.3.73",
+    "cwi-base": "^0.3.74",
     "dotenv": "^16.3.1",
     "node-fetch": "^2.6.12",
     "sendover": "^1.1.9"

@@ -79,12 +79,7 @@ export interface NinjaApi {
         spendable: boolean;
     }): Promise<void>;
     processPendingTransactions(onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler): Promise<void>;
-    processTransaction(params: {
-        submittedTransaction: string | Buffer;
-        reference: string;
-        outputMap: Record<string, number>;
-        inputs?: Record<string, EnvelopeEvidenceApi>;
-    }): Promise<DojoProcessTransactionResultApi>;
+    processTransaction(params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi>;
     getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi>;
     createTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi>;
     processTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi>;
@@ -144,11 +139,13 @@ The template you need to sign and process
 
 ##### Method createTransactionWithOutputs
 
+This method is equivalent to `getTransactionWithOutputs` with `params.autoProcess` false.
+This function ignores `params.autoProcess`
+
 Creates and signs a transaction with specified outputs.
 
-It can be processed with `processTransaction`.
+It can be processed later with `processTransaction`.
 
-This function ignores `params.autoProcess`
 
 This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing,
 when you are not providing any non-Dojo inputs.
@@ -158,10 +155,6 @@ Use this by default, and fall back to `createTransaction` if you need more custo
 ```ts
 createTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi>
 ```
-
-Returns
-
-`GetTxWithOutputsResult` if not autoProcess
 
 ##### Method defenestrateOutput
 
@@ -344,7 +337,10 @@ getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<Ninja
 
 Creates and signs a transaction with specified outputs and (by default) processes it.
 
-By setting `params.autoProcess` to false, it can be processed with `processTransaction`.
+By setting `params.autoProcess` to false, it can be processed later with `processTransaction`.
+
+If `params.autoProcess` is true (the default), `processTransaction` is called automatically
+and merged results are returned.
 
 This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing,
 when you are not providing any non-Dojo inputs.
@@ -357,12 +353,6 @@ Use this by default, and fall back to `createTransaction` if you need more custo
 ```ts
 getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi>
 ```
-
-Returns
-
-`GetTxWithOutputsResult` if not autoProcess
-
-`GetTxWithOutputsProcessedResult` if autoProcess
 
 ##### Method getTransactions
 
@@ -415,48 +405,27 @@ After a transaction is created (with `createTransaction` or with `getTransaction
 submit the serialized raw transaction to transaction processors for processing.
 
 ```ts
-processTransaction(params: {
-    submittedTransaction: string | Buffer;
-    reference: string;
-    outputMap: Record<string, number>;
-    inputs?: Record<string, EnvelopeEvidenceApi>;
-}): Promise<DojoProcessTransactionResultApi>
+processTransaction(params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi>
 ```
 
 Returns
 
 `DojoProcessTransactionResultApi` with txid and status of 'completed' or 'unknown'
 
-Argument Details
-
-+ **params.submittedTransaction**
-  + The transaction that has been created and signed
-+ **params.reference**
-  + The reference number provided by `createTransaction` or `getTransactionWithOutputs`
-+ **params.outputMap**
-  + An object whose keys are derivation prefixes
-and whose values are corresponding change output numbers from the transaction.
-+ **params.inputs**
-  + Inputs to spend as part of this transaction (only used for doublespend processing)
-
 ##### Method processTransactionWithOutputs
+
+This method is equivalent to `getTransactionWithOutputs` with `params.autoProcess` true.
+This function ignores `params.autoProcess`
 
 Creates and signs a transaction with specified outputs and processes it.
 
-This function ignores `params.autoProcess`
-
-This is a higher-level wrapper around `createTransaction` so that you do not need to manually handle signing,
-when you are not providing any non-Dojo inputs.
-
+This is a higher-level wrapper around `createTransaction` and `processTransaction`
+so that you do not need to manually handle signing, when you are not providing any non-Dojo inputs.
 Use this by default, and fall back to `createTransaction` if you need more customization.
 
 ```ts
 processTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi>
 ```
-
-Returns
-
-`GetTxWithOutputsProcessedResult` if autoProcess
 
 ##### Method saveCertificate
 
@@ -671,7 +640,10 @@ Argument Details
 
 ##### Method updateTransactionStatus
 
-Use this endpoint to update the status of a transaction. This is useful for flagging incomplete transactions as aborted or reverting a completed transaction back into a pending status if it never got confirmed. Setting the status to "completed" or "waitingForSenderToSend" will make any selected UTXOs unavailable for spending, while any other status value will free up the UTXOs for use in other transactions.
+Use this endpoint to update the status of a transaction. This is useful for flagging incomplete transactions as aborted
+or reverting a completed transaction back into a pending status if it never got confirmed. Setting the status to "completed"
+or "unproven" will make any input UTXOs unavailable for spending,
+while any other status value will free up the UTXOs for use in other transactions.
 
 ```ts
 updateTransactionStatus(params: {
@@ -994,7 +966,7 @@ senderPaymail: string
 
 ##### Property status
 
-The current state of the transaction. Common statuses are `completed` and `waitingForSenderToSend`.
+The current state of the transaction. Common statuses are `completed` and `unproven`.
 
 ```ts
 status: string
@@ -1444,7 +1416,7 @@ senderPaymail: string | undefined | null
 ##### Property status
 
 max length of 64
-e.g. completed, failed, unprocessed, waitingForSenderToSend
+e.g. unprocessed, unsigned
 
 ```ts
 status: DojoTransactionStatusApi
@@ -1842,12 +1814,47 @@ export interface NinjaGetTransactionWithOutputsParams {
     autoProcess?: boolean;
     feePerKb?: number;
     feeModel?: DojoFeeModelApi;
+    acceptDelayedBroadcast?: boolean;
 }
 ```
 
 <details>
 
 <summary>Interface NinjaGetTransactionWithOutputsParams Details</summary>
+
+##### Property acceptDelayedBroadcast
+
+Set to true for normal, high performance operation and offline
+operation if running locally.
+
+Always validates `submittedTransaction` and remaining inputs.
+
+If true, creates a self-signed MapiResponse for the transaction
+and queues it for repeated broadcast attempts and proof validation.
+The `status` of the transaction will be set to `unproven`.
+
+If not true, attempts one broadcast and fails the transaction
+if it is not accepted by at least one external transaction processor.
+If it is accepted, status is set to `unproven'.
+The transaction may still fail at a later time if a merkle
+proof is not confirmed.
+
+The transaction status will be set to `completed` or `failed`
+depending on the success or failure of broadcast attempts
+and Chaintracks validation of a merkle proof.
+
+When status is set to `unproven` or `completed`:
+- Inputs are confirmed to be spendable false, spentBy this transaction.
+- Outputs are set to spendable true unless already spent (spentBy is non-null).
+
+If the transaction fails, status is set to `failed`:
+- Inputs are returned to spendable true, spentBy null
+- Outputs are set to spendable false
+- If spentBy is non-null, failure propagates to that transaction.
+
+```ts
+acceptDelayedBroadcast?: boolean
+```
 
 ##### Property autoProcess
 
@@ -2431,7 +2438,7 @@ export class DojoExpressClient implements DojoClientApi {
     async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<DojoGetTransactionOutputsResultApi> 
     async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<DojoGetTransactionLabelsResultApi> 
     async createTransaction(params: DojoCreateTransactionParams): Promise<DojoCreateTransactionResultApi> 
-    async processTransaction(rawTx: string | Buffer, reference: string, outputMap: Record<string, number>): Promise<DojoProcessTransactionResultApi> 
+    async processTransaction(params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> 
     async submitDirectTransaction(params: DojoSubmitDirectTransactionParams): Promise<DojoSubmitDirectTransactionResultApi> 
     async copyState(): Promise<DojoUserStateApi> 
     async getJsonOrUndefined<T>(path: string): Promise<T | undefined> 
@@ -2530,12 +2537,7 @@ export class NinjaBase implements NinjaApi {
         labels: DojoTxLabelApi[];
         total: number;
     }> 
-    async processTransaction(params: {
-        inputs?: Record<string, EnvelopeEvidenceApi>;
-        submittedTransaction: string | Buffer;
-        reference: string;
-        outputMap: Record<string, number>;
-    }): Promise<DojoProcessTransactionResultApi> 
+    async processTransaction(params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> 
     async getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
     async createTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
     async processTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
