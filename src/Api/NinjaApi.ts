@@ -695,7 +695,7 @@ export interface NinjaGetPendingTransactionsTxApi {
   provenTxId?: number | null
   /**
      * max length of 64
-     * e.g. completed, failed, unprocessed, unproven, unsigned
+     * e.g. unprocessed, unsigned
      */
   status: DojoTransactionStatusApi
   isOutgoing: boolean
