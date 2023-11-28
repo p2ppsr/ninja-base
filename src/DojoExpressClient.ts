@@ -8,7 +8,10 @@ import {
   DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi,
   CwiError, ERR_BAD_REQUEST, DojoSyncApi, DojoSyncOptionsApi, DojoSyncIdentifyParams, DojoSyncIdentifyResultApi,
   DojoSyncUpdateParams, DojoSyncUpdateResultApi, DojoSyncMergeParams, DojoSyncMergeResultApi,
-  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate, DojoGetTransactionLabelsOptions, DojoTxLabelApi, DojoOutputTagApi, DojoOutputBasketApi, DojoGetTransactionOutputsResultApi, DojoGetTransactionsResultApi, DojoGetTransactionLabelsResultApi, DojoSubmitDirectTransactionParams, DojoCreateTransactionParams, DojoProcessTransactionParams,
+  restoreUserStateEntities, DojoIdentityApi, SyncDojoConfigBaseApi, validateDate, DojoGetTransactionLabelsOptions,
+  DojoTxLabelApi, DojoOutputTagApi, DojoOutputBasketApi, DojoGetTransactionOutputsResultApi, DojoGetTransactionsResultApi,
+  DojoGetTransactionLabelsResultApi, DojoSubmitDirectTransactionParams, DojoCreateTransactionParams,
+  DojoProcessTransactionParams, verifyBufferOrObjectOrNull,
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -222,6 +225,7 @@ export class DojoExpressClient implements DojoClientApi {
     for (const r of results.txs) {
       r.created_at = validateDate(r.created_at)
       r.updated_at = validateDate(r.updated_at)  
+      r.rawTransaction = verifyBufferOrObjectOrNull(r.rawTransaction)
     }
     return results
   }
@@ -243,6 +247,7 @@ export class DojoExpressClient implements DojoClientApi {
     for (const r of results.outputs) {
       r.created_at = validateDate(r.created_at)
       r.updated_at = validateDate(r.updated_at)  
+      r.outputScript = verifyBufferOrObjectOrNull(r.outputScript)
       if (r.basket) {
         r.basket.created_at = validateDate(r.basket.created_at)
         r.basket.updated_at = validateDate(r.basket.updated_at)  
