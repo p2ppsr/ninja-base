@@ -2106,6 +2106,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [DojoExpressClient](#class-dojoexpressclient) |
 | [DojoTxBuilder](#class-dojotxbuilder) |
 | [DojoTxBuilderBase](#class-dojotxbuilderbase) |
+| [ERR_NINJA_INVALID_UNLOCK](#class-err_ninja_invalid_unlock) |
+| [ERR_NINJA_MISSING_UNLOCK](#class-err_ninja_missing_unlock) |
 | [Ninja](#class-ninja) |
 | [NinjaBase](#class-ninjabase) |
 | [NinjaTxBuilder](#class-ninjatxbuilder) |
@@ -2351,6 +2353,32 @@ validate(noThrow = false): {
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+#### Class: ERR_NINJA_INVALID_UNLOCK
+
+Unlocking script for vin ${vin} (${txid}.${vout}) of new transaction is invalid.
+
+```ts
+export class ERR_NINJA_INVALID_UNLOCK extends CwiError {
+    constructor(public vin: number, public txid: string, public vout: number) 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Class: ERR_NINJA_MISSING_UNLOCK
+
+Unlocking script for vin ${vin} of new transaction is invalid.
+
+```ts
+export class ERR_NINJA_MISSING_UNLOCK extends CwiError {
+    constructor(vin: number) 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 #### Class: NinjaTxBuilder
 
 NinjaTxBuilder is intended to complement DojoTxBuilder, implementing the signing functions
@@ -2374,13 +2402,44 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
         outputMap: Record<string, number>;
         amount: number;
     } 
-    static buildJsTx(ninja: NinjaApi, inputs: Record<string, NinjaTxInputsApi>, txInputs: Record<string, DojoCreatingTxInputsApi>, txOutputs: DojoCreatingTxOutputApi[], derivationPrefix: string, paymailHandle?: string, lockTime?: number): {
+    static buildJsTx(ninja: NinjaApi, ninjaInputs: Record<string, NinjaTxInputsApi>, dojoInputs: Record<string, DojoCreatingTxInputsApi>, dojoOutputs: DojoCreatingTxOutputApi[], derivationPrefix: string, paymailHandle?: string, lockTime?: number): {
         tx: bsvJs.Transaction;
         outputMap: Record<string, number>;
         amount: number;
     } 
 }
 ```
+
+<details>
+
+<summary>Class NinjaTxBuilder Details</summary>
+
+##### Method buildJsTx
+
+```ts
+static buildJsTx(ninja: NinjaApi, ninjaInputs: Record<string, NinjaTxInputsApi>, dojoInputs: Record<string, DojoCreatingTxInputsApi>, dojoOutputs: DojoCreatingTxOutputApi[], derivationPrefix: string, paymailHandle?: string, lockTime?: number): {
+    tx: bsvJs.Transaction;
+    outputMap: Record<string, number>;
+    amount: number;
+} 
+```
+
+Returns
+
+new signed bitcoin transaction, output map, an impact amount on authority's balance
+
+Argument Details
+
++ **ninja**
+  + The authority constructing this new transaction
++ **ninjaInputs**
+  + External inputs to be added not known to ninja's dojo.
++ **dojoInputs**
+  + Inputs to be added that are known to ninja's dojo.
++ **dojoOutputs**
+  + All new outputs to be created
+
+</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -2598,6 +2657,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | |
 | --- |
+| [convertToDojoTxInputsApi](#function-converttodojotxinputsapi) |
 | [createTransactionWithOutputs](#function-createtransactionwithoutputs) |
 | [getTransactionWithOutputs](#function-gettransactionwithoutputs) |
 | [invoice3241645161d8](#function-invoice3241645161d8) |
@@ -2606,6 +2666,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [processTransactionWithOutputs](#function-processtransactionwithoutputs) |
 | [signCreatedTransaction](#function-signcreatedtransaction) |
 | [submitDirectTransaction](#function-submitdirecttransaction) |
+| [validateUnlockScript](#function-validateunlockscript) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -2663,6 +2724,26 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export async function processPendingTransactions(ninja: NinjaBase, onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler, onOutgoingTransaction?: NinjaOutgoingTransactionHandler): Promise<void> 
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Function: validateUnlockScript
+
+```ts
+export function validateUnlockScript(txToValidate: bsv.Tx, vin: number, lockingScript: Buffer, amount: number): boolean 
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Function: convertToDojoTxInputsApi
+
+Convert NinjaTxInputsApi to DojoTxInputsApi to protect unlocking scripts.
+
+```ts
+export function convertToDojoTxInputsApi(inputs: Record<string, NinjaTxInputsApi>): Record<string, DojoTxInputsApi> 
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
