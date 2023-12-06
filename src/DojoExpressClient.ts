@@ -313,7 +313,7 @@ export class DojoExpressClient implements DojoClientApi {
   }
 
   handleError<T>(s: FetchStatus<T>, path: string) : void {
-    if (s.error) {
+    if (s.status === 'success' && s.error) {
       const e = CwiError.fromUnknown(JSON.parse(s.error))
       throw e
     } else {
@@ -344,7 +344,7 @@ export class DojoExpressClient implements DojoClientApi {
       throw err
     }
 
-    if (s.status === 'success') {
+    if (s.status === 'success' && !s.error) {
       return s.value
     }
 
