@@ -2502,6 +2502,7 @@ export class DojoExpressClient implements DojoClientApi {
     async copyState(): Promise<DojoUserStateApi> 
     async getJsonOrUndefined<T>(path: string): Promise<T | undefined> 
     async getJson<T>(path: string): Promise<T> 
+    handleError<T>(s: FetchStatus<T>, path: string): void 
     async postJsonOrUndefined<T, R>(path: string, params: T, noAuth?: boolean): Promise<R | undefined> 
     async postJson<T, R>(path: string, params: T, noAuth?: boolean): Promise<R> 
     async postJsonVoid<T>(path: string, params: T, noAuth?: boolean): Promise<void> 
