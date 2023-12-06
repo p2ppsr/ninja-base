@@ -3,9 +3,26 @@ import {
   NinjaGetTransactionWithOutputsParams,
   NinjaSignCreatedTransactionParams,
   NinjaTransactionWithOutputsResultApi,
+  NinjaTxInputsApi,
 } from '../Api/NinjaApi'
 import { NinjaTxBuilder } from '../NinjaTxBuilder'
 import { DojoTxInputsApi } from 'cwi-base'
+
+/**
+ * Convert NinjaTxInputsApi to DojoTxInputsApi to protect unlocking scripts.
+ */
+export function convertToDojoTxInputsApi(inputs: Record<string, NinjaTxInputsApi>) : Record<string, DojoTxInputsApi> {
+  const dojoInputs: Record<string, DojoTxInputsApi> = Object.fromEntries(Object.entries(inputs).map(([k, v]) => ([k, {
+    ...v,
+    // Calculate unlockingScriptLength from unlockingScript
+    outputsToRedeem: v.outputsToRedeem.map(x => ({
+      unlockingScriptLength: x.unlockingScript.length / 2,
+      index: x.index,
+      sequenceNumber: x.sequenceNumber
+    }))
+  }])))
+  return dojoInputs
+}
 
 export async function createTransactionWithOutputs (ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams)
 : Promise<NinjaTransactionWithOutputsResultApi>
@@ -23,22 +40,10 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
     inputs
   } = params
 
-  const dojo = ninja.dojo
   inputs ||= {}
 
-  // Convert NinjaTxInputsApi to DojoTxInputsApi to protect unlocking scripts.
-  const dojoInputs: Record<string, DojoTxInputsApi> = Object.fromEntries(Object.entries(inputs).map(([k, v]) => ([k, {
-    ...v,
-    // Calculate unlockingScriptLength from unlockingScript
-    outputsToRedeem: v.outputsToRedeem.map(x => ({
-      unlockingScriptLength: x.unlockingScript.length / 2,
-      index: x.index,
-      sequenceNumber: x.sequenceNumber
-    }))
-  }])))
-
-  const createResult = await dojo.createTransaction({
-    inputs: dojoInputs,
+  const createResult = await ninja.dojo.createTransaction({
+    inputs: convertToDojoTxInputsApi(inputs),
     outputs,
     feeModel: feeModel || (feePerKb ? { model: 'sat/kb', value: feePerKb } : undefined),
     labels,
