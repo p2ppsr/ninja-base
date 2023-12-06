@@ -2,12 +2,18 @@
 import bsvJs from 'babbage-bsv'
 import { getPaymentAddress, getPaymentPrivateKey } from 'sendover'
 
-import { DojoCreateTransactionResultApi, DojoCreatingTxInputsApi, DojoCreatingTxOutputApi, DojoPendingTxApi, ERR_INVALID_PARAMETER, ERR_NOT_IMPLEMENTED, verifyTruthy } from 'cwi-base'
+import {
+  DojoCreateTransactionResultApi, DojoCreatingTxInputsApi, DojoCreatingTxOutputApi,
+  DojoPendingTxApi,
+  ERR_INVALID_PARAMETER, ERR_NOT_IMPLEMENTED,
+  bsv, asBsvTx, verifyTruthy
+} from 'cwi-base'
 
-import { NinjaApi, NinjaTxInputsApi } from './Api/NinjaApi'
+import { KeyPairApi, NinjaApi, NinjaTxInputsApi } from './Api/NinjaApi'
 import { NinjaBase } from './Base/NinjaBase'
 import { DojoTxBuilderBase, DojoTxBuilderBaseOptions } from './Base/DojoTxBuilderBase'
 import { invoice3241645161d8 } from './invoice'
+import { ERR_NINJA_INVALID_UNLOCK, ERR_NINJA_MISSING_UNLOCK } from './ERR_NINJA_errors'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface NinjaTxBuilderOptions extends DojoTxBuilderBaseOptions {
@@ -57,11 +63,21 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     return this.buildJsTx(ninja, inputs, txInputs, txOutputs, derivationPrefix, paymailHandle, lockTime)
   }
 
+  /**
+   * @param ninja The authority constructing this new transaction
+   * @param ninjaInputs External inputs to be added not known to ninja's dojo.
+   * @param dojoInputs Inputs to be added that are known to ninja's dojo.
+   * @param dojoOutputs All new outputs to be created
+   * @param derivationPrefix 
+   * @param paymailHandle 
+   * @param lockTime 
+   * @returns new signed bitcoin transaction, output map, an impact amount on authority's balance
+   */
   static buildJsTx (
     ninja: NinjaApi,
-    inputs: Record<string, NinjaTxInputsApi>,
-    txInputs: Record<string, DojoCreatingTxInputsApi>,
-    txOutputs: DojoCreatingTxOutputApi[],
+    ninjaInputs: Record<string, NinjaTxInputsApi>,
+    dojoInputs: Record<string, DojoCreatingTxInputsApi>,
+    dojoOutputs: DojoCreatingTxOutputApi[],
     derivationPrefix: string,
     paymailHandle?: string,
     lockTime?: number
@@ -74,35 +90,38 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
 
     const tx = new bsvJs.Transaction()
 
-    const outputMap = {}
+    const outputMap: Record<string, number> = {}
 
-    txOutputs.forEach((out, i) => {
+    dojoOutputs.forEach((out, i) => {
+      // Add requested outputs to new bitcoin transaction tx
+
+      let lockingScript
+
       if (out.providedBy === 'dojo' && out.purpose === 'change') {
-        // Derive a change output script
-        // Get derivation invoice data
+
+        // Derive a change output locking script
         const derivationSuffix = verifyTruthy(out.derivationSuffix)
+
         outputMap[derivationSuffix] = i
-        const invoiceNumber = invoice3241645161d8(derivationPrefix, derivationSuffix, paymailHandle)
-        // Derive the public key used for creating the output script
-        const derivedAddress = getPaymentAddress({
-          senderPrivateKey: changeKeys.privateKey,
-          recipientPublicKey: changeKeys.publicKey,
-          invoiceNumber,
-          returnType: 'address'
-        })
-        // Create an output script that can only be unlocked with the corresponding derived private key
-        tx.addOutput(new bsvJs.Transaction.Output({
-          script: new bsvJs.Script(
-            bsvJs.Script.fromAddress(derivedAddress)
-          ),
-          satoshis: out.satoshis
-        }))
+
+        lockingScript = generateLockingScriptType3241645161d8(
+          changeKeys, derivationPrefix, derivationSuffix, paymailHandle
+        )
+
       } else {
-        tx.addOutput(new bsvJs.Transaction.Output({
-          script: new bsvJs.Script(out.script),
-          satoshis: out.satoshis
-        }))
+
+        // Add transaction output with external supplied locking script.
+        lockingScript = new bsvJs.Script(out.script)
+
       }
+
+      const newOutput = new bsvJs.Transaction.Output({
+        script: lockingScript,
+        satoshis: out.satoshis
+      })
+
+      tx.addOutput(newOutput)
+
     })
 
     const getIndex = (o: (number | { index: number })): number => {
@@ -113,13 +132,31 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
       }
     }
 
+    const unlockScriptsToVerify: {
+      lockingScript: Buffer,
+      vin: number,
+      amount: number
+    }[] = []
+
     // Add inputs, and sum input amounts
     let totalInputs = 0
-    for (const [inputTXID, input] of Object.entries(txInputs)) {
-      const t = new bsvJs.Transaction(input.rawTx)
+    for (const [inputTXID, input] of Object.entries(dojoInputs)) {
+      // For each transaction supplying inputs...
+
+      const txInput = new bsvJs.Transaction(input.rawTx) // transaction referenced by input "outpoint" (txid,vout)
+      
       for (const otr of input.outputsToRedeem) {
+        // For each output being redeemed from that input transaction
+
         const otrIndex = getIndex(otr)
-        const otrOutput = t.outputs[otrIndex]
+        const otrOutput = txInput.outputs[otrIndex] // the bitcoin transaction output being spent by new transaction
+
+        unlockScriptsToVerify.push({
+          lockingScript: otrOutput.script.toBuffer(),
+          vin: unlockScriptsToVerify.length,
+          amount: otrOutput.satoshis
+        })
+
         // Add utxo as new input...
         tx.from(bsvJs.Transaction.UnspentOutput({
           txid: inputTXID,
@@ -129,9 +166,10 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
           scriptPubKey: otrOutput.script,
           satoshis: otrOutput.satoshis
         }))
+
         // All foreign input scripts are added unchanged
         // Find this input in original inputs to recover the already signed unlocking script
-        const otrNinja = inputs[t.id]?.outputsToRedeem.find(x => x.index === getIndex(otr))
+        const otrNinja = ninjaInputs[txInput.id]?.outputsToRedeem.find(x => x.index === getIndex(otr))
         if ((otrNinja != null) && otrNinja.unlockingScript) {
           const txInput = tx.inputs[tx.inputs.length - 1]
           txInput.setScript(bsvJs.Script.fromHex(otrNinja.unlockingScript))
@@ -155,7 +193,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     }
 
     //  Sign inputs using type42 derived key
-    for (const input of Object.values(txInputs)) {
+    for (const input of Object.values(dojoInputs)) {
       for (const otr of input.outputsToRedeem) {
         const otrIndex = getIndex(otr)
         const instructions = input.instructions ? input.instructions[otrIndex] : undefined
@@ -181,9 +219,21 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
       }
     }
 
+    // Verify unlocking scripts
+    const rawTx = tx.uncheckedSerialize()
+    const txToValidate = asBsvTx(rawTx)
+    txToValidate.txIns.forEach((txin, i) => {
+      const vus = unlockScriptsToVerify.find(v => v.vin === i)
+      if (!vus)
+        throw new ERR_NINJA_MISSING_UNLOCK(i)
+      const ok = validateUnlockScript(txToValidate, vus.vin, vus.lockingScript, vus.amount)
+      if (!ok)
+        throw new ERR_NINJA_INVALID_UNLOCK(vus.vin, txin.txid(), txin.txOutNum)
+    })
+
     // The amount is the total of non-foreign inputs minus change outputs
     // Note that the amount can be negative when we are redeeming more inputs than we are spending
-    const amount = totalInputs - txOutputs
+    const amount = totalInputs - dojoOutputs
       .filter(x => x.purpose === 'change')
       .reduce((acc, el) => acc + el.satoshis, 0)
 
@@ -198,3 +248,45 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     }
   }
 }
+
+function generateLockingScriptType3241645161d8(keyPair: KeyPairApi, derivationPrefix: string, derivationSuffix: string, paymailHandle?: string) {
+  const invoiceNumber = invoice3241645161d8(derivationPrefix, derivationSuffix, paymailHandle)
+  // Derive the public key used for creating the output script
+  const derivedAddress = getPaymentAddress({
+    senderPrivateKey: keyPair.privateKey,
+    recipientPublicKey: keyPair.publicKey,
+    invoiceNumber,
+    returnType: 'address'
+  })
+  // Create an output script that can only be unlocked with the corresponding derived private key
+  const lockingScript = bsvJs.Script.fromAddress(derivedAddress)
+  return lockingScript
+}
+
+export function validateUnlockScript(
+    txToValidate: bsv.Tx,
+    vin: number,
+    lockingScript: Buffer,
+    amount: number
+) : boolean
+{
+    const input = txToValidate.txIns[vin];
+    const scriptSig = input.script;
+    const scriptPubKey = bsv.Script.fromBuffer(lockingScript)
+    const valid = new bsv.Interp().verify(
+        scriptSig,
+        scriptPubKey,
+        txToValidate,
+        vin,
+        (bsv.Interp.SCRIPT_ENABLE_SIGHASH_FORKID
+            // Neither of these fags exist in 2023 bitcoin-sv
+            // Both signal that additional restored op codes were enabled.
+            // They are now? And these flags aren't needed?
+            // | bsv.Interp.SCRIPT_ENABLE_MAGNETIC_OPCODES
+            // | bsv.Interp.SCRIPT_ENABLE_MONOLITH_OPCODES
+        ),
+        new bsv.Bn(amount)
+    );
+    return valid
+}
+
