@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Chain, DojoAvatarApi, DojoCertificateApi, DojoClientApi, DojoClientUserApi, DojoCreateTransactionResultApi,
-  DojoCreateTxOutputApi, DojoFeeModelApi, DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions,
-  DojoGetTransactionsOptions, DojoOutputApi, DojoOutputGenerationApi, DojoPendingTxApi, DojoStatsApi,
-  DojoSubmitDirectTransactionApi, DojoSubmitDirectTransactionResultApi, DojoTransactionApi, DojoTransactionStatusApi,
-  DojoTxInputSelectionApi, DojoTxInputsApi, ERR_CHAIN, ERR_INTERNAL, ERR_UNAUTHORIZED, EnvelopeApi,
+  DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions,
+  DojoGetTransactionsOptions, DojoOutputApi, DojoPendingTxApi, DojoStatsApi,
+  DojoSubmitDirectTransactionResultApi, DojoTransactionApi, DojoTransactionStatusApi,
+  ERR_CHAIN, ERR_INTERNAL, ERR_UNAUTHORIZED, EnvelopeApi,
   DojoProcessTransactionResultApi, ERR_INVALID_PARAMETER, asString, DojoUserStateApi,
   CwiError, ERR_BAD_REQUEST, DojoSyncApi, DojoSyncOptionsApi, DojoSyncIdentifyParams, DojoSyncIdentifyResultApi,
   DojoSyncUpdateParams, DojoSyncUpdateResultApi, DojoSyncMergeParams, DojoSyncMergeResultApi,
@@ -20,6 +20,7 @@ import fetch from 'node-fetch'
 
 interface FetchStatus<T> {
   status: 'success' | 'error'
+  error?: string,
   code?: string
   description?: string
   value?: T
@@ -311,6 +312,16 @@ export class DojoExpressClient implements DojoClientApi {
     return r
   }
 
+  handleError<T>(s: FetchStatus<T>, path: string) : void {
+    if (s.error) {
+      const e = CwiError.fromUnknown(JSON.parse(s.error))
+      throw e
+    } else {
+      const e = new CwiError(s.code || 'ERR_BAD_REQUEST', s.description || `path=${path} status=${s.status}`)
+      throw e
+    }
+  }
+
   async postJsonOrUndefined<T, R>(path: string, params: T, noAuth?: boolean): Promise<R | undefined> {
     let s: FetchStatus<R>
     try {
@@ -327,14 +338,17 @@ export class DojoExpressClient implements DojoClientApi {
         })
         s = await r.json() as FetchStatus<R>
       }
-      if (s.status === 'success') { return s.value }
-      throw new ERR_BAD_REQUEST(`path=${path} status=${s.status}`)
     } catch (eu: unknown) {
       const err = CwiError.fromUnknown(eu)
       err.description += `  <<path>> ${path}`
-      // console.log(`Exception: ${JSON.stringify(err)}`)
       throw err
     }
+
+    if (s.status === 'success') {
+      return s.value
+    }
+
+    this.handleError(s, path)
   }
 
   async postJson<T, R>(path: string, params: T, noAuth?: boolean): Promise<R> {

@@ -6,7 +6,8 @@ import {
   NinjaTxInputsApi,
 } from '../Api/NinjaApi'
 import { NinjaTxBuilder } from '../NinjaTxBuilder'
-import { DojoTxInputsApi } from 'cwi-base'
+import { CwiError, DojoTxInputsApi } from 'cwi-base'
+import { ERR_NINJA_INVALID_UNLOCK } from '../ERR_NINJA_errors'
 
 /**
  * Convert NinjaTxInputsApi to DojoTxInputsApi to protect unlocking scripts.
@@ -51,9 +52,21 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
     recipient,
   })
 
-  const signResult = await signCreatedTransaction(ninja, { inputs, note, lockTime, createResult })
+  let r: NinjaTransactionWithOutputsResultApi
+  
+  try {
+    r = await signCreatedTransaction(ninja, { inputs, note, lockTime, createResult })
+  } catch(eu: unknown) {
+    const e = CwiError.fromUnknown(eu)
+    await ninja.dojo.updateTransactionStatus(createResult.referenceNumber, 'failed')
+    if (e.code === 'ERR_NINJA_INVALID_UNLOCK') {
+      const ed = eu as ERR_NINJA_INVALID_UNLOCK
+      await ninja.dojo.updateOutpointStatus(ed.txid, ed.vout, false)
+    }
+    throw eu
+  }
 
-  return signResult
+  return r
 }
 
 export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSignCreatedTransactionParams)
