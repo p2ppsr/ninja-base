@@ -30,9 +30,7 @@
     "lint": "ts-standard src/**/*.ts",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "tonpm": "npm run tonone && npm i authrite-js authrite-utils cwi-base --silent",
-    "tonone": "npm remove authrite-js authrite-utils cwi-base --silent"
+    "test:coverage": "jest --coverage"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.1",
