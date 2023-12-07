@@ -67,6 +67,14 @@ export class NinjaBase implements NinjaApi {
           dec.authrite = authrite
         }
       }
+    } else if (authrite) {
+
+      console.log(`construct NinjaBase for identityKey ${this.getClientChangeKeyPair().publicKey} from authrite`)
+
+    } else {
+
+      console.log(`construct NinjaBase without authentication`)
+
     }
 
     this._isDojoAuthenticated = false
@@ -88,12 +96,20 @@ export class NinjaBase implements NinjaApi {
   }
 
   async authenticate (identityKey?: string, addIfNew?: boolean): Promise<void> {
+    if (this._isDojoAuthenticated && identityKey) {
+      const currentIdentity = this.getClientChangeKeyPair().publicKey
+      if (currentIdentity !== identityKey)
+        throw new ERR_BAD_REQUEST(`Attempted Ninja authenticate with identityKey ${identityKey} over ${currentIdentity}`)
+    }
+
     identityKey ||= this.getClientChangeKeyPair().publicKey
 
     await this.dojo.authenticate(identityKey, addIfNew)
     const user = await this.dojo.getUser()
     this.userId = verifyId(user.userId)
     this._isDojoAuthenticated = true
+
+    console.log(`NinjaBase authenticated as ${identityKey} ${this.userId}`)
   }
 
   async verifyDojoAuthenticated () {
