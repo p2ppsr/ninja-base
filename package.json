@@ -51,12 +51,12 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "authrite-js": "^0.3.6",
-    "authrite-utils": "^0.2.1",
-    "babbage-bsv": "^0.2.1",
-    "cwi-base": "^0.3.90",
+    "authrite-js": "^0.3.7",
+    "authrite-utils": "^0.2.2",
+    "babbage-bsv": "^0.2.2",
+    "cwi-base": "^0.3.91",
     "dotenv": "^16.3.1",
     "node-fetch": "^2.6.12",
-    "sendover": "^1.1.17"
+    "sendover": "^1.1.18"
   }
 }
