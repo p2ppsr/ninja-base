@@ -17,7 +17,7 @@ import {
   DojoTransactionStatusApi,
   DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl, DojoOutputTagApi,
   DojoTxLabelApi, DojoOutputApi, DojoTransactionApi,
-  DojoGetTransactionLabelsOptions, EnvelopeEvidenceApi, CwiError, DojoProcessTransactionParams,
+  DojoGetTransactionLabelsOptions, EnvelopeEvidenceApi, CwiError, DojoProcessTransactionParams, identityKeyFromPrivateKey,
 } from 'cwi-base'
 
 import {
@@ -49,6 +49,9 @@ export class NinjaBase implements NinjaApi {
     if (clientPrivateKey) {
       const privKey = new bsv.PrivKey(new bsv.Bn(clientPrivateKey, 'hex'), true)
       const identityPublicKey = bsv.PubKey.fromPrivKey(privKey).toDer(true).toString('hex')
+
+      console.log(`construct NinjaBase for identityKey ${identityPublicKey} from private key`)
+
       this._keyPair = {
         privateKey: clientPrivateKey,
         publicKey: identityPublicKey

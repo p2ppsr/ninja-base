@@ -31,8 +31,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "tonpm": "npm run tonone && npm i cwi-base --silent",
-    "tonone": "npm remove cwi-base --silent"
+    "tonpm": "npm run tonone && npm i authrite-js authrite-utils cwi-base --silent",
+    "tonone": "npm remove authrite-js authrite-utils cwi-base --silent"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.1",
@@ -53,10 +53,10 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "authrite-js": "^0.3.4",
+    "authrite-js": "^0.3.6",
     "authrite-utils": "^0.2.1",
     "babbage-bsv": "^0.2.1",
-    "cwi-base": "^0.3.89",
+    "cwi-base": "^0.3.90",
     "dotenv": "^16.3.1",
     "node-fetch": "^2.6.12",
     "sendover": "^1.1.9"
