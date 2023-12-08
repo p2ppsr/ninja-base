@@ -7,7 +7,7 @@
  */
 export function invoice3241645161d8 (prefix: string, suffix: string, paymail?: string): string {
   const protocol = invoice3241645161d8Protocol
-  const invoice = paymail
+  const invoice = paymail && !paymail.startsWith('undefined')
     ? `${protocol}-${paymail} ${prefix} ${suffix}`
     : `${protocol}-${prefix} ${suffix}`
   return invoice
