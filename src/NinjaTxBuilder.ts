@@ -63,6 +63,207 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     return this.buildJsTx(ninja, inputs, txInputs, txOutputs, derivationPrefix, paymailHandle, lockTime)
   }
 
+  static buildTxFromCreateTransactionResult (
+    ninja: NinjaApi,
+    inputs: Record<string, NinjaTxInputsApi>,
+    createResult: DojoCreateTransactionResultApi,
+    lockTime?: number
+  ): {
+      tx: bsv.Tx
+      outputMap: Record<string, number>
+      amount: number
+    } {
+    const {
+      inputs: txInputs,
+      outputs: txOutputs,
+      derivationPrefix,
+      paymailHandle
+    } = createResult
+
+    return this.buildTx(ninja, inputs, txInputs, txOutputs, derivationPrefix, paymailHandle, lockTime)
+  }
+
+  /**
+   * @param ninja The authority constructing this new transaction
+   * @param ninjaInputs External inputs to be added not known to ninja's dojo.
+   * @param dojoInputs Inputs to be added that are known to ninja's dojo.
+   * @param dojoOutputs All new outputs to be created
+   * @param derivationPrefix 
+   * @param paymailHandle 
+   * @param lockTime 
+   * @returns new signed bitcoin transaction, output map, an impact amount on authority's balance
+   */
+  static buildTx (
+    ninja: NinjaApi,
+    ninjaInputs: Record<string, NinjaTxInputsApi>,
+    dojoInputs: Record<string, DojoCreatingTxInputsApi>,
+    dojoOutputs: DojoCreatingTxOutputApi[],
+    derivationPrefix: string,
+    paymailHandle?: string,
+    lockTime?: number
+  ): {
+      tx: bsv.Tx
+      outputMap: Record<string, number>
+      amount: number
+    } {
+    const changeKeys = ninja.getClientChangeKeyPair()
+
+    const tx = new bsv.Tx()
+
+    const outputMap: Record<string, number> = {}
+
+    dojoOutputs.forEach((out, i) => {
+      // Add requested outputs to new bitcoin transaction tx
+
+      let lockingScript: bsv.Script
+
+      if (out.providedBy === 'dojo' && out.purpose === 'change') {
+
+        // Derive a change output locking script
+        const derivationSuffix = verifyTruthy(out.derivationSuffix)
+
+        outputMap[derivationSuffix] = i
+
+        lockingScript = generateLockingScriptType3241645161d8Js(
+          changeKeys, derivationPrefix, derivationSuffix, paymailHandle
+        )
+
+      } else {
+
+        // Add transaction output with external supplied locking script.
+        lockingScript = bsv.Script.fromHex(out.script)
+
+      }
+
+      const newOutput = new bsv.TxOut(new bsv.Bn(out.satoshis), undefined, lockingScript)
+
+      tx.addTxOut(newOutput)
+
+    })
+
+    const getIndex = (o: (number | { index: number })): number => {
+      if (typeof o === 'object') {
+        return o.index
+      } else {
+        return o
+      }
+    }
+
+    const unlockScriptsToVerify: {
+      lockingScript: Buffer,
+      vin: number,
+      amount: number
+    }[] = []
+
+    // Add inputs, and sum input amounts
+    let totalInputs = 0
+    for (const [inputTXID, input] of Object.entries(dojoInputs)) {
+      // For each transaction supplying inputs...
+
+      const txInput = new bsvJs.Transaction(input.rawTx) // transaction referenced by input "outpoint" (txid,vout)
+      
+      for (const otr of input.outputsToRedeem) {
+        // For each output being redeemed from that input transaction
+
+        const otrIndex = getIndex(otr)
+        const otrOutput = txInput.outputs[otrIndex] // the bitcoin transaction output being spent by new transaction
+
+        unlockScriptsToVerify.push({
+          lockingScript: otrOutput.script.toBuffer(),
+          vin: unlockScriptsToVerify.length,
+          amount: otrOutput.satoshis
+        })
+
+        // Add utxo as new input...
+        tx.from(bsvJs.Transaction.UnspentOutput({
+          txid: inputTXID,
+          outputIndex: otrIndex,
+          // scruptPubKey a.k.a. lockingScript or outputScript
+          // (whereas scriptSig a.k.a. unlockingScript or inputScript)
+          scriptPubKey: otrOutput.script,
+          satoshis: otrOutput.satoshis
+        }))
+
+        // All foreign input scripts are added unchanged
+        // Find this input in original inputs to recover the already signed unlocking script
+        const otrNinja = ninjaInputs[txInput.id]?.outputsToRedeem.find(x => x.index === getIndex(otr))
+        if ((otrNinja != null) && otrNinja.unlockingScript) {
+          const txInput = tx.inputs[tx.inputs.length - 1]
+          txInput.setScript(bsvJs.Script.fromHex(otrNinja.unlockingScript))
+          // This overrides an abstract method on custom input types,
+          // indicating that the entire unlocking script is already present for
+          // this foreign input, and no new signatures are ever needed.
+          txInput.getSignatures = () => ([])
+          // Set a custom sequence number, if provided
+          if (typeof otrNinja.sequenceNumber === 'number') {
+            txInput.sequenceNumber = otrNinja.sequenceNumber
+          }
+        } else { // All non-foreign inputs are summed
+          totalInputs += otrOutput.satoshis
+        }
+      }
+    }
+
+    // Set a custom lock time if provided
+    if (typeof lockTime === 'number') {
+      tx.nLockTime = lockTime
+    }
+
+    //  Sign inputs using type42 derived key
+    for (const input of Object.values(dojoInputs)) {
+      for (const otr of input.outputsToRedeem) {
+        const otrIndex = getIndex(otr)
+        const instructions = input.instructions ? input.instructions[otrIndex] : undefined
+        if (instructions != null) {
+          // Make sure the transaction type is supported
+          if (instructions.type !== 'P2PKH') throw new ERR_INVALID_PARAMETER(`instructions.type "${instructions.type}" is not a supported unlocking script type.`)
+
+          // Get derivation invoice data
+          const paymailHandle = instructions.paymailHandle
+          const derivationPrefix = verifyTruthy(instructions.derivationPrefix)
+          const derivationSuffix = verifyTruthy(instructions.derivationSuffix)
+
+          const invoiceNumber = invoice3241645161d8(derivationPrefix, derivationSuffix, paymailHandle)
+
+          // Derive the key used to unlock funds
+          const derivedPrivateKey = getPaymentPrivateKey({
+            recipientPrivateKey: changeKeys.privateKey,
+            senderPublicKey: instructions.senderIdentityKey,
+            invoiceNumber
+          })
+          tx.sign(bsvJs.PrivateKey.fromWIF(derivedPrivateKey))
+        }
+      }
+    }
+
+    // Verify unlocking scripts
+    const rawTx = tx.uncheckedSerialize()
+    const txToValidate = asBsvTx(rawTx)
+    txToValidate.txIns.forEach((txin, i) => {
+      const vus = unlockScriptsToVerify.find(v => v.vin === i)
+      if (!vus)
+        throw new ERR_NINJA_MISSING_UNLOCK(i)
+      const ok = validateUnlockScript(txToValidate, vus.vin, vus.lockingScript, vus.amount)
+      if (!ok)
+        throw new ERR_NINJA_INVALID_UNLOCK(vus.vin, txin.txid(), txin.txOutNum)
+    })
+
+    // The amount is the total of non-foreign inputs minus change outputs
+    // Note that the amount can be negative when we are redeeming more inputs than we are spending
+    const amount = totalInputs - dojoOutputs
+      .filter(x => x.purpose === 'change')
+      .reduce((acc, el) => acc + el.satoshis, 0)
+
+    // The following have not yet been set, default values:
+    // tx.version = 1
+    // tx.nLockTime =  0
+
+    return {
+      tx,
+      outputMap,
+      amount
+    }
+  }
   /**
    * @param ninja The authority constructing this new transaction
    * @param ninjaInputs External inputs to be added not known to ninja's dojo.
@@ -104,7 +305,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
 
         outputMap[derivationSuffix] = i
 
-        lockingScript = generateLockingScriptType3241645161d8(
+        lockingScript = generateLockingScriptType3241645161d8Js(
           changeKeys, derivationPrefix, derivationSuffix, paymailHandle
         )
 
@@ -249,7 +450,23 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
   }
 }
 
-function generateLockingScriptType3241645161d8(keyPair: KeyPairApi, derivationPrefix: string, derivationSuffix: string, paymailHandle?: string) {
+function generateLockingScriptType3241645161d8(keyPair: KeyPairApi, derivationPrefix: string, derivationSuffix: string, paymailHandle?: string)
+: bsv.Script
+{
+  const invoiceNumber = invoice3241645161d8(derivationPrefix, derivationSuffix, paymailHandle)
+  // Derive the public key used for creating the output script
+  const derivedAddress = getPaymentAddress({
+    senderPrivateKey: keyPair.privateKey,
+    recipientPublicKey: keyPair.publicKey,
+    invoiceNumber,
+    returnType: 'address'
+  })
+  // Create an output script that can only be unlocked with the corresponding derived private key
+  const lockingScript = bsvJs.Script.fromAddress(derivedAddress)
+  return lockingScript
+}
+
+function generateLockingScriptType3241645161d8Js(keyPair: KeyPairApi, derivationPrefix: string, derivationSuffix: string, paymailHandle?: string) {
   const invoiceNumber = invoice3241645161d8(derivationPrefix, derivationSuffix, paymailHandle)
   // Derive the public key used for creating the output script
   const derivedAddress = getPaymentAddress({
