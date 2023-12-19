@@ -6,7 +6,7 @@ import {
   DojoCreateTransactionResultApi, DojoCreatingTxInputsApi, DojoCreatingTxOutputApi,
   DojoPendingTxApi,
   ERR_INVALID_PARAMETER, ERR_NOT_IMPLEMENTED,
-  bsv, asBsvTx, verifyTruthy
+  bsv, asBsvTx, verifyTruthy, asBuffer
 } from 'cwi-base'
 
 import { KeyPairApi, NinjaApi, NinjaTxInputsApi } from './Api/NinjaApi'
@@ -48,11 +48,12 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     inputs: Record<string, NinjaTxInputsApi>,
     createResult: DojoCreateTransactionResultApi,
     lockTime?: number
-  ): {
-      tx: bsvJs.Transaction
-      outputMap: Record<string, number>
-      amount: number
-    } {
+  ) : {
+    tx: bsvJs.Transaction
+    outputMap: Record<string, number>
+    amount: number
+  }
+  {
     const {
       inputs: txInputs,
       outputs: txOutputs,
@@ -68,11 +69,11 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     inputs: Record<string, NinjaTxInputsApi>,
     createResult: DojoCreateTransactionResultApi,
     lockTime?: number
-  ): {
-      tx: bsv.Tx
-      outputMap: Record<string, number>
-      amount: number
-    } {
+  ) : {
+    tx: bsv.Tx
+    outputMap: Record<string, number>
+    amount: number
+  } {
     const {
       inputs: txInputs,
       outputs: txOutputs,
@@ -152,7 +153,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     const unlockScriptsToVerify: {
       lockingScript: Buffer,
       vin: number,
-      amount: number
+      amount: bsv.Bn
     }[] = []
 
     // Add inputs, and sum input amounts
@@ -160,46 +161,40 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     for (const [inputTXID, input] of Object.entries(dojoInputs)) {
       // For each transaction supplying inputs...
 
-      const txInput = new bsvJs.Transaction(input.rawTx) // transaction referenced by input "outpoint" (txid,vout)
+      const txInput = bsv.Tx.fromHex(input.rawTx) // transaction referenced by input "outpoint" (txid,vout)
       
       for (const otr of input.outputsToRedeem) {
         // For each output being redeemed from that input transaction
 
         const otrIndex = getIndex(otr)
-        const otrOutput = txInput.outputs[otrIndex] // the bitcoin transaction output being spent by new transaction
+        const otrOutput = txInput.txOuts[otrIndex] // the bitcoin transaction output being spent by new transaction
 
         unlockScriptsToVerify.push({
           lockingScript: otrOutput.script.toBuffer(),
           vin: unlockScriptsToVerify.length,
-          amount: otrOutput.satoshis
+          amount: otrOutput.valueBn
         })
 
         // Add utxo as new input...
-        tx.from(bsvJs.Transaction.UnspentOutput({
-          txid: inputTXID,
-          outputIndex: otrIndex,
-          // scruptPubKey a.k.a. lockingScript or outputScript
-          // (whereas scriptSig a.k.a. unlockingScript or inputScript)
-          scriptPubKey: otrOutput.script,
-          satoshis: otrOutput.satoshis
-        }))
+        const nSequenceForInput = 0
+        tx.addTxIn(asBuffer(inputTXID), otrIndex, otrOutput.script, nSequenceForInput)
 
         // All foreign input scripts are added unchanged
         // Find this input in original inputs to recover the already signed unlocking script
-        const otrNinja = ninjaInputs[txInput.id]?.outputsToRedeem.find(x => x.index === getIndex(otr))
+        const otrNinja = ninjaInputs[txInput.id()]?.outputsToRedeem.find(x => x.index === getIndex(otr))
         if ((otrNinja != null) && otrNinja.unlockingScript) {
-          const txInput = tx.inputs[tx.inputs.length - 1]
-          txInput.setScript(bsvJs.Script.fromHex(otrNinja.unlockingScript))
+          const txInput = tx.txIns[tx.txIns.length - 1]
+          txInput.setScript(bsv.Script.fromHex(otrNinja.unlockingScript))
           // This overrides an abstract method on custom input types,
           // indicating that the entire unlocking script is already present for
           // this foreign input, and no new signatures are ever needed.
           txInput.getSignatures = () => ([])
           // Set a custom sequence number, if provided
           if (typeof otrNinja.sequenceNumber === 'number') {
-            txInput.sequenceNumber = otrNinja.sequenceNumber
+            txInput.nSequence = otrNinja.sequenceNumber
           }
         } else { // All non-foreign inputs are summed
-          totalInputs += otrOutput.satoshis
+          totalInputs += otrOutput.valueBn.toNumber()
         }
       }
     }
@@ -231,6 +226,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
             senderPublicKey: instructions.senderIdentityKey,
             invoiceNumber
           })
+          tx.sign()
           tx.sign(bsvJs.PrivateKey.fromWIF(derivedPrivateKey))
         }
       }
