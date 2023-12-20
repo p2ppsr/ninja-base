@@ -68,6 +68,11 @@ export class DojoExpressClient implements DojoClientApi {
     this.authrite = options?.authrite
   }
 
+  getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> {
+    // TODONOW
+    throw new Error('Method not implemented.')
+  }
+
   isDojoExpressClient(): boolean {
     return true
   }
