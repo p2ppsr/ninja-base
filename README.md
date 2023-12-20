@@ -2458,6 +2458,7 @@ export class DojoExpressClient implements DojoClientApi {
     get isAuthenticated(): boolean 
     syncDojoConfig?: SyncDojoConfigBaseApi;
     constructor(public chain: Chain, public serviceUrl: string, options?: DojoExpressClientOptions) 
+    getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> 
     isDojoExpressClient(): boolean 
     async destroy(): Promise<void> 
     async getChain(): Promise<Chain> 
