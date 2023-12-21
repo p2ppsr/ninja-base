@@ -2458,7 +2458,6 @@ export class DojoExpressClient implements DojoClientApi {
     get isAuthenticated(): boolean 
     syncDojoConfig?: SyncDojoConfigBaseApi;
     constructor(public chain: Chain, public serviceUrl: string, options?: DojoExpressClientOptions) 
-    getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> 
     isDojoExpressClient(): boolean 
     async destroy(): Promise<void> 
     async getChain(): Promise<Chain> 
@@ -2495,6 +2494,7 @@ export class DojoExpressClient implements DojoClientApi {
     async getTransactions(options?: DojoGetTransactionsOptions): Promise<DojoGetTransactionsResultApi> 
     async getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]> 
     async getEnvelopeForTransaction(txid: string): Promise<EnvelopeApi | undefined> 
+    async getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> 
     async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<DojoGetTransactionOutputsResultApi> 
     async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<DojoGetTransactionLabelsResultApi> 
     async createTransaction(params: DojoCreateTransactionParams): Promise<DojoCreateTransactionResultApi> 
