@@ -17,7 +17,7 @@ import {
   DojoTransactionStatusApi,
   DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl, DojoOutputTagApi,
   DojoTxLabelApi, DojoOutputApi, DojoTransactionApi,
-  DojoGetTransactionLabelsOptions, EnvelopeEvidenceApi, CwiError, DojoProcessTransactionParams, identityKeyFromPrivateKey,
+  DojoGetTransactionLabelsOptions, EnvelopeEvidenceApi, CwiError, DojoProcessTransactionParams, identityKeyFromPrivateKey, EnvelopeApi,
 } from 'cwi-base'
 
 import {
@@ -414,9 +414,14 @@ export class NinjaBase implements NinjaApi {
 
   async submitDirectTransaction (params: NinjaSubmitDirectTransactionParams): Promise<NinjaSubmitDirectTransactionResultApi> {
     await this.verifyDojoAuthenticated()
-    
     const r = await submitDirectTransaction(this, params)
-    
     return r
   }
+
+  async getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> {
+    await this.verifyDojoAuthenticated()
+    const r = await this.dojo.getEnvelopesOfConflictingTransactions(txid)
+    return r
+  }
+
 }
