@@ -92,6 +92,7 @@ export interface NinjaApi {
     untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void>;
     unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void>;
     defenestrateOutput(partial: Partial<DojoOutputApi>): Promise<void>;
+    getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]>;
 }
 ```
 
@@ -224,6 +225,22 @@ Return the private / public keypair used by the Ninja client for change UTXOs
 ```ts
 getClientChangeKeyPair(): KeyPairApi
 ```
+
+##### Method getEnvelopesOfConflictingTransactions
+
+Returns array of Everett Style envelopes for transactions that spend one or
+more of the inputs to transaction with `txid`, which must exist in Dojo.
+
+This method supports double spend resolution.
+
+```ts
+getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]>
+```
+
+Argument Details
+
++ **txid**
+  + double hash of raw transaction as hex string
 
 ##### Method getNetOfAmounts
 
@@ -2611,6 +2628,7 @@ export class NinjaBase implements NinjaApi {
     async defenestrateOutput(partial: Partial<DojoOutputApi>): Promise<void> 
     async unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void> 
     async submitDirectTransaction(params: NinjaSubmitDirectTransactionParams): Promise<NinjaSubmitDirectTransactionResultApi> 
+    async getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> 
 }
 ```
 
