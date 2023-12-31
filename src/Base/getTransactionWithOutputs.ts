@@ -6,7 +6,7 @@ import {
   NinjaTxInputsApi,
 } from '../Api/NinjaApi'
 import { NinjaTxBuilder } from '../NinjaTxBuilder'
-import { CwiError, DojoTxInputsApi } from 'cwi-base'
+import { CwiError, DojoCreateTransactionParams, DojoTxInputsApi, validateInputSelection } from 'cwi-base'
 import { ERR_NINJA_INVALID_UNLOCK } from '../ERR_NINJA_errors'
 
 /**
@@ -43,14 +43,21 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
 
   inputs ||= {}
 
-  const createResult = await ninja.dojo.createTransaction({
+  const params2: DojoCreateTransactionParams = {
     inputs: convertToDojoTxInputsApi(inputs),
     outputs,
     feeModel: feeModel || (feePerKb ? { model: 'sat/kb', value: feePerKb } : undefined),
     labels,
     note,
     recipient,
-  })
+  }
+  if (params.acceptDelayedBroadcast) {
+    // Create inputSelection with default properties
+    params2.inputSelection = validateInputSelection(undefined)
+    // Include transaction outputs from transactions still waiting to be sent.
+    params2.inputSelection.includeSending = true
+  }
+  const createResult = await ninja.dojo.createTransaction(params2)
 
   let r: NinjaTransactionWithOutputsResultApi
   
