@@ -395,7 +395,7 @@ export interface NinjaCreateTransactionParams {
      * If Dojo needs to select more inputs beyond what you provided in the `inputs` parameter,
      * this parameter describes which kinds of inputs can be selected, and from where.
      */
-  inputSelection: DojoTxInputSelectionApi
+  inputSelection?: DojoTxInputSelectionApi
   /**
      * External outputs that you will include when you create this transaction.
      * These outputs can contain custom scripts as specified by recipients.
@@ -416,12 +416,12 @@ export interface NinjaCreateTransactionParams {
      * "single" just uses one output, randomly selected from the available types,
      * that contains all the satoshis.
      */
-  outputGeneration: DojoOutputGenerationApi
+  outputGeneration?: DojoOutputGenerationApi
   /**
      * When the fee model is "sat/kb", this is the number of satoshis per kilobyte of block space
      * that the transaction will pay.
      */
-  fee: DojoFeeModelApi
+  fee?: DojoFeeModelApi
   /**
      * The labels to affix to this transaction
      */
