@@ -688,10 +688,10 @@ Input parameters to createTransaction method.
 ```ts
 export interface NinjaCreateTransactionParams {
     inputs: Record<string, DojoTxInputsApi>;
-    inputSelection: DojoTxInputSelectionApi;
+    inputSelection?: DojoTxInputSelectionApi;
     outputs: DojoCreateTxOutputApi[];
-    outputGeneration: DojoOutputGenerationApi;
-    fee: DojoFeeModelApi;
+    outputGeneration?: DojoOutputGenerationApi;
+    fee?: DojoFeeModelApi;
     labels: string[];
     note?: string;
     recipient?: string;
@@ -708,7 +708,7 @@ When the fee model is "sat/kb", this is the number of satoshis per kilobyte of b
 that the transaction will pay.
 
 ```ts
-fee: DojoFeeModelApi
+fee?: DojoFeeModelApi
 ```
 
 ##### Property inputSelection
@@ -717,7 +717,7 @@ If Dojo needs to select more inputs beyond what you provided in the `inputs` par
 this parameter describes which kinds of inputs can be selected, and from where.
 
 ```ts
-inputSelection: DojoTxInputSelectionApi
+inputSelection?: DojoTxInputSelectionApi
 ```
 
 ##### Property inputs
@@ -762,7 +762,7 @@ then uses Benford's law to distribute the satoshis across them.
 that contains all the satoshis.
 
 ```ts
-outputGeneration: DojoOutputGenerationApi
+outputGeneration?: DojoOutputGenerationApi
 ```
 
 ##### Property outputs
