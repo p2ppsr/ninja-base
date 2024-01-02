@@ -818,6 +818,7 @@ export interface NinjaSubmitDirectTransactionOutputApi {
  */
 export interface NinjaSubmitDirectTransactionApi {
   rawTx: string
+  txid?: string
   inputs?: Record<string, EnvelopeEvidenceApi>
   mapiResponses?: MapiResponseApi[]
   proof?: TscMerkleProofApi
