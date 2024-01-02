@@ -73,5 +73,12 @@ function validateSubmitDirectTransactionPrams (params: NinjaSubmitDirectTransact
     }
   }
 
+  if (params.derivationPrefix) {
+    if (params.derivationPrefix !== firstDerivationPrefix) throw new ERR_INTERNAL()
+  } else {
+    if (!firstDerivationPrefix) throw new ERR_INTERNAL()
+    params.derivationPrefix = firstDerivationPrefix
+  }
+
   return params
 }
