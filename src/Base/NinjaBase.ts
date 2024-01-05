@@ -393,22 +393,33 @@ export class NinjaBase implements NinjaApi {
     await this.dojo.unlabelTransaction(txid, label)
   }
 
-  async tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> {
+  async tagOutput(output: { txid: string, vout: number }, tag: string): Promise<void> {
     await this.verifyDojoAuthenticated()
+    const partial: Partial<DojoOutputApi> = {
+      txid: output.txid,
+      vout: output.vout,
+      userId: this.userId
+    }
     await this.dojo.tagOutput(partial, tag)
   }
 
-  async untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> {
+  async untagOutput(output: { txid: string, vout: number }, tag: string): Promise<void> {
     await this.verifyDojoAuthenticated()
+    const partial: Partial<DojoOutputApi> = {
+      txid: output.txid,
+      vout: output.vout,
+      userId: this.userId
+    }
     await this.dojo.untagOutput(partial, tag)
   }
     
-  async defenestrateOutput(partial: Partial<DojoOutputApi>): Promise<void> {
-    await this.unbasketOutput(partial)
-  }
-
-  async unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void> {
+  async unbasketOutput(output: { txid: string, vout: number }): Promise<void> {
     await this.verifyDojoAuthenticated()
+    const partial: Partial<DojoOutputApi> = {
+      txid: output.txid,
+      vout: output.vout,
+      userId: this.userId
+    }
     await this.dojo.unbasketOutput(partial)
   }
 
