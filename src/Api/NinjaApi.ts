@@ -5,7 +5,7 @@ import {
   DojoTxInputSelectionApi, DojoCreateTxOutputApi, DojoOutputGenerationApi, DojoFeeModelApi,
   DojoPendingTxInputApi, DojoPendingTxOutputApi, DojoCreateTransactionResultApi,
   DojoProcessTransactionResultApi, SyncDojoConfigBaseApi, DojoSyncOptionsApi,
-  EnvelopeApi, DojoOutputApi, DojoTransactionApi, DojoGetTransactionLabelsOptions,
+  EnvelopeApi, DojoTransactionApi, DojoGetTransactionLabelsOptions,
   DojoTxLabelApi, DojoProcessTransactionParams
 } from 'cwi-base'
 
@@ -337,7 +337,7 @@ export interface NinjaApi {
     * @param partial unique output identifier as a partial pattern. 
     * @param tag the tag to add, will be created if it doesn't already exist
     */
-   tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void>
+   tagOutput(output: { txid: string, vout: number }, tag: string): Promise<void>
 
    /**
     * Removes a tag from an output
@@ -349,7 +349,7 @@ export interface NinjaApi {
     * @param partial unique output identifier as a partial pattern. 
     * @param tag the tag to be removed from the output
     */
-   untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void>
+   untagOutput(output: { txid: string, vout: number }, tag: string): Promise<void>
 
    /**
     * Removes the uniquely identified output's basket assignment.
@@ -358,14 +358,8 @@ export interface NinjaApi {
     * 
     * This is typically only useful for outputs that are no longer usefull.
     *
-    * @param partial unique output identifier as a partial pattern. 
     */
-   unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void>
-
-   /**
-    * If you have to ask you shouldn't be calling this method...
-    */
-   defenestrateOutput(partial: Partial<DojoOutputApi>): Promise<void>
+   unbasketOutput(output: { txid: string, vout: number }): Promise<void>
 
    /**
     * Returns array of Everett Style envelopes for transactions that spend one or
