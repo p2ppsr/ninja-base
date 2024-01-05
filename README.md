@@ -88,10 +88,18 @@ export interface NinjaApi {
     deleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number>;
     labelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void>;
     unlabelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void>;
-    tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void>;
-    untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void>;
-    unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void>;
-    defenestrateOutput(partial: Partial<DojoOutputApi>): Promise<void>;
+    tagOutput(output: {
+        txid: string;
+        vout: number;
+    }, tag: string): Promise<void>;
+    untagOutput(output: {
+        txid: string;
+        vout: number;
+    }, tag: string): Promise<void>;
+    unbasketOutput(output: {
+        txid: string;
+        vout: number;
+    }): Promise<void>;
     getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]>;
 }
 ```
@@ -155,14 +163,6 @@ Use this by default, and fall back to `createTransaction` if you need more custo
 
 ```ts
 createTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi>
-```
-
-##### Method defenestrateOutput
-
-If you have to ask you shouldn't be calling this method...
-
-```ts
-defenestrateOutput(partial: Partial<DojoOutputApi>): Promise<void>
 ```
 
 ##### Method deleteCertificate
@@ -569,7 +569,10 @@ Creates new tag if necessary.
 Adds tag to output if not already tagged.
 
 ```ts
-tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void>
+tagOutput(output: {
+    txid: string;
+    vout: number;
+}, tag: string): Promise<void>
 ```
 
 Argument Details
@@ -588,13 +591,11 @@ The output will no longer belong to any basket.
 This is typically only useful for outputs that are no longer usefull.
 
 ```ts
-unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void>
+unbasketOutput(output: {
+    txid: string;
+    vout: number;
+}): Promise<void>
 ```
-
-Argument Details
-
-+ **partial**
-  + unique output identifier as a partial pattern.
 
 ##### Method unlabelTransaction
 
@@ -624,7 +625,10 @@ Validates user is authenticated, partial identifies a single output, and tag alr
 Does nothing if output is not tagged.
 
 ```ts
-untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void>
+untagOutput(output: {
+    txid: string;
+    vout: number;
+}, tag: string): Promise<void>
 ```
 
 Argument Details
@@ -2624,10 +2628,18 @@ export class NinjaBase implements NinjaApi {
     async deleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number> 
     async labelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> 
     async unlabelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> 
-    async tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> 
-    async untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> 
-    async defenestrateOutput(partial: Partial<DojoOutputApi>): Promise<void> 
-    async unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void> 
+    async tagOutput(output: {
+        txid: string;
+        vout: number;
+    }, tag: string): Promise<void> 
+    async untagOutput(output: {
+        txid: string;
+        vout: number;
+    }, tag: string): Promise<void> 
+    async unbasketOutput(output: {
+        txid: string;
+        vout: number;
+    }): Promise<void> 
     async submitDirectTransaction(params: NinjaSubmitDirectTransactionParams): Promise<NinjaSubmitDirectTransactionResultApi> 
     async getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> 
 }
