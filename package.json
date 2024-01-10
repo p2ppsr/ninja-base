@@ -30,7 +30,8 @@
     "lint": "ts-standard src/**/*.ts",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "doc": "ts2md"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.1",

@@ -59,25 +59,24 @@ function validateSubmitDirectTransactionPrams (params: NinjaSubmitDirectTransact
   })
 
   // Validate each output
-  let firstDerivationPrefix: string | undefined
-  for (const i in params.transaction.outputs) {
-    const out = params.transaction.outputs[i]
+  // SABPPP needs derivationPrefix, and derivationSuffix
+  if (params.protocol === '3241645161d8') {
+    let firstDerivationPrefix: string | undefined
 
-    // SABPPP needs derivationPrefix, and derivationSuffix
-    if (params.protocol === '3241645161d8') {
+    // A derivation prefix must be present for the Payment Protocol
+    if (!params.derivationPrefix) {
+      throw new ERR_INTERNAL()
+    }
+
+    // Check that the derivation prefix is common for all outputs
+    for (const i in params.transaction.outputs) {
+      const out = params.transaction.outputs[i]
       if (typeof out.derivationPrefix !== 'string' || typeof out.derivationSuffix !== 'string') { throw new ERR_INVALID_PARAMETER('transaction.outputs', 'have derivationPrefix and derivationSuffix strings') }
-
       if (!firstDerivationPrefix) firstDerivationPrefix = out.derivationPrefix
-
       if (out.derivationPrefix !== firstDerivationPrefix) { throw new ERR_INVALID_PARAMETER('transaction.outputs', 'have the same derivationPrefix') }
     }
-  }
 
-  if (params.derivationPrefix) {
     if (params.derivationPrefix !== firstDerivationPrefix) throw new ERR_INTERNAL()
-  } else {
-    if (!firstDerivationPrefix) throw new ERR_INTERNAL()
-    params.derivationPrefix = firstDerivationPrefix
   }
 
   return params

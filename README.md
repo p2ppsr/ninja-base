@@ -1631,7 +1631,7 @@ export interface NinjaSubmitDirectTransactionOutputApi {
     basket?: string;
     derivationPrefix?: string;
     derivationSuffix?: string;
-    customInstructions?: object;
+    customInstructions?: string;
 }
 ```
 
