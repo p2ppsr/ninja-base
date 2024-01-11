@@ -2538,7 +2538,7 @@ export class DojoExpressClient implements DojoClientApi {
     async unlabelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> 
     async tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> 
     async untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> 
-    async unbasketOutput(partial: Partial<DojoOutputApi>, basket: string): Promise<void> 
+    async unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void> 
 }
 ```
 
