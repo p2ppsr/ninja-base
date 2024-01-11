@@ -805,6 +805,7 @@ export interface NinjaSubmitDirectTransactionOutputApi {
   derivationPrefix?: string
   derivationSuffix?: string
   customInstructions?: string
+  senderIdentityKey?: string
 }
 
 /**
@@ -831,7 +832,7 @@ export interface NinjaSubmitDirectTransactionParams {
      * Specify the transaction submission payment protocol to use.
      * Currently, the only supported protocol is that with BRFC ID "3241645161d8"
      */
-  protocol: string
+  protocol?: string
   /**
      * The transaction envelope to submit, including key derivation information.
      *
