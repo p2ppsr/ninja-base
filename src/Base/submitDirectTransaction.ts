@@ -71,13 +71,13 @@ function validateSubmitDirectTransactionPrams (params: NinjaSubmitDirectTransact
       if (out.derivationPrefix !== firstDerivationPrefix) { throw new ERR_INVALID_PARAMETER('transaction.outputs', 'have the same derivationPrefix') }
     }
 
-    if (params.derivationPrefix !== firstDerivationPrefix) throw new ERR_INTERNAL()
-
     // A derivation prefix must be present for the Payment Protocol
     if (!params.derivationPrefix) {
       if (!firstDerivationPrefix) throw new ERR_INTERNAL()
       params.derivationPrefix = firstDerivationPrefix
     }
+
+    if (params.derivationPrefix !== firstDerivationPrefix) throw new ERR_INTERNAL()
 
   }
 
