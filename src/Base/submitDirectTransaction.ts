@@ -63,11 +63,6 @@ function validateSubmitDirectTransactionPrams (params: NinjaSubmitDirectTransact
   if (params.protocol === '3241645161d8') {
     let firstDerivationPrefix: string | undefined
 
-    // A derivation prefix must be present for the Payment Protocol
-    if (!params.derivationPrefix) {
-      throw new ERR_INTERNAL()
-    }
-
     // Check that the derivation prefix is common for all outputs
     for (const i in params.transaction.outputs) {
       const out = params.transaction.outputs[i]
@@ -77,6 +72,13 @@ function validateSubmitDirectTransactionPrams (params: NinjaSubmitDirectTransact
     }
 
     if (params.derivationPrefix !== firstDerivationPrefix) throw new ERR_INTERNAL()
+
+    // A derivation prefix must be present for the Payment Protocol
+    if (!params.derivationPrefix) {
+      if (!firstDerivationPrefix) throw new ERR_INTERNAL()
+      params.derivationPrefix = firstDerivationPrefix
+    }
+
   }
 
   return params
