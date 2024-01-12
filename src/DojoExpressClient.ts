@@ -388,26 +388,26 @@ export class DojoExpressClient implements DojoClientApi {
 
   async labelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> {
     this.verifyAuthenticated()
-    return await this.postJson('/labelTransaction', { identityKey: this.identityKey, txid, label })
+    await this.postJsonVoid('/labelTransaction', { identityKey: this.identityKey, txid, label })
   }
 
   async unlabelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> {
     this.verifyAuthenticated()
-    return await this.postJson('/unlabelTransaction', { identityKey: this.identityKey, txid, label })
+    await this.postJsonVoid('/unlabelTransaction', { identityKey: this.identityKey, txid, label })
   }
 
   async tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> {
     this.verifyAuthenticated()
-    return await this.postJson('/tagOutput', { identityKey: this.identityKey, partial, tag })
+    await this.postJsonVoid('/tagOutput', { identityKey: this.identityKey, partial, tag })
   }
 
   async untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> {
     this.verifyAuthenticated()
-    return await this.postJson('/untagOutput', { identityKey: this.identityKey, partial, tag })
+    await this.postJsonVoid('/untagOutput', { identityKey: this.identityKey, partial, tag })
   }
 
   async unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void> {
     this.verifyAuthenticated()
-    return await this.postJson('/unbasketOutput', { identityKey: this.identityKey, partial })
+    await this.postJsonVoid('/unbasketOutput', { identityKey: this.identityKey, partial })
   }
 }
