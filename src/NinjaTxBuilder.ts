@@ -228,7 +228,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
         throw new ERR_NINJA_MISSING_UNLOCK(i)
       const ok = validateUnlockScript(txToValidate, vus.vin, vus.lockingScript, vus.amount)
       if (!ok)
-        throw new ERR_NINJA_INVALID_UNLOCK(vus.vin, txin.txid(), txin.txOutNum)
+        throw new ERR_NINJA_INVALID_UNLOCK(vus.vin, txin.txid(), txin.txOutNum, rawTx)
     })
 
     // The amount is the total of non-foreign inputs minus change outputs
