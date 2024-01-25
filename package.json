@@ -52,8 +52,8 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "authrite-js": "^0.3.22",
-    "authrite-utils": "^0.2.18",
+    "authrite-js": "^0.3.24",
+    "authrite-utils": "^0.2.19",
     "babbage-bsv": "^0.2.4",
     "cwi-base": "^0.3.103",
     "dotenv": "^16.3.1",
