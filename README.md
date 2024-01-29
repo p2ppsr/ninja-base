@@ -1519,7 +1519,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 #### Interface: NinjaGetTransactionOutputsResultApi
 
 ```ts
-export interface NinjaGetTransactionOutputsResultApi {
+export interface NinjaGetTransactionOutputsResultApi extends GetTransactionOutputResult {
     txid: string;
     vout: number;
     amount: number;
@@ -1625,7 +1625,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 #### Interface: NinjaSubmitDirectTransactionOutputApi
 
 ```ts
-export interface NinjaSubmitDirectTransactionOutputApi {
+export interface NinjaSubmitDirectTransactionOutputApi extends SubmitDirectTransactionOutput {
     vout: number;
     satoshis: number;
     basket?: string;
@@ -1645,7 +1645,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 Transaction input parameter to submitDirectTransaction method.
 
 ```ts
-export interface NinjaSubmitDirectTransactionApi {
+export interface NinjaSubmitDirectTransactionApi extends SubmitDirectTransaction {
     rawTx: string;
     txid?: string;
     inputs?: Record<string, EnvelopeEvidenceApi>;
@@ -1759,7 +1759,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 #### Interface: NinjaSubmitDirectTransactionResultApi
 
 ```ts
-export interface NinjaSubmitDirectTransactionResultApi {
+export interface NinjaSubmitDirectTransactionResultApi extends SubmitDirectTransactionResult {
     transactionId: number;
     referenceNumber: string;
 }
