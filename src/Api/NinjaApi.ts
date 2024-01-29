@@ -1,3 +1,4 @@
+import { GetTransactionOutputResult, SubmitDirectTransaction, SubmitDirectTransactionOutput, SubmitDirectTransactionResult } from '@babbage/sdk-ts'
 import {
   Chain, CwiError, DojoAvatarApi, DojoCertificateApi, DojoClientApi, EnvelopeEvidenceApi,
   DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions, DojoGetTransactionsOptions,
@@ -755,7 +756,7 @@ export interface TxOutputApi {
 /**
  *
  */
-export interface NinjaGetTransactionOutputsResultApi {
+export interface NinjaGetTransactionOutputsResultApi extends GetTransactionOutputResult {
    /**
     * Transaction ID of transaction that created the output
     */
@@ -798,7 +799,7 @@ export interface NinjaGetTransactionOutputsResultApi {
    tags?: string[]
 }
 
-export interface NinjaSubmitDirectTransactionOutputApi {
+export interface NinjaSubmitDirectTransactionOutputApi extends SubmitDirectTransactionOutput {
   vout: number
   satoshis: number
   basket?: string
@@ -812,7 +813,7 @@ export interface NinjaSubmitDirectTransactionOutputApi {
 /**
  * Transaction input parameter to submitDirectTransaction method.
  */
-export interface NinjaSubmitDirectTransactionApi {
+export interface NinjaSubmitDirectTransactionApi extends SubmitDirectTransaction {
   rawTx: string
   txid?: string
   inputs?: Record<string, EnvelopeEvidenceApi>
@@ -866,7 +867,7 @@ export interface NinjaSubmitDirectTransactionParams {
   amount?: number
 }
 
-export interface NinjaSubmitDirectTransactionResultApi {
+export interface NinjaSubmitDirectTransactionResultApi extends SubmitDirectTransactionResult {
   transactionId: number
   referenceNumber: string
 }

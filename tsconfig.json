@@ -20,6 +20,7 @@
   "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules", "jest.config.ts"],
   "references": [
+     { "path": "../babbage-sdk-ts" },
      { "path": "../cwi-base" }
   ]
 }
