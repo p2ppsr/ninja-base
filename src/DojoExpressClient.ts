@@ -17,6 +17,7 @@ import {
 import { AuthriteClient } from 'authrite-js'
 
 import fetch from 'node-fetch'
+import { stampLog } from 'cwi-base'
 
 interface FetchStatus<T> {
   status: 'success' | 'error'
@@ -282,13 +283,19 @@ export class DojoExpressClient implements DojoClientApi {
   async createTransaction (params: DojoCreateTransactionParams)
   : Promise<DojoCreateTransactionResultApi> {
     this.verifyAuthenticated()
-    return await this.postJson('/createTransaction', { identityKey: this.identityKey, params })
+    params.log = stampLog(params.log, 'start dojo client createTransaction')
+    const r = <DojoCreateTransactionResultApi>await this.postJson('/createTransaction', { identityKey: this.identityKey, params })
+    r.log = stampLog(r.log, 'end dojo client createTransaction')
+    return r
   }
 
   async processTransaction (params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> {
     this.verifyAuthenticated()
+    params.log = stampLog(params.log, 'start dojo client createTransaction')
     params.submittedTransaction = asString(params.submittedTransaction)
-    return await this.postJson('/processTransaction', { identityKey: this.identityKey, params })
+    const r = <DojoProcessTransactionResultApi>await this.postJson('/processTransaction', { identityKey: this.identityKey, params })
+    r.log = stampLog(r.log, 'end dojo client processTransaction')
+    return r
   }
 
   async submitDirectTransaction (params: DojoSubmitDirectTransactionParams)
