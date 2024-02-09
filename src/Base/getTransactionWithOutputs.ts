@@ -6,7 +6,7 @@ import {
   NinjaTxInputsApi,
 } from '../Api/NinjaApi'
 import { NinjaTxBuilder } from '../NinjaTxBuilder'
-import { CwiError, DojoCreateTransactionParams, DojoTxInputsApi, validateInputSelection } from 'cwi-base'
+import { CwiError, DojoCreateTransactionParams, DojoTxInputsApi, stampLog, validateInputSelection } from 'cwi-base'
 import { ERR_NINJA_INVALID_UNLOCK } from '../ERR_NINJA_errors'
 
 /**
@@ -50,6 +50,7 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
     labels,
     note,
     recipient,
+    log: stampLog(params.log, "start ninja createTransactionWithOutputs")
   }
   if (params.acceptDelayedBroadcast) {
     // Create inputSelection with default properties
@@ -60,6 +61,8 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
   const createResult = await ninja.dojo.createTransaction(params2)
 
   let r: NinjaTransactionWithOutputsResultApi
+
+  createResult.log = stampLog(createResult.log, '... ninja createTransactionWithOutputs signing transaction')
   
   try {
     r = await signCreatedTransaction(ninja, { inputs, note, lockTime, createResult })
@@ -73,6 +76,8 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
     throw eu
   }
 
+  r.log = stampLog(r.log, "end ninja createTransactionWithOutputs")
+
   return r
 }
 
@@ -81,7 +86,7 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
 {
   const { inputs, note, lockTime, createResult } = params
 
-  const { tx, outputMap, amount } = NinjaTxBuilder.buildJsTxFromCreateTransactionResult(ninja, inputs, createResult, lockTime)
+  const { tx, outputMap, amount, log } = NinjaTxBuilder.buildJsTxFromCreateTransactionResult(ninja, inputs, createResult, lockTime)
 
   const { inputs: txInputs, referenceNumber } = createResult
 
@@ -105,6 +110,7 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
     note,
     referenceNumber,
     outputMap,
+    log
   }
 }
 
@@ -112,18 +118,22 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
 export async function processTransactionWithOutputs (ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams)
 : Promise<NinjaTransactionWithOutputsResultApi>
 {
+  params.log = stampLog(params.log, "start ninja processTransactionWithOutputs")
+
   const cr = await createTransactionWithOutputs(ninja, params)
 
   const pr = await ninja.processTransaction({
     submittedTransaction: cr.rawTx,
     reference: cr.referenceNumber,
     outputMap: cr.outputMap,
-    acceptDelayedBroadcast: params.acceptDelayedBroadcast
+    acceptDelayedBroadcast: params.acceptDelayedBroadcast,
+    log: cr.log
   })
 
   return {
     ...cr,
     mapiResponses: pr.mapiResponses,
+    log: stampLog(pr.log, "end ninja processTransactionWithOutputs")
   }
 }
 

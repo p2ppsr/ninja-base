@@ -648,6 +648,11 @@ export interface NinjaTransactionWithOutputsResultApi {
      * If processed, array of acceptance responses from mapi transaction processors.
      */
   mapiResponses?: MapiResponseApi[]
+
+  /**
+   * Optional transaction processing history
+   */
+  log?: string
 }
 
 export interface NinjaGetPendingTransactionsInstructionsApi {
@@ -991,4 +996,9 @@ export interface NinjaGetTransactionWithOutputsParams {
     * - If spentBy is non-null, failure propagates to that transaction.
     */
    acceptDelayedBroadcast?: boolean
+
+   /**
+    * Optional transaction processing log
+    */
+   log?: string
 }

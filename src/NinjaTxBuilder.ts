@@ -52,6 +52,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
       tx: bsvJs.Transaction
       outputMap: Record<string, number>
       amount: number
+      log?: string
     } {
     const {
       inputs: txInputs,
@@ -60,7 +61,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
       paymailHandle
     } = createResult
 
-    return this.buildJsTx(ninja, inputs, txInputs, txOutputs, derivationPrefix, paymailHandle, lockTime)
+    return this.buildJsTx(ninja, inputs, txInputs, txOutputs, derivationPrefix, paymailHandle, lockTime, createResult.log);
   }
 
   /**
@@ -80,11 +81,13 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     dojoOutputs: DojoCreatingTxOutputApi[],
     derivationPrefix: string,
     paymailHandle?: string,
-    lockTime?: number
+    lockTime?: number,
+    log?: string
   ): {
       tx: bsvJs.Transaction
       outputMap: Record<string, number>
       amount: number
+      log?: string
     } {
     const changeKeys = ninja.getClientChangeKeyPair()
 
@@ -244,7 +247,8 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     return {
       tx,
       outputMap,
-      amount
+      amount,
+      log
     }
   }
 }

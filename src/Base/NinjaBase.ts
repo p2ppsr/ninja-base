@@ -17,7 +17,7 @@ import {
   DojoTransactionStatusApi,
   DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl, DojoOutputTagApi,
   DojoTxLabelApi, DojoOutputApi, DojoTransactionApi,
-  DojoGetTransactionLabelsOptions, EnvelopeEvidenceApi, CwiError, DojoProcessTransactionParams, identityKeyFromPrivateKey, EnvelopeApi,
+  DojoGetTransactionLabelsOptions, EnvelopeEvidenceApi, CwiError, DojoProcessTransactionParams, identityKeyFromPrivateKey, EnvelopeApi, stampLog,
 } from 'cwi-base'
 
 import {
@@ -328,8 +328,10 @@ export class NinjaBase implements NinjaApi {
 
   async processTransaction (params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> {
     await this.verifyDojoAuthenticated()
+    params.log = stampLog(params.log, 'start ninja processTransaction')
     try {
       const r = await this.dojo.processTransaction(params)
+      r.log = stampLog(r.log, 'end ninja processTransaction')
       return r
     } catch (eu: unknown) {
       const error = CwiError.fromUnknown(eu)
