@@ -1210,6 +1210,7 @@ export interface NinjaTransactionWithOutputsResultApi {
     referenceNumber: string;
     outputMap: Record<string, number>;
     mapiResponses?: MapiResponseApi[];
+    log?: string;
 }
 ```
 
@@ -1231,6 +1232,14 @@ This is the fully-formed `inputs` field of this transaction, as per the SPV Enve
 
 ```ts
 inputs: Record<string, EnvelopeEvidenceApi>
+```
+
+##### Property log
+
+Optional transaction processing history
+
+```ts
+log?: string
 ```
 
 ##### Property mapiResponses
@@ -1839,6 +1848,7 @@ export interface NinjaGetTransactionWithOutputsParams {
     feePerKb?: number;
     feeModel?: DojoFeeModelApi;
     acceptDelayedBroadcast?: boolean;
+    log?: string;
 }
 ```
 
@@ -1945,6 +1955,14 @@ A lock time for the transaction
 
 ```ts
 lockTime?: number
+```
+
+##### Property log
+
+Optional transaction processing log
+
+```ts
+log?: string
 ```
 
 ##### Property note
@@ -2425,11 +2443,13 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
         tx: bsvJs.Transaction;
         outputMap: Record<string, number>;
         amount: number;
+        log?: string;
     } 
-    static buildJsTx(ninja: NinjaApi, ninjaInputs: Record<string, NinjaTxInputsApi>, dojoInputs: Record<string, DojoCreatingTxInputsApi>, dojoOutputs: DojoCreatingTxOutputApi[], derivationPrefix: string, paymailHandle?: string, lockTime?: number): {
+    static buildJsTx(ninja: NinjaApi, ninjaInputs: Record<string, NinjaTxInputsApi>, dojoInputs: Record<string, DojoCreatingTxInputsApi>, dojoOutputs: DojoCreatingTxOutputApi[], derivationPrefix: string, paymailHandle?: string, lockTime?: number, log?: string): {
         tx: bsvJs.Transaction;
         outputMap: Record<string, number>;
         amount: number;
+        log?: string;
     } 
 }
 ```
@@ -2441,10 +2461,11 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
 ##### Method buildJsTx
 
 ```ts
-static buildJsTx(ninja: NinjaApi, ninjaInputs: Record<string, NinjaTxInputsApi>, dojoInputs: Record<string, DojoCreatingTxInputsApi>, dojoOutputs: DojoCreatingTxOutputApi[], derivationPrefix: string, paymailHandle?: string, lockTime?: number): {
+static buildJsTx(ninja: NinjaApi, ninjaInputs: Record<string, NinjaTxInputsApi>, dojoInputs: Record<string, DojoCreatingTxInputsApi>, dojoOutputs: DojoCreatingTxOutputApi[], derivationPrefix: string, paymailHandle?: string, lockTime?: number, log?: string): {
     tx: bsvJs.Transaction;
     outputMap: Record<string, number>;
     amount: number;
+    log?: string;
 } 
 ```
 
