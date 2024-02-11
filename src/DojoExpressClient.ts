@@ -285,7 +285,7 @@ export class DojoExpressClient implements DojoClientApi {
     this.verifyAuthenticated()
     params.log = stampLog(params.log, 'start dojo client createTransaction')
     const r = <DojoCreateTransactionResultApi>await this.postJson('/createTransaction', { identityKey: this.identityKey, params })
-    r.log = stampLog(r.log, 'end dojo client createTransaction')
+    r.log = stampLog(r.log, 'end dojo client createTransaction **NETWORK**')
     return r
   }
 
@@ -294,7 +294,7 @@ export class DojoExpressClient implements DojoClientApi {
     params.log = stampLog(params.log, 'start dojo client createTransaction')
     params.submittedTransaction = asString(params.submittedTransaction)
     const r = <DojoProcessTransactionResultApi>await this.postJson('/processTransaction', { identityKey: this.identityKey, params })
-    r.log = stampLog(r.log, 'end dojo client processTransaction')
+    r.log = stampLog(r.log, 'end dojo client processTransaction **NETWORK**')
     return r
   }
 
