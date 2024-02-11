@@ -328,7 +328,7 @@ export class NinjaBase implements NinjaApi {
 
   async processTransaction (params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> {
     await this.verifyDojoAuthenticated()
-    params.log = stampLog(params.log, 'start ninja processTransaction')
+    params.log = stampLog(params.log, `start ninja processTransaction acceptDelayedBroadcast=${params.acceptDelayedBroadcast}`)
     try {
       const r = await this.dojo.processTransaction(params)
       r.log = stampLog(r.log, 'end ninja processTransaction')
