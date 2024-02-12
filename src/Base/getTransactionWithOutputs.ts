@@ -6,7 +6,7 @@ import {
   NinjaTxInputsApi,
 } from '../Api/NinjaApi'
 import { NinjaTxBuilder } from '../NinjaTxBuilder'
-import { CwiError, DojoCreateTransactionParams, DojoTxInputsApi, stampLog, validateInputSelection } from 'cwi-base'
+import { CwiError, DojoCreateTransactionParams, DojoTxInputsApi, stampLog, stampLogFormat, validateInputSelection } from 'cwi-base'
 import { ERR_NINJA_INVALID_UNLOCK } from '../ERR_NINJA_errors'
 
 /**
@@ -43,6 +43,8 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
 
   inputs ||= {}
 
+  let log = stampLog('', "start ninja createTransactionWithOutputs")
+
   const params2: DojoCreateTransactionParams = {
     inputs: convertToDojoTxInputsApi(inputs),
     outputs,
@@ -50,7 +52,7 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
     labels,
     note,
     recipient,
-    log: stampLog(params.log, "start ninja createTransactionWithOutputs")
+    log
   }
   if (params.acceptDelayedBroadcast) {
     // Create inputSelection with default properties
@@ -60,12 +62,14 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
   }
   const createResult = await ninja.dojo.createTransaction(params2)
 
+  log = stampLog(createResult.log, '... ninja createTransactionWithOutputs signing transaction')
+
   let r: NinjaTransactionWithOutputsResultApi
 
-  createResult.log = stampLog(createResult.log, '... ninja createTransactionWithOutputs signing transaction')
-  
   try {
+    createResult.log = log
     r = await signCreatedTransaction(ninja, { inputs, note, lockTime, createResult })
+    log = stampLog(r.log, '... ninja createTransactionWithOutputs signing transaction')
   } catch(eu: unknown) {
     const e = CwiError.fromUnknown(eu)
     await ninja.dojo.updateTransactionStatus(createResult.referenceNumber, 'failed')
@@ -76,7 +80,13 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
     throw eu
   }
 
-  r.log = stampLog(r.log, "end ninja createTransactionWithOutputs")
+  log = stampLog(r.log, "end ninja createTransactionWithOutputs")
+  if (typeof params.log === 'string')
+    r.log = params.log + log
+  else {
+    r.log = log
+    console.log(stampLogFormat(log))
+  }
 
   return r
 }
