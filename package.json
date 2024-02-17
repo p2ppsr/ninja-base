@@ -53,12 +53,12 @@
   },
   "dependencies": {
     "@babbage/sdk-ts": "^0.1.11",
-    "authrite-js": "^0.3.33",
-    "authrite-utils": "^0.2.28",
+    "authrite-js": "^0.3.35",
+    "authrite-utils": "^0.2.30",
     "babbage-bsv": "^0.2.4",
     "cwi-base": "^0.3.116",
     "dotenv": "^16.3.1",
     "node-fetch": "^2.6.12",
-    "sendover": "^1.2.13"
+    "sendover": "^1.2.16"
   }
 }
