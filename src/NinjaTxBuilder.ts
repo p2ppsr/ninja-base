@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import bsvSdk from '@bsv/sdk'
 import bsvJs from 'babbage-bsv'
 import { getPaymentAddress, getPaymentPrivateKey } from 'sendover'
 
@@ -6,7 +7,7 @@ import {
   DojoCreateTransactionResultApi, DojoCreatingTxInputsApi, DojoCreatingTxOutputApi,
   DojoPendingTxApi,
   ERR_INVALID_PARAMETER, ERR_NOT_IMPLEMENTED,
-  bsv, asBsvTx, verifyTruthy
+  bsv, asBsvTx, verifyTruthy, asString, asBsvSdkTx
 } from 'cwi-base'
 
 import { KeyPairApi, NinjaApi, NinjaTxInputsApi } from './Api/NinjaApi'
@@ -224,14 +225,14 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
 
     // Verify unlocking scripts
     const rawTx = tx.uncheckedSerialize()
-    const txToValidate = asBsvTx(rawTx)
-    txToValidate.txIns.forEach((txin, i) => {
+    const txToValidate = asBsvSdkTx(rawTx)
+    txToValidate.inputs.forEach((txin, i) => {
       const vus = unlockScriptsToVerify.find(v => v.vin === i)
       if (!vus)
         throw new ERR_NINJA_MISSING_UNLOCK(i)
-      const ok = validateUnlockScript(txToValidate, vus.vin, vus.lockingScript, vus.amount)
+      const ok = validateUnlockScriptWithBsvSdk(txToValidate, vus.vin, vus.lockingScript, vus.amount)
       if (!ok)
-        throw new ERR_NINJA_INVALID_UNLOCK(vus.vin, txin.txid(), txin.txOutNum, rawTx)
+        throw new ERR_NINJA_INVALID_UNLOCK(vus.vin, txin.sourceTXID || '', txin.sourceOutputIndex, rawTx)
     })
 
     // The amount is the total of non-foreign inputs minus change outputs
@@ -294,3 +295,27 @@ export function validateUnlockScript(
     return valid
 }
 
+export function validateUnlockScriptWithBsvSdk(
+  spendingTx: bsvSdk.Transaction,
+  vin: number,
+  lockingScript: string | Buffer,
+  amount: number
+) : boolean
+{
+  const spend = new bsvSdk.Spend({
+    sourceTXID: verifyTruthy(spendingTx.inputs[vin].sourceTXID),
+    sourceOutputIndex: spendingTx.inputs[vin].sourceOutputIndex,
+    sourceSatoshis: amount,
+    lockingScript: bsvSdk.Script.fromHex(asString(lockingScript)),
+    transactionVersion: spendingTx.version,
+    otherInputs: spendingTx.inputs.filter((v, i) => i !== vin),
+    inputIndex: vin,
+    unlockingScript: verifyTruthy(spendingTx.inputs[vin].unlockingScript),
+    outputs: spendingTx.outputs,
+    inputSequence: spendingTx.inputs[vin].sequence,
+    lockTime: spendingTx.lockTime
+  })
+
+  const valid = spend.validate()
+  return valid
+}
