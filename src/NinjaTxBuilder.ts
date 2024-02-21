@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import bsvSdk from '@bsv/sdk'
+import { Script, Spend, Transaction } from '@bsv/sdk'
 import bsvJs from 'babbage-bsv'
 import { getPaymentAddress, getPaymentPrivateKey } from 'sendover'
 
@@ -296,17 +296,17 @@ export function validateUnlockScript(
 }
 
 export function validateUnlockScriptWithBsvSdk(
-  spendingTx: bsvSdk.Transaction,
+  spendingTx: Transaction,
   vin: number,
   lockingScript: string | Buffer,
   amount: number
 ) : boolean
 {
-  const spend = new bsvSdk.Spend({
+  const spend = new Spend({
     sourceTXID: verifyTruthy(spendingTx.inputs[vin].sourceTXID),
     sourceOutputIndex: spendingTx.inputs[vin].sourceOutputIndex,
     sourceSatoshis: amount,
-    lockingScript: bsvSdk.Script.fromHex(asString(lockingScript)),
+    lockingScript: Script.fromHex(asString(lockingScript)),
     transactionVersion: spendingTx.version,
     otherInputs: spendingTx.inputs.filter((v, i) => i !== vin),
     inputIndex: vin,
