@@ -2723,6 +2723,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [signCreatedTransaction](#function-signcreatedtransaction) |
 | [submitDirectTransaction](#function-submitdirecttransaction) |
 | [validateUnlockScript](#function-validateunlockscript) |
+| [validateUnlockScriptWithBsvSdk](#function-validateunlockscriptwithbsvsdk) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -2789,6 +2790,15 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export function validateUnlockScript(txToValidate: bsv.Tx, vin: number, lockingScript: Buffer, amount: number): boolean 
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Function: validateUnlockScriptWithBsvSdk
+
+```ts
+export function validateUnlockScriptWithBsvSdk(spendingTx: bsvSdk.Transaction, vin: number, lockingScript: string | Buffer, amount: number): boolean 
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
