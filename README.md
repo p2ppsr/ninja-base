@@ -2798,7 +2798,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 #### Function: validateUnlockScriptWithBsvSdk
 
 ```ts
-export function validateUnlockScriptWithBsvSdk(spendingTx: bsvSdk.Transaction, vin: number, lockingScript: string | Buffer, amount: number): boolean 
+export function validateUnlockScriptWithBsvSdk(spendingTx: Transaction, vin: number, lockingScript: string | Buffer, amount: number): boolean 
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
