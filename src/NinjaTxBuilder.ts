@@ -30,13 +30,13 @@ export interface NinjaTxBuilderOptions extends DojoTxBuilderBaseOptions {
  * This is a work in progress...
  */
 export class NinjaTxBuilder extends DojoTxBuilderBase {
-  constructor (public ninja: NinjaApi, public options?: NinjaTxBuilderOptions) {
+  constructor(public ninja: NinjaApi, public options?: NinjaTxBuilderOptions) {
     super(ninja.dojo, options)
   }
 
   // TODO: For this to work, NinjaTxInputsApi with unlocking scripts need a way into
   // the flow.
-  static buildJsTxFromPendingTx (ninja: NinjaBase, ptx: DojoPendingTxApi): {
+  static buildJsTxFromPendingTx(ninja: NinjaBase, ptx: DojoPendingTxApi): {
     tx: bsvJs.Transaction
     outputMap: Record<string, number>
     amount: number
@@ -44,17 +44,17 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     throw new ERR_NOT_IMPLEMENTED()
   }
 
-  static buildJsTxFromCreateTransactionResult (
+  static buildJsTxFromCreateTransactionResult(
     ninja: NinjaApi,
     inputs: Record<string, NinjaTxInputsApi>,
     createResult: DojoCreateTransactionResultApi,
     lockTime?: number
   ): {
-      tx: bsvJs.Transaction
-      outputMap: Record<string, number>
-      amount: number
-      log?: string
-    } {
+    tx: bsvJs.Transaction
+    outputMap: Record<string, number>
+    amount: number
+    log?: string
+  } {
     const {
       inputs: txInputs,
       outputs: txOutputs,
@@ -75,7 +75,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
    * @param lockTime 
    * @returns new signed bitcoin transaction, output map, an impact amount on authority's balance
    */
-  static buildJsTx (
+  static buildJsTx(
     ninja: NinjaApi,
     ninjaInputs: Record<string, NinjaTxInputsApi>,
     dojoInputs: Record<string, DojoCreatingTxInputsApi>,
@@ -85,11 +85,11 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     lockTime?: number,
     log?: string
   ): {
-      tx: bsvJs.Transaction
-      outputMap: Record<string, number>
-      amount: number
-      log?: string
-    } {
+    tx: bsvJs.Transaction
+    outputMap: Record<string, number>
+    amount: number
+    log?: string
+  } {
     const changeKeys = ninja.getClientChangeKeyPair()
 
     const tx = new bsvJs.Transaction()
@@ -148,7 +148,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
       // For each transaction supplying inputs...
 
       const txInput = new bsvJs.Transaction(input.rawTx) // transaction referenced by input "outpoint" (txid,vout)
-      
+
       for (const otr of input.outputsToRedeem) {
         // For each output being redeemed from that input transaction
 
@@ -230,7 +230,14 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
       const vus = unlockScriptsToVerify.find(v => v.vin === i)
       if (!vus)
         throw new ERR_NINJA_MISSING_UNLOCK(i)
-      const ok = validateUnlockScriptWithBsvSdk(txToValidate, vus.vin, vus.lockingScript, vus.amount)
+      let ok = false
+      try {
+        ok = validateUnlockScriptWithBsvSdk(txToValidate, vus.vin, vus.lockingScript, vus.amount)
+      } catch (e: unknown) {
+        const e2 = new ERR_NINJA_INVALID_UNLOCK(vus.vin, txin.sourceTXID || '', txin.sourceOutputIndex, rawTx)
+        e2.message += `\n\n` + (e as Error).message
+        throw e2
+      }
       if (!ok)
         throw new ERR_NINJA_INVALID_UNLOCK(vus.vin, txin.sourceTXID || '', txin.sourceOutputIndex, rawTx)
     })
@@ -269,30 +276,29 @@ function generateLockingScriptType3241645161d8(keyPair: KeyPairApi, derivationPr
 }
 
 export function validateUnlockScript(
-    txToValidate: bsv.Tx,
-    vin: number,
-    lockingScript: Buffer,
-    amount: number
-) : boolean
-{
-    const input = txToValidate.txIns[vin];
-    const scriptSig = input.script;
-    const scriptPubKey = bsv.Script.fromBuffer(lockingScript)
-    const valid = new bsv.Interp().verify(
-        scriptSig,
-        scriptPubKey,
-        txToValidate,
-        vin,
-        (bsv.Interp.SCRIPT_ENABLE_SIGHASH_FORKID
-            // Neither of these fags exist in 2023 bitcoin-sv
-            // Both signal that additional restored op codes were enabled.
-            // They are now? And these flags aren't needed?
-            // | bsv.Interp.SCRIPT_ENABLE_MAGNETIC_OPCODES
-            // | bsv.Interp.SCRIPT_ENABLE_MONOLITH_OPCODES
-        ),
-        new bsv.Bn(amount)
-    );
-    return valid
+  txToValidate: bsv.Tx,
+  vin: number,
+  lockingScript: Buffer,
+  amount: number
+): boolean {
+  const input = txToValidate.txIns[vin];
+  const scriptSig = input.script;
+  const scriptPubKey = bsv.Script.fromBuffer(lockingScript)
+  const valid = new bsv.Interp().verify(
+    scriptSig,
+    scriptPubKey,
+    txToValidate,
+    vin,
+    (bsv.Interp.SCRIPT_ENABLE_SIGHASH_FORKID
+      // Neither of these fags exist in 2023 bitcoin-sv
+      // Both signal that additional restored op codes were enabled.
+      // They are now? And these flags aren't needed?
+      // | bsv.Interp.SCRIPT_ENABLE_MAGNETIC_OPCODES
+      // | bsv.Interp.SCRIPT_ENABLE_MONOLITH_OPCODES
+    ),
+    new bsv.Bn(amount)
+  );
+  return valid
 }
 
 export function validateUnlockScriptWithBsvSdk(
@@ -300,8 +306,7 @@ export function validateUnlockScriptWithBsvSdk(
   vin: number,
   lockingScript: string | Buffer,
   amount: number
-) : boolean
-{
+): boolean {
   const spend = new Spend({
     sourceTXID: verifyTruthy(spendingTx.inputs[vin].sourceTXID),
     sourceOutputIndex: spendingTx.inputs[vin].sourceOutputIndex,
