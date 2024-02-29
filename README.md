@@ -2401,7 +2401,7 @@ Unlocking script for vin ${vin} (${txid}.${vout}) of new transaction is invalid.
 
 ```ts
 export class ERR_NINJA_INVALID_UNLOCK extends CwiError {
-    constructor(public vin: number, public txid: string, public vout: number, public signedRawTx: string) 
+    constructor(public vin: number, public txid: string, public vout: number, public signedRawTx: string, public e?: CwiError) 
 }
 ```
 
