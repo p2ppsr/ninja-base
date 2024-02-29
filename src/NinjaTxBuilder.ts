@@ -7,7 +7,7 @@ import {
   DojoCreateTransactionResultApi, DojoCreatingTxInputsApi, DojoCreatingTxOutputApi,
   DojoPendingTxApi,
   ERR_INVALID_PARAMETER, ERR_NOT_IMPLEMENTED,
-  bsv, asBsvTx, verifyTruthy, asString, asBsvSdkTx
+  bsv, asBsvTx, verifyTruthy, asString, asBsvSdkTx, CwiError
 } from 'cwi-base'
 
 import { KeyPairApi, NinjaApi, NinjaTxInputsApi } from './Api/NinjaApi'
@@ -230,16 +230,15 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
       const vus = unlockScriptsToVerify.find(v => v.vin === i)
       if (!vus)
         throw new ERR_NINJA_MISSING_UNLOCK(i)
+      let e: CwiError | undefined = undefined
       let ok = false
       try {
         ok = validateUnlockScriptWithBsvSdk(txToValidate, vus.vin, vus.lockingScript, vus.amount)
-      } catch (e: unknown) {
-        const e2 = new ERR_NINJA_INVALID_UNLOCK(vus.vin, txin.sourceTXID || '', txin.sourceOutputIndex, rawTx)
-        e2.message += `\n\n` + (e as Error).message
-        throw e2
+      } catch (eu: unknown) {
+        e = CwiError.fromUnknown(eu)
       }
-      if (!ok)
-        throw new ERR_NINJA_INVALID_UNLOCK(vus.vin, txin.sourceTXID || '', txin.sourceOutputIndex, rawTx)
+      if (!ok || e)
+        throw new ERR_NINJA_INVALID_UNLOCK(vus.vin, txin.sourceTXID || '', txin.sourceOutputIndex, rawTx, e)
     })
 
     // The amount is the total of non-foreign inputs minus change outputs
