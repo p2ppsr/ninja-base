@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { AuthriteClient } from 'authrite-js'
 
 import {
-  bsv, Chain,
+  Chain,
   ERR_INVALID_PARAMETER, ERR_MISSING_PARAMETER, ERR_BAD_REQUEST,
   asString, verifyTruthy, verifyId,
   DojoAvatarApi, DojoCertificateApi,
@@ -15,9 +13,9 @@ import {
   DojoPendingTxApi,
   DojoProcessTransactionResultApi,
   DojoTransactionStatusApi,
-  DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl, DojoOutputTagApi,
+  DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl,
   DojoTxLabelApi, DojoOutputApi, DojoTransactionApi,
-  DojoGetTransactionLabelsOptions, EnvelopeEvidenceApi, CwiError, DojoProcessTransactionParams, identityKeyFromPrivateKey, EnvelopeApi, stampLog,
+  DojoGetTransactionLabelsOptions, CwiError, DojoProcessTransactionParams, identityKeyFromPrivateKey, EnvelopeApi, stampLog,
 } from 'cwi-base'
 
 import {
@@ -47,8 +45,7 @@ export class NinjaBase implements NinjaApi {
     if (clientPrivateKey && authrite) throw new ERR_INVALID_PARAMETER('clientPrivateKey and authrite', 'only one provided')
 
     if (clientPrivateKey) {
-      const privKey = new bsv.PrivKey(new bsv.Bn(clientPrivateKey, 'hex'), true)
-      const identityPublicKey = bsv.PubKey.fromPrivKey(privKey).toDer(true).toString('hex')
+      const identityPublicKey = identityKeyFromPrivateKey(clientPrivateKey)
 
       console.log(`construct NinjaBase for identityKey ${identityPublicKey} from private key`)
 
@@ -159,6 +156,7 @@ export class NinjaBase implements NinjaApi {
     return paymails[0]
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async setPaymail (paymail: string): Promise<void> {
     throw new Error('Obsolete API.')
   }

@@ -1,13 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Script, Spend, Transaction } from '@bsv/sdk'
 import bsvJs from 'babbage-bsv'
 import { getPaymentAddress, getPaymentPrivateKey } from 'sendover'
 
 import {
   DojoCreateTransactionResultApi, DojoCreatingTxInputsApi, DojoCreatingTxOutputApi,
   DojoPendingTxApi,
-  ERR_INVALID_PARAMETER, ERR_NOT_IMPLEMENTED,
-  bsv, asBsvTx, verifyTruthy, asString, asBsvSdkTx, CwiError
+  ERR_INVALID_PARAMETER, ERR_NOT_IMPLEMENTED, CwiError,
+  asBsvSdkTx, verifyTruthy, validateUnlockScriptWithBsvSdk
 } from 'cwi-base'
 
 import { KeyPairApi, NinjaApi, NinjaTxInputsApi } from './Api/NinjaApi'
@@ -36,6 +34,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
 
   // TODO: For this to work, NinjaTxInputsApi with unlocking scripts need a way into
   // the flow.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   static buildJsTxFromPendingTx(ninja: NinjaBase, ptx: DojoPendingTxApi): {
     tx: bsvJs.Transaction
     outputMap: Record<string, number>
@@ -272,54 +271,4 @@ function generateLockingScriptType3241645161d8(keyPair: KeyPairApi, derivationPr
   // Create an output script that can only be unlocked with the corresponding derived private key
   const lockingScript = bsvJs.Script.fromAddress(derivedAddress)
   return lockingScript
-}
-
-export function validateUnlockScript(
-  txToValidate: bsv.Tx,
-  vin: number,
-  lockingScript: Buffer,
-  amount: number
-): boolean {
-  const input = txToValidate.txIns[vin];
-  const scriptSig = input.script;
-  const scriptPubKey = bsv.Script.fromBuffer(lockingScript)
-  const valid = new bsv.Interp().verify(
-    scriptSig,
-    scriptPubKey,
-    txToValidate,
-    vin,
-    (bsv.Interp.SCRIPT_ENABLE_SIGHASH_FORKID
-      // Neither of these fags exist in 2023 bitcoin-sv
-      // Both signal that additional restored op codes were enabled.
-      // They are now? And these flags aren't needed?
-      // | bsv.Interp.SCRIPT_ENABLE_MAGNETIC_OPCODES
-      // | bsv.Interp.SCRIPT_ENABLE_MONOLITH_OPCODES
-    ),
-    new bsv.Bn(amount)
-  );
-  return valid
-}
-
-export function validateUnlockScriptWithBsvSdk(
-  spendingTx: Transaction,
-  vin: number,
-  lockingScript: string | Buffer,
-  amount: number
-): boolean {
-  const spend = new Spend({
-    sourceTXID: verifyTruthy(spendingTx.inputs[vin].sourceTXID),
-    sourceOutputIndex: spendingTx.inputs[vin].sourceOutputIndex,
-    sourceSatoshis: amount,
-    lockingScript: Script.fromHex(asString(lockingScript)),
-    transactionVersion: spendingTx.version,
-    otherInputs: spendingTx.inputs.filter((v, i) => i !== vin),
-    inputIndex: vin,
-    unlockingScript: verifyTruthy(spendingTx.inputs[vin].unlockingScript),
-    outputs: spendingTx.outputs,
-    inputSequence: spendingTx.inputs[vin].sequence,
-    lockTime: spendingTx.lockTime
-  })
-
-  const valid = spend.validate()
-  return valid
 }
