@@ -417,4 +417,15 @@ export class DojoExpressClient implements DojoClientApi {
     this.verifyAuthenticated()
     await this.postJsonVoid('/unbasketOutput', { identityKey: this.identityKey, partial })
   }
+
+  async getHeight(): Promise<number> {
+    this.verifyAuthenticated()
+    return await this.postJson('/getHeight', { identityKey: this.identityKey })
+  }
+
+  async getMerkleRootForHeight(height: number): Promise<string | undefined> {
+    this.verifyAuthenticated()
+    return await this.postJson('/getMerkleRootForHeight', { identityKey: this.identityKey, height })
+  }
+
 }

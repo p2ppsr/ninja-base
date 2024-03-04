@@ -435,4 +435,15 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
+  async getHeight(): Promise<number> {
+    await this.verifyDojoAuthenticated()
+    const r = await this.dojo.getHeight()
+    return r
+  }
+
+  async getMerkleRootForHeight(height: number): Promise<string | undefined> {
+    await this.verifyDojoAuthenticated()
+    const r = await this.dojo.getMerkleRootForHeight(height)
+    return r
+  }
 }

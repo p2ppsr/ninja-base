@@ -371,6 +371,19 @@ export interface NinjaApi {
     * @param txid  double hash of raw transaction as hex string
     */
    getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]>
+
+   /**
+    * Returns the current chain height of the network
+    * @returns The current chain height
+    */
+   getHeight() : Promise<number>
+
+   /**
+    * A method to verify the validity of a Merkle root for a given block height.
+    *
+    * @returns merkle root for the given height or undefined, if height doesn't have a known merkle root or is invalid.
+   */
+   getMerkleRootForHeight(height: number): Promise<string | undefined>
 }
 
 /**
