@@ -101,6 +101,8 @@ export interface NinjaApi {
         vout: number;
     }): Promise<void>;
     getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]>;
+    getHeight(): Promise<number>;
+    getMerkleRootForHeight(height: number): Promise<string | undefined>;
 }
 ```
 
@@ -241,6 +243,30 @@ Argument Details
 
 + **txid**
   + double hash of raw transaction as hex string
+
+##### Method getHeight
+
+Returns the current chain height of the network
+
+```ts
+getHeight(): Promise<number>
+```
+
+Returns
+
+The current chain height
+
+##### Method getMerkleRootForHeight
+
+A method to verify the validity of a Merkle root for a given block height.
+
+```ts
+getMerkleRootForHeight(height: number): Promise<string | undefined>
+```
+
+Returns
+
+merkle root for the given height or undefined, if height doesn't have a known merkle root or is invalid.
 
 ##### Method getNetOfAmounts
 
@@ -2561,6 +2587,8 @@ export class DojoExpressClient implements DojoClientApi {
     async tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> 
     async untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> 
     async unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void> 
+    async getHeight(): Promise<number> 
+    async getMerkleRootForHeight(height: number): Promise<string | undefined> 
 }
 ```
 
@@ -2665,6 +2693,8 @@ export class NinjaBase implements NinjaApi {
     }): Promise<void> 
     async submitDirectTransaction(params: NinjaSubmitDirectTransactionParams): Promise<NinjaSubmitDirectTransactionResultApi> 
     async getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> 
+    async getHeight(): Promise<number> 
+    async getMerkleRootForHeight(height: number): Promise<string | undefined> 
 }
 ```
 

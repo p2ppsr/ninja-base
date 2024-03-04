@@ -52,14 +52,14 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@babbage/sdk-ts": "^0.2.3",
+    "@babbage/sdk-ts": "^0.2.5",
     "@bsv/sdk": "^1.0.8",
-    "authrite-js": "^0.4.3",
-    "authrite-utils": "^0.3.3",
+    "authrite-js": "^0.4.5",
+    "authrite-utils": "^0.3.5",
     "babbage-bsv": "^0.2.4",
-    "cwi-base": "^0.4.3",
+    "cwi-base": "^0.4.5",
     "dotenv": "^16.3.1",
     "node-fetch": "^2.6.12",
-    "sendover": "^1.3.3"
+    "sendover": "^1.3.5"
   }
 }
