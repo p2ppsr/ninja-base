@@ -383,7 +383,7 @@ export interface NinjaApi {
     *
     * @returns merkle root for the given height or undefined, if height doesn't have a known merkle root or is invalid.
    */
-   getMerkleRootForHeight(args: { height: number }): Promise<string | undefined>
+   getMerkleRootForHeight(height: number): Promise<string | undefined>
 }
 
 /**

@@ -441,9 +441,9 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
-  async getMerkleRootForHeight(args: { height: number }): Promise<string | undefined> {
+  async getMerkleRootForHeight(height: number): Promise<string | undefined> {
     await this.verifyDojoAuthenticated()
-    const r = await this.dojo.getMerkleRootForHeight(args.height)
+    const r = await this.dojo.getMerkleRootForHeight(height)
     return r
   }
 }
