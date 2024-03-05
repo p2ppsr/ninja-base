@@ -102,9 +102,7 @@ export interface NinjaApi {
     }): Promise<void>;
     getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]>;
     getHeight(): Promise<number>;
-    getMerkleRootForHeight(args: {
-        height: number;
-    }): Promise<string | undefined>;
+    getMerkleRootForHeight(height: number): Promise<string | undefined>;
 }
 ```
 
@@ -263,9 +261,7 @@ The current chain height
 A method to verify the validity of a Merkle root for a given block height.
 
 ```ts
-getMerkleRootForHeight(args: {
-    height: number;
-}): Promise<string | undefined>
+getMerkleRootForHeight(height: number): Promise<string | undefined>
 ```
 
 Returns
@@ -2698,9 +2694,7 @@ export class NinjaBase implements NinjaApi {
     async submitDirectTransaction(params: NinjaSubmitDirectTransactionParams): Promise<NinjaSubmitDirectTransactionResultApi> 
     async getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> 
     async getHeight(): Promise<number> 
-    async getMerkleRootForHeight(args: {
-        height: number;
-    }): Promise<string | undefined> 
+    async getMerkleRootForHeight(height: number): Promise<string | undefined> 
 }
 ```
 
