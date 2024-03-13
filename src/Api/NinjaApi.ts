@@ -476,7 +476,7 @@ export interface NinjaOutputToRedeemApi {
      */
   index: number
   /**
-     * Hex scriptcode that unlocks the satoshis or the maximum script length if using `signAction`.
+     * Hex scriptcode that unlocks the satoshis or the maximum script length (in bytes) if using `signAction`.
      *
      * When supplying a signed unlock script, it should use `SIGHASH_NONE | ANYONECANPAY` (or similar)
      * so additional Dojo outputs can added if necessary without invalidating the signature.
