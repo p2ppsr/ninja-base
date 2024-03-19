@@ -65,6 +65,9 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
     recipient,
     log
   }
+
+  const signActionRequired = needsSignAction(inputs)
+
   if (params.acceptDelayedBroadcast) {
     // Create inputSelection with default properties
     params2.inputSelection = validateInputSelection(undefined)
