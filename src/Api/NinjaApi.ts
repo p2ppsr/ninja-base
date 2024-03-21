@@ -276,6 +276,18 @@ export interface NinjaApi {
    processTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi>
 
    /**
+    * Complete a transaction with status `unsigned` previously started by a call to `createAction`
+    * with parameters meant to be completed by a call to `signAction`. 
+    */
+   signAction(params: NinjaSignActionParams): Promise<NinjaSignActionResultApi>
+
+   /**
+    * Abort a transaction with status `unsigned` previously started by a call to `createAction`
+    * with parameters meant to be completed by a call to `signAction`. 
+    */
+   abortAction(params: NinjaAbortActionParams): Promise<NinjaAbortActionResultApi>
+
+   /**
       * Creates a new transaction that must be processed with `processTransaction`
       * after you sign it
       *
@@ -1018,4 +1030,85 @@ export interface NinjaGetTransactionWithOutputsParams {
     * Optional transaction processing log
     */
    log?: string
+}
+
+export interface NinjaSignActionParams {
+   /**
+    * unique transaction identifier previously returned by createAction when at least one unlockingScript
+    * was specified by max script byte length.
+    *
+    * The status of the transaction identified by `referenceNumber` must be `unsigned`.
+    */
+   referenceNumber: string
+   /**
+    * All non-SABPPP inputs signed transaction as LE hex string.
+    */
+   rawTx: string
+   /**
+    * Must match original value in `createAction`.
+    *
+    * true if local validation and self-signed mapi response is sufficient.
+    * Upon return, transaction will have `sending` status. Watchman will proceed to send the transaction asynchronously.
+    *
+    * false if a valid mapi response from the bitcoin transaction processing network is required.
+    * Upon return, transaction will have `unproven` status. Watchman will proceed to prove transaction.
+    *
+    * default true
+    */
+   acceptDelayedBroadcast?: boolean
+   /**
+    * Optional operational and performance logging prior data.
+    */
+   log: string | undefined
+}
+
+export interface NinjaSignActionResultApi {
+    /**
+     * The unique transaction identifier that was processed.
+     */
+    referenceNumber: string
+    /**
+     * fully signed transaction hash (double SHA256 BE hex string)
+     * 
+     * Serves as confirmation of which transaction was processed.
+     */
+    txid: string,
+    /**
+     * Fully signed transaction as LE hex string
+     */
+    rawTx: string,
+    /**
+     * at least one valid mapi response.
+     * may be a self-signed response if `acceptDelayedBroadcast` is true.
+     */
+    mapiResponses: MapiResponseApi[],
+    /**
+     * operational and performance logging if enabled.
+     */
+    log: string | undefined
+}
+
+export interface NinjaAbortActionParams {
+   /**
+    * unique transaction identifier previously returned by createAction when at least one unlockingScript
+    * was specified by max script byte length.
+    *
+    * The status of the transaction identified by `referenceNumber` must be `unsigned`.
+    */
+   referenceNumber: string
+   /**
+    * Optional operational and performance logging prior data.
+    */
+   log: string | undefined
+}
+
+export interface NinjaAbortActionResultApi {
+    /**
+     * The unique transaction identifier that was processed.
+     */
+    referenceNumber: string
+    /**
+     * operational and performance logging if enabled.
+     */
+    log: string | undefined
 }

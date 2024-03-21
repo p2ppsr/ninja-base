@@ -56,48 +56,16 @@ export interface CwiCoreApi {
          */
         acceptDelayedBroadcast: boolean,
         /**
+         * Optional operational and performance logging prior data.
+         */
+        log: string | undefined,
+        /**
          * default 0
          */
         _recursionCounter: number,
         _lastRecursionError: Error | undefined,
     }) : Promise<CreateActionResultApi>
 
-    signAction(params: {
-        /**
-         * unique transaction identifier previously returned by createAction when at least one unlockingScript
-         * was specified by max script byte length.
-         * 
-         * The status of the transaction identified by `referenceNumber` must be `unsigned`.
-         */
-        referenceNumber: string | undefined
-
-        /**
-         * fully signed transaction as LE hex string
-         */
-        rawTx: string,
-        /**
-         * Must match original value in `createAction`.
-         * 
-         * true if local validation and self-signed mapi response is sufficient.
-         * Upon return, transaction will have `sending` status. Watchman will proceed to send the transaction asynchronously.
-         * 
-         * false if a valid mapi response from the bitcoin transaction processing network is required.
-         * Upon return, transaction will have `unproven` status. Watchman will proceed to prove transaction.
-         * 
-         * default true
-         */
-        acceptDelayedBroadcast: boolean,
-    }) : Promise<SignActionResultApi>
-
-    abortAction(params: {
-        /**
-         * unique transaction identifier previously returned by createAction when at least one unlockingScript
-         * was specified by max script byte length.
-         * 
-         * The status of the transaction identified by `referenceNumber` must be `unsigned`.
-         */
-        referenceNumber: string | undefined
-    }) : Promise<void>
 }
 
 export interface CreateActionResultApi {
@@ -124,7 +92,9 @@ export interface CreateActionResultApi {
      * if not signActionRequired, fully signed transaction as LE hex string
      * 
      * if signActionRequired:
-     *   - All dojo supplied inputs have been signed
+     *   - All length specified unlocking scripts are zero bytes
+     *   - All SABPPP template unlocking scripts have zero byte signatures
+     *   - All custom provided unlocking scripts fully copied.
      */
     rawTx: string,
     /**
@@ -144,25 +114,4 @@ export interface CreateActionResultApi {
     log: string | undefined
 }
 
-export interface SignActionResultApi {
-    /**
-     * The unique transaction identifier that was processed.
-     */
-    referenceNumber: string | undefined
-    /**
-     * fully signed transaction hash (double SHA256 BE hex string)
-     * 
-     * Serves as confirmation of which transaction was processed.
-     */
-    txid: string,
-    /**
-     * at least one valid mapi response.
-     * may be a self-signed response if `acceptDelayedBroadcast` is true.
-     */
-    mapiResponses: MapiResponseApi[],
-    /**
-     * operational and performance logging if enabled.
-     */
-    log: string | undefined
-}
 
