@@ -1,4 +1,4 @@
-import { DojoCreateTxOutputApi, EnvelopeEvidenceApi, MapiResponseApi } from "cwi-base";
+import { DojoCreateTransactionResultApi, DojoCreateTxOutputApi, EnvelopeEvidenceApi, MapiResponseApi } from "cwi-base";
 import { NinjaTxInputsApi } from "./NinjaApi";
 
 /**
@@ -81,9 +81,9 @@ export interface CreateActionResultApi {
      */
     signActionRequired: boolean | undefined
     /**
-     * if signActionRequired, a unique, in-process transaction identifier.
+     * if signActionRequired, the dojo createTransaction results to be forwarded to signAction
      */
-    referenceNumber: string | undefined
+    createTransactionResult: DojoCreateTransactionResultApi | undefined
     /**
      * if not signActionRequired, signed transaction hash (double SHA256 BE hex string)
      */

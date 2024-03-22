@@ -1034,26 +1034,15 @@ export interface NinjaGetTransactionWithOutputsParams {
 
 export interface NinjaSignActionParams {
    /**
-    * unique transaction identifier previously returned by createAction when at least one unlockingScript
-    * was specified by max script byte length.
-    *
-    * The status of the transaction identified by `referenceNumber` must be `unsigned`.
+    * The dojo createTransaction results returned from createAction.
     */
-   referenceNumber: string
+   createTransactionResult: DojoCreateTransactionResultApi
    /**
-    * All non-SABPPP inputs signed transaction as LE hex string.
+    * Transaction with all non-SABPPP inputs signed as LE hex string.
     */
    rawTx: string
    /**
-    * Must match original value in `createAction`.
-    *
-    * true if local validation and self-signed mapi response is sufficient.
-    * Upon return, transaction will have `sending` status. Watchman will proceed to send the transaction asynchronously.
-    *
-    * false if a valid mapi response from the bitcoin transaction processing network is required.
-    * Upon return, transaction will have `unproven` status. Watchman will proceed to prove transaction.
-    *
-    * default true
+    * Must match original value passed to `createAction`.
     */
    acceptDelayedBroadcast?: boolean
    /**
