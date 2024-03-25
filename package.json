@@ -1,6 +1,6 @@
 {
   "name": "ninja-base",
-  "version": "0.3.11",
+  "version": "0.3.13",
   "description": "Base level functions, classes, interfaces for Ninja",
   "author": "Peer-to-peer Privacy Systems Research LLC",
   "license": "PROPRIETARY",
@@ -53,13 +53,13 @@
   },
   "dependencies": {
     "@babbage/sdk-ts": "^0.2.9",
-    "@bsv/sdk": "^1.0.10",
-    "authrite-js": "^0.4.11",
-    "authrite-utils": "^0.3.10",
+    "@bsv/sdk": "^1.0.11",
+    "authrite-js": "^0.4.12",
+    "authrite-utils": "^0.3.11",
     "babbage-bsv": "^0.2.4",
-    "cwi-base": "^0.4.11",
+    "cwi-base": "^0.4.13",
     "dotenv": "^16.3.1",
     "node-fetch": "^2.6.12",
-    "sendover": "^1.3.10"
+    "sendover": "^1.3.11"
   }
 }
