@@ -19,8 +19,11 @@ import {
 } from 'cwi-base'
 
 import {
-  KeyPairApi, NinjaApi, NinjaCreateTransactionParams, NinjaGetTransactionOutputsResultApi,
+  KeyPairApi, NinjaApi,
+  NinjaCreateTransactionParams, NinjaGetTransactionOutputsResultApi,
   NinjaGetTransactionWithOutputsParams, NinjaGetTransactionsResultApi,
+  NinjaSignActionParams, NinjaSignActionResultApi,
+  NinjaAbortActionParams, NinjaAbortActionResultApi, 
   NinjaSubmitDirectTransactionParams, NinjaSubmitDirectTransactionResultApi,
   NinjaTransactionFailedHandler, NinjaTransactionProcessedHandler,
   NinjaTransactionWithOutputsResultApi,
@@ -34,6 +37,8 @@ import {
 } from './getTransactionWithOutputs'
 import { submitDirectTransaction } from './submitDirectTransaction'
 import { DojoExpressClient } from '../DojoExpressClient'
+import { signAction } from './signAction'
+import { abortAction } from './abortAction'
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain
@@ -368,6 +373,18 @@ export class NinjaBase implements NinjaApi {
   async processTransactionWithOutputs (params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> {
     await this.verifyDojoAuthenticated()
     const r = await processTransactionWithOutputs(this, params)
+    return r
+  }
+
+  async signAction(params: NinjaSignActionParams): Promise<NinjaSignActionResultApi> {
+    await this.verifyDojoAuthenticated()
+    const r = await signAction(this, params)
+    return r
+  }
+
+  async abortAction(params: NinjaAbortActionParams): Promise<NinjaAbortActionResultApi> {
+    await this.verifyDojoAuthenticated()
+    const r = await abortAction(this, params)
     return r
   }
 

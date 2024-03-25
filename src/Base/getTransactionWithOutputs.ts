@@ -9,6 +9,17 @@ import { NinjaTxBuilder } from '../NinjaTxBuilder'
 import { CwiError, DojoCreateTransactionParams, DojoTxInputsApi, stampLog, stampLogFormat, validateInputSelection } from 'cwi-base'
 import { ERR_NINJA_INVALID_UNLOCK } from '../ERR_NINJA_errors'
 
+export function getUnlockingScriptLength(script: string | number) : number {
+  return typeof script === 'string' ? script.length / 2 : script
+}
+
+/**
+ * @returns true if at least one unlockingScript is specified only as a maximum length number.
+ */
+export function needsSignAction(inputs: Record<string, NinjaTxInputsApi>) {
+  return Object.values(inputs).some(i => i.outputsToRedeem.some(otr => typeof otr.unlockingScript !== 'string'))
+}
+
 /**
  * Convert NinjaTxInputsApi to DojoTxInputsApi to protect unlocking scripts.
  */
@@ -17,7 +28,7 @@ export function convertToDojoTxInputsApi(inputs: Record<string, NinjaTxInputsApi
     ...v,
     // Calculate unlockingScriptLength from unlockingScript
     outputsToRedeem: v.outputsToRedeem.map(x => ({
-      unlockingScriptLength: x.unlockingScript.length / 2,
+      unlockingScriptLength: getUnlockingScriptLength(x.unlockingScript),
       index: x.index,
       sequenceNumber: x.sequenceNumber
     }))
@@ -54,6 +65,9 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
     recipient,
     log
   }
+
+  const signActionRequired = needsSignAction(inputs)
+
   if (params.acceptDelayedBroadcast) {
     // Create inputSelection with default properties
     params2.inputSelection = validateInputSelection(undefined)

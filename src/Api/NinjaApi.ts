@@ -276,6 +276,18 @@ export interface NinjaApi {
    processTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi>
 
    /**
+    * Complete a transaction with status `unsigned` previously started by a call to `createAction`
+    * with parameters meant to be completed by a call to `signAction`. 
+    */
+   signAction(params: NinjaSignActionParams): Promise<NinjaSignActionResultApi>
+
+   /**
+    * Abort a transaction with status `unsigned` previously started by a call to `createAction`
+    * with parameters meant to be completed by a call to `signAction`. 
+    */
+   abortAction(params: NinjaAbortActionParams): Promise<NinjaAbortActionResultApi>
+
+   /**
       * Creates a new transaction that must be processed with `processTransaction`
       * after you sign it
       *
@@ -476,12 +488,16 @@ export interface NinjaOutputToRedeemApi {
      */
   index: number
   /**
-     * Hex scriptcode that unlocks the satoshis.
+    * value of output being spent. Must match. Must be greater than zero.
+    */
+  satoshis: number
+  /**
+     * Hex scriptcode that unlocks the satoshis or the maximum script length (in bytes) if using `signAction`.
      *
-     * Note that you should create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
-     * so that the additional Dojo outputs can be added afterward without invalidating your signature.
+     * When supplying a signed unlock script, it should use `SIGHASH_NONE | ANYONECANPAY` (or similar)
+     * so additional Dojo outputs can added if necessary without invalidating the signature.
      */
-  unlockingScript: string
+  unlockingScript: string | number
   spendingDescription?: string
    /**
      * Sequence number to use when spending
@@ -1014,4 +1030,74 @@ export interface NinjaGetTransactionWithOutputsParams {
     * Optional transaction processing log
     */
    log?: string
+}
+
+export interface NinjaSignActionParams {
+   /**
+    * The dojo createTransaction results returned from createAction.
+    */
+   createTransactionResult: DojoCreateTransactionResultApi
+   /**
+    * Transaction with all non-SABPPP inputs signed as LE hex string.
+    */
+   rawTx: string
+   /**
+    * Must match original value passed to `createAction`.
+    */
+   acceptDelayedBroadcast?: boolean
+   /**
+    * Optional operational and performance logging prior data.
+    */
+   log: string | undefined
+}
+
+export interface NinjaSignActionResultApi {
+    /**
+     * The unique transaction identifier that was processed.
+     */
+    referenceNumber: string
+    /**
+     * fully signed transaction hash (double SHA256 BE hex string)
+     * 
+     * Serves as confirmation of which transaction was processed.
+     */
+    txid: string,
+    /**
+     * Fully signed transaction as LE hex string
+     */
+    rawTx: string,
+    /**
+     * at least one valid mapi response.
+     * may be a self-signed response if `acceptDelayedBroadcast` is true.
+     */
+    mapiResponses: MapiResponseApi[],
+    /**
+     * operational and performance logging if enabled.
+     */
+    log: string | undefined
+}
+
+export interface NinjaAbortActionParams {
+   /**
+    * unique transaction identifier previously returned by createAction when at least one unlockingScript
+    * was specified by max script byte length.
+    *
+    * The status of the transaction identified by `referenceNumber` must be `unsigned`.
+    */
+   referenceNumber: string
+   /**
+    * Optional operational and performance logging prior data.
+    */
+   log: string | undefined
+}
+
+export interface NinjaAbortActionResultApi {
+    /**
+     * The unique transaction identifier that was processed.
+     */
+    referenceNumber: string
+    /**
+     * operational and performance logging if enabled.
+     */
+    log: string | undefined
 }
