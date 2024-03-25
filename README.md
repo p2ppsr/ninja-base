@@ -2255,7 +2255,7 @@ export interface CreateActionParams {
     labels?: string[];
     originator?: string;
     acceptDelayedBroadcast: boolean;
-    log: string | undefined;
+    log?: string;
     _recursionCounter?: number;
     _lastRecursionError?: Error;
 }
@@ -2332,7 +2332,7 @@ lockTime: number
 Optional operational and performance logging prior data.
 
 ```ts
-log: string | undefined
+log?: string
 ```
 
 ##### Property originator
