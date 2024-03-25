@@ -62,7 +62,7 @@ export interface CreateActionParams {
     /**
      * Optional operational and performance logging prior data.
      */
-    log: string | undefined;
+    log?: string;
     /**
      * default 0
      */
