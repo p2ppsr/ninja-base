@@ -488,10 +488,6 @@ export interface NinjaOutputToRedeemApi {
      */
   index: number
   /**
-    * value of output being spent. Must match. Must be greater than zero.
-    */
-  satoshis: number
-  /**
      * Hex scriptcode that unlocks the satoshis or the maximum script length (in bytes) if using `signAction`.
      *
      * When supplying a signed unlock script, it should use `SIGHASH_NONE | ANYONECANPAY` (or similar)

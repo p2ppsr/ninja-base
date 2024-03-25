@@ -1,3 +1,4 @@
+export * from './Api/CwiCoreApi'
 export * from './Api/NinjaApi'
 export * from './Base/NinjaBase'
 export * from './Base/DojoTxBuilderBase'
