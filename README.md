@@ -1831,7 +1831,6 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export interface NinjaSignCreatedTransactionParams {
     inputs: Record<string, NinjaTxInputsApi>;
     note?: string;
-    lockTime?: number;
     createResult: DojoCreateTransactionResultApi;
 }
 ```
@@ -1859,14 +1858,6 @@ so that the additional Dojo outputs can be added afterward without invalidating 
 inputs: Record<string, NinjaTxInputsApi>
 ```
 
-##### Property lockTime
-
-A lock time for the transaction
-
-```ts
-lockTime?: number
-```
-
 ##### Property note
 
 A note about the transaction
@@ -1891,6 +1882,7 @@ export interface NinjaGetTransactionWithOutputsParams {
     inputs?: Record<string, NinjaTxInputsApi>;
     note?: string;
     lockTime?: number;
+    version?: number;
     recipient?: string;
     autoProcess?: boolean;
     feePerKb?: number;
@@ -1999,7 +1991,10 @@ labels?: string[]
 
 ##### Property lockTime
 
-A lock time for the transaction
+Optional. Default is zero.
+When the transaction can be processed into a block:
+>= 500,000,000 values are interpreted as minimum required unix time stamps in seconds
+< 500,000,000 values are interpreted as minimum required block height
 
 ```ts
 lockTime?: number
@@ -2035,6 +2030,14 @@ Paymail recipient for transaction
 
 ```ts
 recipient?: string
+```
+
+##### Property version
+
+Optional. Transaction version number, default is current standard transaction version value.
+
+```ts
+version?: number
 ```
 
 </details>
@@ -2251,7 +2254,8 @@ export interface CreateActionParams {
     description: string;
     inputs: Record<string, NinjaTxInputsApi>;
     outputs: DojoCreateTxOutputApi[];
-    lockTime: number;
+    lockTime?: number;
+    version?: number;
     labels?: string[];
     originator?: string;
     acceptDelayedBroadcast: boolean;
@@ -2319,12 +2323,13 @@ labels?: string[]
 
 ##### Property lockTime
 
+Optional. Default is zero.
 When the transaction can be processed into a block:
 >= 500,000,000 values are interpreted as minimum required unix time stamps in seconds
 < 500,000,000 values are interpreted as minimum required block height
 
 ```ts
-lockTime: number
+lockTime?: number
 ```
 
 ##### Property log
@@ -2353,6 +2358,14 @@ each output:
 
 ```ts
 outputs: DojoCreateTxOutputApi[]
+```
+
+##### Property version
+
+Optional. Transaction version number, default is current standard transaction version value.
+
+```ts
+version?: number
 ```
 
 </details>
@@ -2899,13 +2912,13 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
         outputMap: Record<string, number>;
         amount: number;
     } 
-    static buildJsTxFromCreateTransactionResult(ninja: NinjaApi, inputs: Record<string, NinjaTxInputsApi>, createResult: DojoCreateTransactionResultApi, lockTime?: number): {
+    static buildJsTxFromCreateTransactionResult(ninja: NinjaApi, inputs: Record<string, NinjaTxInputsApi>, createResult: DojoCreateTransactionResultApi): {
         tx: bsvJs.Transaction;
         outputMap: Record<string, number>;
         amount: number;
         log?: string;
     } 
-    static buildJsTx(ninja: NinjaApi, ninjaInputs: Record<string, NinjaTxInputsApi>, dojoInputs: Record<string, DojoCreatingTxInputsApi>, dojoOutputs: DojoCreatingTxOutputApi[], derivationPrefix: string, paymailHandle?: string, lockTime?: number, log?: string): {
+    static buildJsTx(ninja: NinjaApi, ninjaInputs: Record<string, NinjaTxInputsApi>, dojoInputs: Record<string, DojoCreatingTxInputsApi>, dojoOutputs: DojoCreatingTxOutputApi[], derivationPrefix: string, version: number, lockTime: number, paymailHandle?: string, log?: string): {
         tx: bsvJs.Transaction;
         outputMap: Record<string, number>;
         amount: number;
@@ -2921,7 +2934,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
 ##### Method buildJsTx
 
 ```ts
-static buildJsTx(ninja: NinjaApi, ninjaInputs: Record<string, NinjaTxInputsApi>, dojoInputs: Record<string, DojoCreatingTxInputsApi>, dojoOutputs: DojoCreatingTxOutputApi[], derivationPrefix: string, paymailHandle?: string, lockTime?: number, log?: string): {
+static buildJsTx(ninja: NinjaApi, ninjaInputs: Record<string, NinjaTxInputsApi>, dojoInputs: Record<string, DojoCreatingTxInputsApi>, dojoOutputs: DojoCreatingTxOutputApi[], derivationPrefix: string, version: number, lockTime: number, paymailHandle?: string, log?: string): {
     tx: bsvJs.Transaction;
     outputMap: Record<string, number>;
     amount: number;
