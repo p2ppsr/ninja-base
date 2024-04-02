@@ -32,11 +32,16 @@ export interface CreateActionParams {
      */
     outputs: DojoCreateTxOutputApi[];
     /**
+     * Optional. Default is zero.
      * When the transaction can be processed into a block:
      * >= 500,000,000 values are interpreted as minimum required unix time stamps in seconds
      * < 500,000,000 values are interpreted as minimum required block height
      */
-    lockTime: number;
+    lockTime?: number;
+    /**
+     * Optional. Transaction version number, default is current standard transaction version value.
+     */
+    version?: number;
     /**
      * transaction labels to apply to this transaction
      * default []

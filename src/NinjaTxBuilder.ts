@@ -46,8 +46,7 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
   static buildJsTxFromCreateTransactionResult(
     ninja: NinjaApi,
     inputs: Record<string, NinjaTxInputsApi>,
-    createResult: DojoCreateTransactionResultApi,
-    lockTime?: number
+    createResult: DojoCreateTransactionResultApi
   ): {
     tx: bsvJs.Transaction
     outputMap: Record<string, number>
@@ -58,10 +57,12 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
       inputs: txInputs,
       outputs: txOutputs,
       derivationPrefix,
-      paymailHandle
+      paymailHandle,
+      version,
+      lockTime
     } = createResult
 
-    return this.buildJsTx(ninja, inputs, txInputs, txOutputs, derivationPrefix, paymailHandle, lockTime, createResult.log);
+    return this.buildJsTx(ninja, inputs, txInputs, txOutputs, derivationPrefix, version, lockTime, paymailHandle, createResult.log);
   }
 
   /**
@@ -70,8 +71,9 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
    * @param dojoInputs Inputs to be added that are known to ninja's dojo.
    * @param dojoOutputs All new outputs to be created
    * @param derivationPrefix 
-   * @param paymailHandle 
+   * @param version 
    * @param lockTime 
+   * @param paymailHandle 
    * @returns new signed bitcoin transaction, output map, an impact amount on authority's balance
    */
   static buildJsTx(
@@ -80,8 +82,9 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     dojoInputs: Record<string, DojoCreatingTxInputsApi>,
     dojoOutputs: DojoCreatingTxOutputApi[],
     derivationPrefix: string,
+    version: number,
+    lockTime: number,
     paymailHandle?: string,
-    lockTime?: number,
     log?: string
   ): {
     tx: bsvJs.Transaction
@@ -193,6 +196,10 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
     // Set a custom lock time if provided
     if (typeof lockTime === 'number') {
       tx.nLockTime = lockTime
+    }
+
+    if (typeof version === 'number') {
+      tx.version = version
     }
 
     //  Sign inputs using type42 derived key

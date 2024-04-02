@@ -47,6 +47,7 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
     feePerKb,
     feeModel,
     lockTime,
+    version
   } = params
   let {
     inputs
@@ -60,12 +61,15 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
     inputs: convertToDojoTxInputsApi(inputs),
     outputs,
     feeModel: feeModel || (feePerKb ? { model: 'sat/kb', value: feePerKb } : undefined),
+    version,
+    lockTime,
     labels,
     note,
     recipient,
     log
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const signActionRequired = needsSignAction(inputs)
 
   if (params.acceptDelayedBroadcast) {
@@ -82,7 +86,7 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
 
   try {
     createResult.log = log
-    r = await signCreatedTransaction(ninja, { inputs, note, lockTime, createResult })
+    r = await signCreatedTransaction(ninja, { inputs, note, createResult })
     log = stampLog(r.log, '... ninja createTransactionWithOutputs signing transaction')
   } catch(eu: unknown) {
     const e = CwiError.fromUnknown(eu)
@@ -108,9 +112,9 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
 export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSignCreatedTransactionParams)
 : Promise<NinjaTransactionWithOutputsResultApi>
 {
-  const { inputs, note, lockTime, createResult } = params
+  const { inputs, note, createResult } = params
 
-  const { tx, outputMap, amount, log } = NinjaTxBuilder.buildJsTxFromCreateTransactionResult(ninja, inputs, createResult, lockTime)
+  const { tx, outputMap, amount, log } = NinjaTxBuilder.buildJsTxFromCreateTransactionResult(ninja, inputs, createResult)
 
   const { inputs: txInputs, referenceNumber } = createResult
 

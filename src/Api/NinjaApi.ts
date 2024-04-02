@@ -922,10 +922,6 @@ export interface NinjaSignCreatedTransactionParams {
      * A note about the transaction
      */
    note?: string
-   /**
-     * A lock time for the transaction
-     */
-   lockTime?: number
    
    createResult: DojoCreateTransactionResultApi
 }
@@ -961,10 +957,17 @@ export interface NinjaGetTransactionWithOutputsParams {
      * A note about the transaction
      */
    note?: string
-   /**
-     * A lock time for the transaction
+    /**
+     * Optional. Default is zero.
+     * When the transaction can be processed into a block:
+     * >= 500,000,000 values are interpreted as minimum required unix time stamps in seconds
+     * < 500,000,000 values are interpreted as minimum required block height
      */
-   lockTime?: number
+    lockTime?: number;
+    /**
+     * Optional. Transaction version number, default is current standard transaction version value.
+     */
+    version?: number;
   /**
      * Paymail recipient for transaction
      */
