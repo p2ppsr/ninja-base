@@ -949,10 +949,10 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 #### Interface: NinjaGetTransactionsTxApi
 
 ```ts
-export interface NinjaGetTransactionsTxApi {
+export interface NinjaGetTransactionsTxApi extends ListActionsTransaction {
     txid: string;
     amount: number;
-    status: string;
+    status: TransactionStatusApi;
     senderPaymail: string;
     recipientPaymail: string;
     isOutgoing: boolean;
@@ -1038,7 +1038,7 @@ senderPaymail: string
 The current state of the transaction. Common statuses are `completed` and `unproven`.
 
 ```ts
-status: string
+status: TransactionStatusApi
 ```
 
 ##### Property txid
@@ -1057,7 +1057,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 #### Interface: NinjaGetTransactionsTxInputApi
 
 ```ts
-export interface NinjaGetTransactionsTxInputApi {
+export interface NinjaGetTransactionsTxInputApi extends ListActionsTransactionInput {
     txid: string;
     vout: number;
     amount: number;
@@ -1065,6 +1065,8 @@ export interface NinjaGetTransactionsTxInputApi {
     type: string;
     spendable: boolean;
     spendingDescription?: string;
+    basket?: string;
+    tags?: string[];
 }
 ```
 
@@ -1078,6 +1080,14 @@ Number of satoshis in the output
 
 ```ts
 amount: number
+```
+
+##### Property basket
+
+Optionally included basket assignment.
+
+```ts
+basket?: string
 ```
 
 ##### Property outputScript
@@ -1102,6 +1112,14 @@ Spending description for this transaction input
 
 ```ts
 spendingDescription?: string
+```
+
+##### Property tags
+
+Optionally included tag assignments.
+
+```ts
+tags?: string[]
 ```
 
 ##### Property txid
@@ -1136,7 +1154,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 #### Interface: NinjaGetTransactionsTxOutputApi
 
 ```ts
-export interface NinjaGetTransactionsTxOutputApi {
+export interface NinjaGetTransactionsTxOutputApi extends ListActionsTransactionOutput {
     txid: string;
     vout: number;
     amount: number;
@@ -1144,6 +1162,8 @@ export interface NinjaGetTransactionsTxOutputApi {
     type: string;
     spendable: boolean;
     description?: string;
+    basket?: string;
+    tags?: string[];
 }
 ```
 
@@ -1157,6 +1177,14 @@ Number of satoshis in the output
 
 ```ts
 amount: number
+```
+
+##### Property basket
+
+Optionally included basket assignment.
+
+```ts
+basket?: string
 ```
 
 ##### Property description
@@ -1181,6 +1209,14 @@ Whether this output is free to be spent
 
 ```ts
 spendable: boolean
+```
+
+##### Property tags
+
+Optionally included tag assignments.
+
+```ts
+tags?: string[]
 ```
 
 ##### Property txid
