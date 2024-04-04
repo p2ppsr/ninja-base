@@ -1,4 +1,8 @@
-import { GetTransactionOutputResult, SubmitDirectTransaction, SubmitDirectTransactionOutput, SubmitDirectTransactionResult } from '@babbage/sdk-ts'
+import {
+   GetTransactionOutputResult, ListActionsTransaction, ListActionsTransactionInput,
+   ListActionsTransactionOutput, SubmitDirectTransaction, SubmitDirectTransactionOutput,
+   SubmitDirectTransactionResult, TransactionStatusApi
+} from '@babbage/sdk-ts'
 import {
   Chain, CwiError, DojoAvatarApi, DojoCertificateApi, DojoClientApi, EnvelopeEvidenceApi,
   DojoGetTotalOfAmountsOptions, DojoGetTransactionOutputsOptions, DojoGetTransactionsOptions,
@@ -510,7 +514,7 @@ export interface KeyPairApi {
   publicKey: string
 }
 
-export interface NinjaGetTransactionsTxApi {
+export interface NinjaGetTransactionsTxApi extends ListActionsTransaction {
   /**
      * The transaction ID
      */
@@ -522,7 +526,7 @@ export interface NinjaGetTransactionsTxApi {
   /**
      * The current state of the transaction. Common statuses are `completed` and `unproven`.
      */
-  status: string
+  status: TransactionStatusApi
   /**
      * The Paymail handle of the person who sent the transaction
      */
@@ -558,7 +562,7 @@ export interface NinjaGetTransactionsTxApi {
 /**
  *
  */
-export interface NinjaGetTransactionsTxInputApi {
+export interface NinjaGetTransactionsTxInputApi extends ListActionsTransactionInput {
    /**
     * Transaction ID of transaction that created the output
     */
@@ -587,12 +591,20 @@ export interface NinjaGetTransactionsTxInputApi {
     * Spending description for this transaction input
     */
    spendingDescription?: string
+   /**
+    * Optionally included basket assignment.
+    */
+   basket?: string
+   /**
+    * Optionally included tag assignments.
+    */
+   tags?: string[]
 }
 
 /**
  *
  */
-export interface NinjaGetTransactionsTxOutputApi {
+export interface NinjaGetTransactionsTxOutputApi extends ListActionsTransactionOutput {
    /**
     * Transaction ID of transaction that created the output
     */
@@ -621,6 +633,14 @@ export interface NinjaGetTransactionsTxOutputApi {
     * Output description
     */
    description?: string
+   /**
+    * Optionally included basket assignment.
+    */
+   basket?: string
+   /**
+    * Optionally included tag assignments.
+    */
+   tags?: string[]
 }
 
 /**

@@ -27,6 +27,8 @@ import {
   NinjaSubmitDirectTransactionParams, NinjaSubmitDirectTransactionResultApi,
   NinjaTransactionFailedHandler, NinjaTransactionProcessedHandler,
   NinjaTransactionWithOutputsResultApi,
+  NinjaGetTransactionsTxOutputApi,
+  NinjaGetTransactionsTxInputApi,
 } from '../Api/NinjaApi'
 
 import { processPendingTransactions } from './processPendingTransactions'
@@ -263,30 +265,39 @@ export class NinjaBase implements NinjaApi {
         created_at: t.created_at instanceof Date ? t.created_at.toISOString() : t.created_at || '',
         referenceNumber: t.referenceNumber || '',
         labels: t.labels || [],
-        inputs: t.inputs ? t.inputs.map(x => ({
-          txid: x.txid || '',
-          vout: x.vout || 0,
-          amount: x.amount || 0,
-          outputScript: asString(x.outputScript || ''),
-          type: x.type,
-          spendable: x.spendable,
-          spendingDescription: x.spendingDescription || undefined,
-          basket: x.basket ? x.basket.name : undefined,
-          tags: x.tags ? x.tags.map(t => t.tag) : undefined
-        })) : undefined,
-        outputs: t.outputs ? t.outputs.map(x => ({
-          txid: x.txid || '',
-          vout: x.vout || 0,
-          amount: x.amount || 0,
-          outputScript: asString(x.outputScript || ''),
-          type: x.type,
-          spendable: x.spendable,
-          description: x.description || undefined,
-          basket: x.basket ? x.basket.name : undefined,
-          tags: x.tags ? x.tags.map(t => t.tag) : undefined
-        })) : undefined
-      }))
-    }
+        inputs: !t.inputs
+          ? undefined
+          : t.inputs.map(x => {
+            const input: NinjaGetTransactionsTxInputApi = {
+              txid: x.txid || '',
+              vout: x.vout || 0,
+              amount: x.amount || 0,
+              outputScript: asString(x.outputScript || ''),
+              type: x.type,
+              spendable: x.spendable,
+              spendingDescription: x.spendingDescription || undefined,
+              basket: x.basket ? x.basket.name : undefined,
+              tags: x.tags ? x.tags.map(t => t.tag) : undefined
+            }
+          return input
+        }),
+        outputs: !t.outputs
+          ? undefined
+          : t.outputs.map(x => {
+            const output: NinjaGetTransactionsTxOutputApi = {
+            txid: x.txid || '',
+            vout: x.vout || 0,
+            amount: x.amount || 0,
+            outputScript: asString(x.outputScript || ''),
+            type: x.type,
+            spendable: x.spendable,
+            description: x.description || undefined,
+            basket: x.basket ? x.basket.name : undefined,
+            tags: x.tags ? x.tags.map(t => t.tag) : undefined
+          }
+          return output
+      })
+    }))}
     return rr
   }
 
