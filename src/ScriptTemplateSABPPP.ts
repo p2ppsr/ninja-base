@@ -1,5 +1,5 @@
 import { asBsvSdkPrivateKey, verifyTruthy } from "cwi-base";
-import { LockingScript, P2PKH, ScriptTemplate, Transaction, UnlockingScript } from "@bsv/sdk";
+import { LockingScript, P2PKH, Script, ScriptTemplate, Transaction, UnlockingScript } from "@bsv/sdk";
 import { getPaymentAddress, getPaymentPrivateKey } from "sendover";
 
 export interface ScriptTemplateParamsSABPPP {
@@ -38,7 +38,7 @@ export class ScriptTemplateSABPPP implements ScriptTemplate {
         return r
     } 
 
-    unlock(unlockerPrivKey: string, lockerPubKey: string)
+    unlock(unlockerPrivKey: string, lockerPubKey: string, sourceSatoshis?: number, lockingScript?: Script)
     : {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
         estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
@@ -52,7 +52,7 @@ export class ScriptTemplateSABPPP implements ScriptTemplate {
             returnType: "hex"
         })
         
-        const r = this.p2pkh.unlock(asBsvSdkPrivateKey(derivedPrivateKey), "all", false)
+        const r = this.p2pkh.unlock(asBsvSdkPrivateKey(derivedPrivateKey), "all", false, sourceSatoshis, lockingScript)
         return r
     }
 

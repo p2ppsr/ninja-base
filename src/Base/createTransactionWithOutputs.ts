@@ -66,13 +66,16 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
 
   } catch (eu: unknown) {
     const e = CwiError.fromUnknown(eu);
-    try {
-      await ninja.dojo.updateTransactionStatus(createResult.referenceNumber, 'failed');
-      if (e.code === 'ERR_NINJA_INVALID_UNLOCK') {
-        const ed = eu as ERR_NINJA_INVALID_UNLOCK;
-        await ninja.dojo.updateOutpointStatus(ed.txid, ed.vout, false);
-      }
-    } catch { /* */ }
+    // knex access in catch block hangs on sqlite...
+    if (false) {
+      try {
+        await ninja.dojo.updateTransactionStatus(createResult.referenceNumber, 'failed');
+        if (e.code === 'ERR_NINJA_INVALID_UNLOCK') {
+          const ed = eu as ERR_NINJA_INVALID_UNLOCK;
+          await ninja.dojo.updateOutpointStatus(ed.txid, ed.vout, false);
+        }
+      } catch { /* */ }
+    }
     throw eu;
   }
 
