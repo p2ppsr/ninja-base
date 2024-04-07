@@ -90,10 +90,13 @@ export async function createTransactionWithOutputs (ninja: NinjaBase, params: Ni
     log = stampLog(r.log, '... ninja createTransactionWithOutputs signing transaction')
   } catch(eu: unknown) {
     const e = CwiError.fromUnknown(eu)
-    await ninja.dojo.updateTransactionStatus(createResult.referenceNumber, 'failed')
-    if (e.code === 'ERR_NINJA_INVALID_UNLOCK') {
-      const ed = eu as ERR_NINJA_INVALID_UNLOCK
-      await ninja.dojo.updateOutpointStatus(ed.txid, ed.vout, false)
+    if (false) {
+      // Is this a problem for Sqlite? YES. Causes a knex connection timeout.
+      await ninja.dojo.updateTransactionStatus(createResult.referenceNumber, 'failed')
+      if (e.code === 'ERR_NINJA_INVALID_UNLOCK') {
+        const ed = eu as ERR_NINJA_INVALID_UNLOCK
+        await ninja.dojo.updateOutpointStatus(ed.txid, ed.vout, false)
+      }
     }
     throw eu
   }
