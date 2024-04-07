@@ -33,10 +33,10 @@ import {
 
 import { processPendingTransactions } from './processPendingTransactions'
 import {
-  createTransactionWithOutputs,
-  processTransactionWithOutputs,
   getTransactionWithOutputs
 } from './getTransactionWithOutputs'
+import { createTransactionWithOutputs } from './createTransactionWithOutputs'
+import { processTransactionWithOutputs } from './processTransactionWithOutputs'
 import { submitDirectTransaction } from './submitDirectTransaction'
 import { DojoExpressClient } from '../DojoExpressClient'
 import { signAction } from './signAction'

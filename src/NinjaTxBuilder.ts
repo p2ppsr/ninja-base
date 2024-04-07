@@ -224,6 +224,17 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
             senderPublicKey: instructions.senderIdentityKey,
             invoiceNumber
           })
+          {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const derivedPrivateKeyHex = getPaymentPrivateKey({
+              recipientPrivateKey: changeKeys.privateKey,
+              senderPublicKey: instructions.senderIdentityKey,
+              invoiceNumber,
+              returnType: "hex"
+            })
+            debugger;
+          }
+
           tx.sign(bsvJs.PrivateKey.fromWIF(derivedPrivateKey))
         }
       }

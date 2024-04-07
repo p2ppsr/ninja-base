@@ -1,28 +1,37 @@
-import { DojoCreatingTxInstructionsApi, asBsvSdkPrivateKey, verifyTruthy } from "cwi-base";
+import { asBsvSdkPrivateKey, verifyTruthy } from "cwi-base";
 import { LockingScript, P2PKH, ScriptTemplate, Transaction, UnlockingScript } from "@bsv/sdk";
-import { invoice3241645161d8 } from "../invoice";
 import { getPaymentAddress, getPaymentPrivateKey } from "sendover";
 
-export class NinjaUnlockTemplateSABPPP implements ScriptTemplate {
-    p2pkh: P2PKH
-    invoiceNumber: string
+export interface ScriptTemplateParamsSABPPP {
+   derivationPrefix?: string
+   derivationSuffix?: string
+}
 
-    constructor(public instructions: DojoCreatingTxInstructionsApi) {
+export class ScriptTemplateSABPPP implements ScriptTemplate {
+    p2pkh: P2PKH
+
+    protocol: string = '2-3241645161d8'
+
+    constructor(public params: ScriptTemplateParamsSABPPP) {
         this.p2pkh = new P2PKH()
 
-        const paymailHandle = instructions.paymailHandle
-        const derivationPrefix = verifyTruthy(instructions.derivationPrefix)
-        const derivationSuffix = verifyTruthy(instructions.derivationSuffix)
+        verifyTruthy(params.derivationPrefix)
+        verifyTruthy(params.derivationSuffix)
+    }
 
-        this.invoiceNumber = invoice3241645161d8(derivationPrefix, derivationSuffix, paymailHandle)
-
+    /**
+     * Combine inputs per protocol 3241645161d8 to generate an 'invoice' string used for cryptographic key generation.
+     */
+    invoice (): string {
+        const invoice = `${this.protocol}-${this.params.derivationPrefix} ${this.params.derivationSuffix}`
+        return invoice
     }
 
     lock(lockerPrivKey: string, unlockerPubKey: string) : LockingScript {
         const derivedAddress = getPaymentAddress({
             senderPrivateKey: lockerPrivKey,
             recipientPublicKey: unlockerPubKey,
-            invoiceNumber: this.invoiceNumber,
+            invoiceNumber: this.invoice(),
             returnType: 'address'
         }) as string
         const r = this.p2pkh.lock(derivedAddress)
@@ -39,8 +48,10 @@ export class NinjaUnlockTemplateSABPPP implements ScriptTemplate {
         const derivedPrivateKey = getPaymentPrivateKey({
             recipientPrivateKey: unlockerPrivKey,
             senderPublicKey: lockerPubKey,
-            invoiceNumber: this.invoiceNumber
+            invoiceNumber: this.invoice(),
+            returnType: "hex"
         })
+        
         const r = this.p2pkh.unlock(asBsvSdkPrivateKey(derivedPrivateKey), "all", false)
         return r
     }
