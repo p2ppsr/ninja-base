@@ -4,7 +4,7 @@ import { getPaymentPrivateKey } from 'sendover'
 
 export async function makeUnlockTestRawTxBabbageBsv(params: {
     sourceTXID: string,
-    sourceIndex: number,
+    sourceOutputIndex: number,
     lockingScript: string,
     satoshis: number,
     derivationPrefix: string,
@@ -18,7 +18,7 @@ export async function makeUnlockTestRawTxBabbageBsv(params: {
 
     tx.from(bsvJs.Transaction.UnspentOutput({
         txid: params.sourceTXID,
-        outputIndex: params.sourceIndex,
+        outputIndex: params.sourceOutputIndex,
         // scruptPubKey a.k.a. lockingScript or outputScript
         // (whereas scriptSig a.k.a. unlockingScript or inputScript)
         scriptPubKey: params.lockingScript,

@@ -3,10 +3,10 @@ import { NinjaApi, NinjaTxInputsApi } from '../Api/NinjaApi';
 import {
   CwiError, DojoCreatingTxInputsApi, DojoCreatingTxOutputApi,
   ERR_INTERNAL, ERR_INVALID_PARAMETER,
+  ScriptTemplateSABPPP,
   asBsvSdkScript, asBsvSdkTx, validateUnlockScriptWithBsvSdk, verifyTruthy
 } from 'cwi-base';
 import { ERR_NINJA_INVALID_UNLOCK, ERR_NINJA_MISSING_UNLOCK } from '../ERR_NINJA_errors';
-import { ScriptTemplateSABPPP } from '../ScriptTemplateSABPPP';
 
 /**
  * @param ninja The authority constructing this new transaction
