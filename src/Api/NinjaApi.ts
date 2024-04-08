@@ -662,38 +662,60 @@ export interface NinjaGetTransactionsResultApi {
  */
 export interface NinjaTransactionWithOutputsResultApi {
   /**
-     * The serialized, signed transaction that is ready for broadcast, or has been broadcast.
-     */
-  rawTx: string
+    * true if at least one input's outputsToRedeem uses numeric max script byte length for unlockingScript
+    * 
+    * If true, in-process transaction will have status `unsigned`. An `unsigned` transaction must be completed
+    * by signing all remaining unsigned inputs and calling `signAction`. Failure to complete the process in
+    * a timely manner will cause the transaction to transition to `failed`.
+    * 
+    * If false or undefined, completed transaction will have status of `sending` or `unproven`,
+    * depending on `acceptDelayedBroadcast` being true or false.   
+    */
+  signActionRequired?: boolean
   /**
-     * rawTx hash as hex string
-     */
-  txid: string
+    * if signActionRequired, the dojo createTransaction results to be forwarded to signAction
+    */
+  createTransactionResult?: DojoCreateTransactionResultApi
   /**
-     * The amount of the transaction
-     */
+   * The serialized, signed transaction that is ready for broadcast, or has been broadcast.
+   * 
+   * Only valid if signActionRequired !== true
+   */
+  rawTx?: string
+  /**
+   * rawTx hash as hex string
+   * 
+   * Only valid if signActionRequired !== true
+   */
+  txid?: string
+  /**
+   * The amount of the transaction
+   */
   amount: number
   /**
-     * This is the fully-formed `inputs` field of this transaction, as per the SPV Envelope specification.
-     */
+   * This is the fully-formed `inputs` field of this transaction, as per the SPV Envelope specification.
+   */
   inputs: Record<string, EnvelopeEvidenceApi>
   /**
    * 
    */
   note?: string
   /**
-     * The reference number that should now be provided back to `processTransaction (or `updateTransactionStatus`)
-     */
+   * The reference number that should now be provided back to `processTransaction (or `updateTransactionStatus`)
+   */
   referenceNumber: string
   /**
-     * Map of change output derivationSuffix values to transaction vout indices
-     */
-  outputMap: Record<string, number>
+   * Map of change output derivationSuffix values to transaction vout indices
+   * 
+   * Only valid if signActionRequired !== true
+   */
+  outputMap?: Record<string, number>
   /**
-     * If processed, array of acceptance responses from mapi transaction processors.
-     */
+   * If processed, array of acceptance responses from mapi transaction processors.
+   * 
+   * Only valid if signActionRequired !== true
+   */
   mapiResponses?: MapiResponseApi[]
-
   /**
    * Optional transaction processing history
    */

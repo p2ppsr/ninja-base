@@ -7,6 +7,7 @@ import {
 import { CwiError, DojoCreateTransactionParams, DojoTxInputsApi, stampLog, stampLogFormat, validateInputSelection } from 'cwi-base';
 import { ERR_NINJA_INVALID_UNLOCK } from '../ERR_NINJA_errors';
 import { signCreatedTransaction } from './signCreatedTransaction';
+import { amountFromCreateTransactionResult, unpackFromCreateTransactionResult } from './unpackFromCreateTransactionResult';
 
 
 export async function createTransactionWithOutputs(ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> {
@@ -49,17 +50,30 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
 
   const createResult = await ninja.dojo.createTransaction(params2);
 
-  log = stampLog(createResult.log, '... ninja createTransactionWithOutputs signing transaction');
-
   let r: NinjaTransactionWithOutputsResultApi;
+
+  if (signActionRequired) {
+    const unpacked = unpackFromCreateTransactionResult(inputs, createResult)
+    log = stampLog(log, "end ninja createTransactionWithOutputs signActionRequired");
+    r = {
+      signActionRequired,
+      createTransactionResult: createResult,
+      ...unpacked,
+      note,
+      log
+    }
+    return r
+  }
 
   try {
 
+    log = stampLog(createResult.log, '... ninja createTransactionWithOutputs signing transaction');
     createResult.log = log;
 
     /////////////
     // Ninja creates BSV signed transaction (unless some unlockingScripts specified by length only)
     ////////////
+
     r = await signCreatedTransaction(ninja, { inputs, note, createResult });
 
     log = stampLog(r.log, '... ninja createTransactionWithOutputs signing transaction');
