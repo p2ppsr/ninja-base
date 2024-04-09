@@ -52,10 +52,10 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@babbage/sdk-ts": "^0.2.13",
-    "@bsv/sdk": "^1.0.14",
+    "@babbage/sdk-ts": "^0.2.14",
+    "@bsv/sdk": "^1.0.16",
     "authrite-js": "^0.4.16",
-    "authrite-utils": "^0.3.15",
+    "authrite-utils": "^0.3.16",
     "babbage-bsv": "^0.2.4",
     "cwi-base": "^0.4.19",
     "dotenv": "^16.3.1",
