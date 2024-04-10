@@ -1,13 +1,19 @@
 import { Script, Transaction, TransactionInput, TransactionOutput } from '@bsv/sdk';
-import { NinjaApi, NinjaTxInputsApi } from '../Api/NinjaApi';
+import { KeyPairApi, NinjaTxInputsApi } from '../Api/NinjaApi';
 import { CwiError, DojoCreateTransactionResultApi, ERR_INTERNAL, ERR_INVALID_PARAMETER, ScriptTemplateSABPPP, asBsvSdkScript, asBsvSdkTx, validateUnlockScriptWithBsvSdk, verifyTruthy } from 'cwi-base';
 import { ERR_NINJA_INVALID_UNLOCK, ERR_NINJA_MISSING_UNLOCK } from '../ERR_NINJA_errors';
 
-
+/**
+ * Constructs a @bsv/sdk `Transaction` from Ninja inputs and Dojo create transaction results. 
+ * 
+ * @param ninjaInputs Ninja inputs as passed to createAction
+ * @param createResult Create transaction results returned by createAction when signActionRequires is true.
+ * @param changeKeys Dummy keys can be used to create a transaction with which to generate Ninja input lockingScripts.
+ */
 export async function buildBsvTxFromCreateTransactionResult(
-  ninja: NinjaApi,
   ninjaInputs: Record<string, NinjaTxInputsApi>,
-  createResult: DojoCreateTransactionResultApi
+  createResult: DojoCreateTransactionResultApi,
+  changeKeys: KeyPairApi
 ): Promise<{
   tx: Transaction;
   outputMap: Record<string, number>;
@@ -22,8 +28,6 @@ export async function buildBsvTxFromCreateTransactionResult(
     lockTime,
     log
   } = createResult;
-
-  const changeKeys = ninja.getClientChangeKeyPair();
 
   const tx = new Transaction(version, [], [], lockTime);
 

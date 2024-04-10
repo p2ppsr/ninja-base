@@ -29,7 +29,9 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
   // End Temporary code
   //////////////////////
 
-  const { tx, outputMap, amount, log } = await buildBsvTxFromCreateTransactionResult(ninja, inputs, createResult);
+  const changeKeys = ninja.getClientChangeKeyPair();
+
+  const { tx, outputMap, amount, log } = await buildBsvTxFromCreateTransactionResult(inputs, createResult, changeKeys);
 
   const rawTx = tx.toHex();
   const txid = tx.id("hex") as string;

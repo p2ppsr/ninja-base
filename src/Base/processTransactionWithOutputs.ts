@@ -3,7 +3,7 @@ import {
   NinjaGetTransactionWithOutputsParams,
   NinjaTransactionWithOutputsResultApi
 } from '../Api/NinjaApi';
-import { stampLog } from 'cwi-base';
+import { stampLog, verifyTruthy } from 'cwi-base';
 import { createTransactionWithOutputs } from './createTransactionWithOutputs';
 
 export async function processTransactionWithOutputs(ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> {
@@ -13,9 +13,9 @@ export async function processTransactionWithOutputs(ninja: NinjaBase, params: Ni
   const cr = await createTransactionWithOutputs(ninja, params);
 
   const pr = await ninja.processTransaction({
-    submittedTransaction: cr.rawTx,
+    submittedTransaction: verifyTruthy(cr.rawTx),
     reference: cr.referenceNumber,
-    outputMap: cr.outputMap,
+    outputMap: verifyTruthy(cr.outputMap),
     acceptDelayedBroadcast: params.acceptDelayedBroadcast,
     log: cr.log
   });
