@@ -232,7 +232,6 @@ export class NinjaTxBuilder extends DojoTxBuilderBase {
               invoiceNumber,
               returnType: "hex"
             })
-            debugger;
           }
 
           tx.sign(bsvJs.PrivateKey.fromWIF(derivedPrivateKey))

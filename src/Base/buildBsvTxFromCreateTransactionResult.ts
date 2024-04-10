@@ -84,13 +84,13 @@ export async function buildBsvTxFromCreateTransactionResult(
 
   let vin = -1;
   for (const [inputTXID, input] of Object.entries(dojoInputs)) {
-    vin++;
     // For each transaction supplying inputs...
     const txInput = asBsvSdkTx(input.rawTx); // transaction referenced by input "outpoint" (txid,vout)
     if (txInput.id("hex") !== inputTXID)
       throw new ERR_INVALID_PARAMETER("rawTx", `match txid. Hash of rawTx is not equal to input txid ${inputTXID}`);
 
     for (const otr of input.outputsToRedeem) {
+      vin++;
       // For each output being redeemed from that input transaction
       const otrIndex = getIndex(otr);
       const otrOutput = txInput.outputs[otrIndex]; // the bitcoin transaction output being spent by new transaction
