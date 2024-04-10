@@ -6,12 +6,16 @@ import {
   ERR_INTERNAL, ERR_INVALID_PARAMETER} from 'cwi-base';
 import { NinjaTxBuilder } from '../NinjaTxBuilder';
 import { buildBsvTxFromCreateTransactionResult } from './buildBsvTxFromCreateTransactionResult';
+import { needsSignAction } from './createTransactionWithOutputs';
 
 
 export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSignCreatedTransactionParams)
 : Promise<NinjaTransactionWithOutputsResultApi>
 {
-  const { inputs, note, createResult } = params;
+  const { inputs, createResult } = params;
+
+  if (needsSignAction(inputs))
+    throw new ERR_INVALID_PARAMETER('inputs', 'complete unlockingScript values.')
 
   if (createResult.paymailHandle)
     throw new ERR_INVALID_PARAMETER('paymailHandle', 'undefined. It has be fully deprecated.')
@@ -56,7 +60,7 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
     txid,
     amount,
     inputs: sanitizedInputs,
-    note,
+    note: createResult.note,
     referenceNumber,
     outputMap,
     log

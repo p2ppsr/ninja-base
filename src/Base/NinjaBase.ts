@@ -41,6 +41,7 @@ import { submitDirectTransaction } from './submitDirectTransaction'
 import { DojoExpressClient } from '../DojoExpressClient'
 import { signAction } from './signAction'
 import { abortAction } from './abortAction'
+import { signCreatedTransaction } from './signCreatedTransaction'
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain

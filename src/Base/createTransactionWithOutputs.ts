@@ -4,13 +4,12 @@ import {
   NinjaTransactionWithOutputsResultApi,
   NinjaTxInputsApi
 } from '../Api/NinjaApi';
-import { CwiError, DojoCreateTransactionParams, DojoTxInputsApi, stampLog, stampLogFormat, validateInputSelection } from 'cwi-base';
-import { ERR_NINJA_INVALID_UNLOCK } from '../ERR_NINJA_errors';
+import { DojoCreateTransactionParams, DojoTxInputsApi, stampLog, stampLogFormat, validateInputSelection } from 'cwi-base';
 import { signCreatedTransaction } from './signCreatedTransaction';
-import { amountFromCreateTransactionResult, unpackFromCreateTransactionResult } from './unpackFromCreateTransactionResult';
+import { unpackFromCreateTransactionResult } from './unpackFromCreateTransactionResult';
 
-
-export async function createTransactionWithOutputs(ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> {
+export async function createTransactionWithOutputs(ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams)
+: Promise<NinjaTransactionWithOutputsResultApi> {
   const {
     outputs, labels, note, recipient, feePerKb, feeModel, lockTime, version
   } = params;
@@ -54,10 +53,10 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
 
   if (signActionRequired) {
     const unpacked = unpackFromCreateTransactionResult(inputs, createResult)
-    log = stampLog(log, "end ninja createTransactionWithOutputs signActionRequired");
+    log = stampLog(log, "end ninja createTransactionWithOutputs signActionRequired true");
     r = {
       signActionRequired,
-      createTransactionResult: createResult,
+      createResult,
       ...unpacked,
       note,
       log
@@ -65,35 +64,16 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
     return r
   }
 
-  try {
+  createResult.log = stampLog(createResult.log, '... ninja createTransactionWithOutputs signing transaction');
 
-    log = stampLog(createResult.log, '... ninja createTransactionWithOutputs signing transaction');
-    createResult.log = log;
+  /////////////
+  // Ninja creates BSV signed transaction (unless some unlockingScripts specified by length only)
+  ////////////
 
-    /////////////
-    // Ninja creates BSV signed transaction (unless some unlockingScripts specified by length only)
-    ////////////
-
-    r = await signCreatedTransaction(ninja, { inputs, note, createResult });
-
-    log = stampLog(r.log, '... ninja createTransactionWithOutputs signing transaction');
-
-  } catch (eu: unknown) {
-    const e = CwiError.fromUnknown(eu);
-    // knex access in catch block hangs on sqlite...
-    if (false) {
-      try {
-        await ninja.dojo.updateTransactionStatus(createResult.referenceNumber, 'failed');
-        if (e.code === 'ERR_NINJA_INVALID_UNLOCK') {
-          const ed = eu as ERR_NINJA_INVALID_UNLOCK;
-          await ninja.dojo.updateOutpointStatus(ed.txid, ed.vout, false);
-        }
-      } catch { /* */ }
-    }
-    throw eu;
-  }
+  r = await signCreatedTransaction(ninja, { inputs, createResult });
 
   log = stampLog(r.log, "end ninja createTransactionWithOutputs");
+
   if (typeof params.log === 'string')
     r.log = params.log + log;
   else {
