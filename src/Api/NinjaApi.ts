@@ -662,38 +662,60 @@ export interface NinjaGetTransactionsResultApi {
  */
 export interface NinjaTransactionWithOutputsResultApi {
   /**
-     * The serialized, signed transaction that is ready for broadcast, or has been broadcast.
-     */
-  rawTx: string
+    * true if at least one input's outputsToRedeem uses numeric max script byte length for unlockingScript
+    * 
+    * If true, in-process transaction will have status `unsigned`. An `unsigned` transaction must be completed
+    * by signing all remaining unsigned inputs and calling `signAction`. Failure to complete the process in
+    * a timely manner will cause the transaction to transition to `failed`.
+    * 
+    * If false or undefined, completed transaction will have status of `sending` or `unproven`,
+    * depending on `acceptDelayedBroadcast` being true or false.   
+    */
+  signActionRequired?: boolean
   /**
-     * rawTx hash as hex string
-     */
-  txid: string
+    * if signActionRequired, the dojo createTransaction results to be forwarded to signAction
+    */
+  createResult?: DojoCreateTransactionResultApi
   /**
-     * The amount of the transaction
-     */
+   * The serialized, signed transaction that is ready for broadcast, or has been broadcast.
+   * 
+   * Only valid if signActionRequired !== true
+   */
+  rawTx?: string
+  /**
+   * rawTx hash as hex string
+   * 
+   * Only valid if signActionRequired !== true
+   */
+  txid?: string
+  /**
+   * The amount of the transaction
+   */
   amount: number
   /**
-     * This is the fully-formed `inputs` field of this transaction, as per the SPV Envelope specification.
-     */
+   * This is the fully-formed `inputs` field of this transaction, as per the SPV Envelope specification.
+   */
   inputs: Record<string, EnvelopeEvidenceApi>
   /**
    * 
    */
   note?: string
   /**
-     * The reference number that should now be provided back to `processTransaction (or `updateTransactionStatus`)
-     */
+   * The reference number that should now be provided back to `processTransaction (or `updateTransactionStatus`)
+   */
   referenceNumber: string
   /**
-     * Map of change output derivationSuffix values to transaction vout indices
-     */
-  outputMap: Record<string, number>
+   * Map of change output derivationSuffix values to transaction vout indices
+   * 
+   * Only valid if signActionRequired !== true
+   */
+  outputMap?: Record<string, number>
   /**
-     * If processed, array of acceptance responses from mapi transaction processors.
-     */
+   * If processed, array of acceptance responses from mapi transaction processors.
+   * 
+   * Only valid if signActionRequired !== true
+   */
   mapiResponses?: MapiResponseApi[]
-
   /**
    * Optional transaction processing history
    */
@@ -937,11 +959,7 @@ export interface NinjaSignCreatedTransactionParams {
      * Note that you should create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
      * so that the additional Dojo outputs can be added afterward without invalidating your signature.
      */
-  inputs: Record<string, NinjaTxInputsApi>
-  /**
-     * A note about the transaction
-     */
-   note?: string
+   inputs: Record<string, NinjaTxInputsApi>
    
    createResult: DojoCreateTransactionResultApi
 }
@@ -967,7 +985,7 @@ export interface NinjaGetTransactionWithOutputsParams {
      * This is an array of objects, each containing `index` and `unlockingScript` properties.
      *
      * The `index` property is the output number in the transaction you are spending,
-     * and `unlockingScript` is the hex scriptcode that unlocks the satoshis.
+     * and `unlockingScript` is the hex scriptcode that unlocks the satoshis or the maximum script length for signActionRequired.
      *
      * Note that you should create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
      * so that the additional Dojo outputs can be added afterward without invalidating your signature.
@@ -1051,49 +1069,97 @@ export interface NinjaGetTransactionWithOutputsParams {
    log?: string
 }
 
-export interface NinjaSignActionParams {
+export interface NinjaCompleteCreateTransactionWithOutputsParams {
+  /**
+     * Input scripts to spend as part of this transaction.
+     *
+     * This is an object whose keys are TXIDs and whose values are Everett-style
+     * transaction envelopes that contain an additional field called `outputsToRedeem`.
+     *
+     * This is an array of objects, each containing `index` and `unlockingScript` properties.
+     *
+     * The `index` property is the output number in the transaction you are spending,
+     * and `unlockingScript` is the hex scriptcode that unlocks the satoshis.
+     *
+     * Note that you should create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
+     * so that the additional Dojo outputs can be added afterward without invalidating your signature.
+     */
+   inputs?: Record<string, NinjaTxInputsApi>
+   note?: string
+   createResult: DojoCreateTransactionResultApi
+}
+
+export interface NinjaSignActionParams extends NinjaSignCreatedTransactionParams {
+  /**
+     * Input scripts to spend as part of this transaction.
+     *
+     * This is an object whose keys are TXIDs and whose values are Everett-style
+     * transaction envelopes that contain an additional field called `outputsToRedeem`.
+     *
+     * This is an array of objects, each containing `index` and `unlockingScript` properties.
+     *
+     * The `index` property is the output number in the transaction you are spending,
+     * and `unlockingScript` is the hex scriptcode that unlocks the satoshis.
+     *
+     * Note that you should create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
+     * so that the additional Dojo outputs can be added afterward without invalidating your signature.
+     */
+   inputs: Record<string, NinjaTxInputsApi>
    /**
     * The dojo createTransaction results returned from createAction.
     */
-   createTransactionResult: DojoCreateTransactionResultApi
-   /**
-    * Transaction with all non-SABPPP inputs signed as LE hex string.
-    */
-   rawTx: string
+   createResult: DojoCreateTransactionResultApi
    /**
     * Must match original value passed to `createAction`.
     */
    acceptDelayedBroadcast?: boolean
-   /**
-    * Optional operational and performance logging prior data.
-    */
-   log: string | undefined
 }
 
-export interface NinjaSignActionResultApi {
-    /**
-     * The unique transaction identifier that was processed.
-     */
-    referenceNumber: string
-    /**
-     * fully signed transaction hash (double SHA256 BE hex string)
-     * 
-     * Serves as confirmation of which transaction was processed.
-     */
-    txid: string,
-    /**
-     * Fully signed transaction as LE hex string
-     */
-    rawTx: string,
-    /**
-     * at least one valid mapi response.
-     * may be a self-signed response if `acceptDelayedBroadcast` is true.
-     */
-    mapiResponses: MapiResponseApi[],
-    /**
-     * operational and performance logging if enabled.
-     */
-    log: string | undefined
+export interface NinjaSignActionResultApi extends NinjaTransactionWithOutputsResultApi {
+  /**
+   * The serialized, signed transaction that is ready for broadcast, or has been broadcast.
+   * 
+   * Only valid if signActionRequired !== true
+   */
+  rawTx?: string
+  /**
+   * rawTx hash as hex string
+   * 
+   * Only valid if signActionRequired !== true
+   */
+  txid?: string
+  /**
+   * The amount of the transaction
+   */
+  amount: number
+  /**
+   * This is the fully-formed `inputs` field of this transaction, as per the SPV Envelope specification.
+   */
+  inputs: Record<string, EnvelopeEvidenceApi>
+  /**
+   * 
+   */
+  note?: string
+  /**
+   * The reference number that should now be provided back to `processTransaction (or `updateTransactionStatus`)
+   */
+  referenceNumber: string
+  /**
+   * Map of change output derivationSuffix values to transaction vout indices
+   * 
+   * Only valid if signActionRequired !== true
+   */
+  outputMap?: Record<string, number>
+  /**
+   * If processed, array of acceptance responses from mapi transaction processors.
+   * 
+   * Only valid if signActionRequired !== true
+   */
+  mapiResponses?: MapiResponseApi[]
+  /**
+   * Optional transaction processing history
+   */
+  log?: string
 }
 
 export interface NinjaAbortActionParams {
