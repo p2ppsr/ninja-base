@@ -4,7 +4,7 @@ import {
   NinjaTransactionWithOutputsResultApi,
   NinjaTxInputsApi
 } from '../Api/NinjaApi';
-import { DojoCreateTransactionParams, DojoTxInputsApi, stampLog, stampLogFormat, validateInputSelection } from 'cwi-base';
+import { DojoCreateTransactionParams, DojoTxInputsApi, stampLog, validateInputSelection } from 'cwi-base';
 import { signCreatedTransaction } from './signCreatedTransaction';
 import { unpackFromCreateTransactionResult } from './unpackFromCreateTransactionResult';
 
@@ -78,7 +78,6 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
     r.log = params.log + log;
   else {
     r.log = log;
-    console.log(stampLogFormat(log));
   }
 
   return r;

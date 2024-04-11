@@ -3,7 +3,7 @@ import {
   NinjaAbortActionParams,
   NinjaAbortActionResultApi,
 } from '../Api/NinjaApi'
-import { stampLog, stampLogFormat } from 'cwi-base'
+import { stampLog } from 'cwi-base'
 
 export async function abortAction(ninja: NinjaBase, params: NinjaAbortActionParams)
 : Promise<NinjaAbortActionResultApi>
@@ -20,9 +20,6 @@ export async function abortAction(ninja: NinjaBase, params: NinjaAbortActionPara
 
   if (typeof params.log === 'string')
     log = params.log + log
-  else {
-    console.log(stampLogFormat(log))
-  }
 
   return { referenceNumber, log }
 }
