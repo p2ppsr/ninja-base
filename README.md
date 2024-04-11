@@ -2513,7 +2513,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export interface CreateActionResult {
     signActionRequired?: boolean;
-    createTransactionResult?: DojoCreateTransactionResultApi;
+    createResult?: DojoCreateTransactionResultApi;
     txid?: string;
     rawTx?: string;
     inputs: Record<string, EnvelopeEvidenceApi>;
@@ -2526,12 +2526,12 @@ export interface CreateActionResult {
 
 <summary>Interface CreateActionResult Details</summary>
 
-##### Property createTransactionResult
+##### Property createResult
 
 if signActionRequired, the dojo createTransaction results to be forwarded to signAction
 
 ```ts
-createTransactionResult?: DojoCreateTransactionResultApi
+createResult?: DojoCreateTransactionResultApi
 ```
 
 ##### Property inputs
