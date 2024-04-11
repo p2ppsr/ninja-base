@@ -92,7 +92,7 @@ export interface CreateActionResult {
     /**
      * if signActionRequired, the dojo createTransaction results to be forwarded to signAction
      */
-    createTransactionResult?: DojoCreateTransactionResultApi
+    createResult?: DojoCreateTransactionResultApi
     /**
      * if not signActionRequired, signed transaction hash (double SHA256 BE hex string)
      */
