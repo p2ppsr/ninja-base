@@ -69,12 +69,6 @@ export interface CreateActionParams {
      * Optional operational and performance logging prior data.
      */
     log?: string;
-    /**
-     * default 0
-     */
-    _recursionCounter?: number;
-    _lastRecursionError?: Error;
-    _encrypted?: boolean;
 }
 
 export interface CreateActionResult {

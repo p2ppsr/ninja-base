@@ -2394,23 +2394,12 @@ export interface CreateActionParams {
     originator?: string;
     acceptDelayedBroadcast?: boolean;
     log?: string;
-    _recursionCounter?: number;
-    _lastRecursionError?: Error;
-    _encrypted?: boolean;
 }
 ```
 
 <details>
 
 <summary>Interface CreateActionParams Details</summary>
-
-##### Property _recursionCounter
-
-default 0
-
-```ts
-_recursionCounter?: number
-```
 
 ##### Property acceptDelayedBroadcast
 
