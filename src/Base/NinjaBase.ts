@@ -41,7 +41,6 @@ import { submitDirectTransaction } from './submitDirectTransaction'
 import { DojoExpressClient } from '../DojoExpressClient'
 import { signAction } from './signAction'
 import { abortAction } from './abortAction'
-import { signCreatedTransaction } from './signCreatedTransaction'
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain
@@ -313,6 +312,7 @@ export class NinjaBase implements NinjaApi {
     await processPendingTransactions(this, onTransactionProcessed, onTransactionFailed)
   }
 
+
   async getTransactionOutputs (options?: DojoGetTransactionOutputsOptions)
   : Promise<NinjaGetTransactionOutputsResultApi[]> {
     await this.verifyDojoAuthenticated()
@@ -338,6 +338,12 @@ export class NinjaBase implements NinjaApi {
   async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<{ labels: DojoTxLabelApi[], total: number }> {
     await this.verifyDojoAuthenticated()
     const r = await this.dojo.getTransactionLabels(options)
+    return r
+  }
+
+  async getEnvelopeForTransaction(txid: string): Promise<EnvelopeApi | undefined> {
+    await this.verifyDojoAuthenticated()
+    const r = await this.dojo.getEnvelopeForTransaction(txid)
     return r
   }
 

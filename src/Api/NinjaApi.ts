@@ -194,6 +194,22 @@ export interface NinjaApi {
    getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<{ labels: DojoTxLabelApi[], total: number }>
 
    /**
+      * Returns an Everett Style envelope for the given txid.
+      *
+      * A transaction envelope is a tree of inputs where all the leaves are proven transactions.
+      * The trivial case is a single leaf: the envelope for a proven transaction is the rawTx and its proof.
+      *
+      * Each branching level of the tree corresponds to an unmined transaction without a proof,
+      * in which case the envelope is:
+      * - rawTx
+      * - mapiResponses from transaction processors (optional)
+      * - inputs object where keys are this transaction's input txids and values are recursive envelope for those txids.
+      *
+      * @param txid double hash of raw transaction as hex string
+      */
+   getEnvelopeForTransaction(txid: string): Promise<EnvelopeApi | undefined>
+
+   /**
       * Returns a set of all transactions that need to be signed and submitted, or canceled
       */
    getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]>
