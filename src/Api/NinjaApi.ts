@@ -1,6 +1,6 @@
 import {
    GetTransactionOutputResult, ListActionsTransaction, ListActionsTransactionInput,
-   ListActionsTransactionOutput, SubmitDirectTransaction, SubmitDirectTransactionOutput,
+   ListActionsTransactionOutput, OptionalEnvelopeEvidenceApi, SubmitDirectTransaction, SubmitDirectTransactionOutput,
    SubmitDirectTransactionResult, TransactionStatusApi
 } from '@babbage/sdk-ts'
 import {
@@ -521,7 +521,7 @@ export interface NinjaOutputToRedeemApi {
   sequenceNumber?: number
 }
 
-export interface NinjaTxInputsApi extends EnvelopeEvidenceApi {
+export interface NinjaTxInputsApi extends OptionalEnvelopeEvidenceApi {
   outputsToRedeem: NinjaOutputToRedeemApi[]
 }
 
@@ -995,15 +995,16 @@ export interface NinjaGetTransactionWithOutputsParams {
   /**
      * Input scripts to spend as part of this transaction.
      *
-     * This is an object whose keys are TXIDs and whose values are Everett-style
-     * transaction envelopes that contain an additional field called `outputsToRedeem`.
-     *
+     * This is an object whose keys are TXIDs and whose values are, optionally, Everett-style
+     * transaction envelopes.
+     * 
+     * The values must contain a field called `outputsToRedeem`.
      * This is an array of objects, each containing `index` and `unlockingScript` properties.
      *
      * The `index` property is the output number in the transaction you are spending,
      * and `unlockingScript` is the hex scriptcode that unlocks the satoshis or the maximum script length for signActionRequired.
      *
-     * Note that you should create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
+     * If hex scriptcode is provided, create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
      * so that the additional Dojo outputs can be added afterward without invalidating your signature.
      */
   inputs?: Record<string, NinjaTxInputsApi>
