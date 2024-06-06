@@ -3,7 +3,8 @@ import {
   NinjaSignCreatedTransactionParams,
   NinjaTransactionWithOutputsResultApi} from '../Api/NinjaApi';
 import {
-  ERR_INTERNAL, ERR_INVALID_PARAMETER} from 'cwi-base';
+  ERR_INTERNAL, ERR_INVALID_PARAMETER,
+  verifyTruthy} from 'cwi-base';
 import { NinjaTxBuilder } from '../NinjaTxBuilder';
 import { buildBsvTxFromCreateTransactionResult } from './buildBsvTxFromCreateTransactionResult';
 import { needsSignAction } from './createTransactionWithOutputs';
@@ -53,7 +54,7 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
       inputs: v.inputs,
       mapiResponses: v.mapiResponses,
       proof: v.proof,
-      rawTx: v.rawTx
+      rawTx: verifyTruthy(v.rawTx)
     }]))
   );
 

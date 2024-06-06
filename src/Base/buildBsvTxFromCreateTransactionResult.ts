@@ -85,7 +85,7 @@ export async function buildBsvTxFromCreateTransactionResult(
   let vin = -1;
   for (const [inputTXID, input] of Object.entries(dojoInputs)) {
     // For each transaction supplying inputs...
-    const txInput = asBsvSdkTx(input.rawTx); // transaction referenced by input "outpoint" (txid,vout)
+    const txInput = asBsvSdkTx(verifyTruthy(input.rawTx)); // transaction referenced by input "outpoint" (txid,vout)
     if (txInput.id("hex") !== inputTXID)
       throw new ERR_INVALID_PARAMETER("rawTx", `match txid. Hash of rawTx is not equal to input txid ${inputTXID}`);
 
