@@ -109,6 +109,7 @@ export interface NinjaApi {
     getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]>;
     getHeight(): Promise<number>;
     getMerkleRootForHeight(height: number): Promise<string | undefined>;
+    getInfo(params: GetInfoParams): Promise<GetInfoResult>;
 }
 ```
 
@@ -292,6 +293,16 @@ getHeight(): Promise<number>
 Returns
 
 The current chain height
+
+##### Method getInfo
+
+```ts
+getInfo(params: GetInfoParams): Promise<GetInfoResult>
+```
+
+Returns
+
+information about the metanet-client context (version, chain, height, user...).
 
 ##### Method getMerkleRootForHeight
 
@@ -3018,6 +3029,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export class NinjaBase implements NinjaApi {
     chain?: Chain;
     userId?: number;
+    user?: DojoClientUserApi;
     _keyPair: KeyPairApi | undefined;
     _isDojoAuthenticated: boolean;
     constructor(public dojo: DojoClientApi, clientPrivateKey?: string, public authrite?: AuthriteClient) 
@@ -3092,6 +3104,7 @@ export class NinjaBase implements NinjaApi {
     async getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> 
     async getHeight(): Promise<number> 
     async getMerkleRootForHeight(height: number): Promise<string | undefined> 
+    async getInfo(params: GetInfoParams): Promise<GetInfoResult> 
 }
 ```
 
@@ -3444,14 +3457,15 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | |
 | --- | --- |
-| [abortAction](#function-abortaction) | [needsSignAction](#function-needssignaction) |
-| [buildBsvTxFromCreateTransactionResult](#function-buildbsvtxfromcreatetransactionresult) | [processIncomingTransaction](#function-processincomingtransaction) |
-| [convertToDojoTxInputsApi](#function-converttodojotxinputsapi) | [processPendingTransactions](#function-processpendingtransactions) |
-| [createTransactionWithOutputs](#function-createtransactionwithoutputs) | [processTransactionWithOutputs](#function-processtransactionwithoutputs) |
-| [getTransactionWithOutputs](#function-gettransactionwithoutputs) | [signAction](#function-signaction) |
-| [getUnlockingScriptLength](#function-getunlockingscriptlength) | [signCreatedTransaction](#function-signcreatedtransaction) |
-| [invoice3241645161d8](#function-invoice3241645161d8) | [submitDirectTransaction](#function-submitdirecttransaction) |
-| [makeUnlockTestRawTxBabbageBsv](#function-makeunlocktestrawtxbabbagebsv) | [unpackFromCreateTransactionResult](#function-unpackfromcreatetransactionresult) |
+| [abortAction](#function-abortaction) | [processIncomingTransaction](#function-processincomingtransaction) |
+| [buildBsvTxFromCreateTransactionResult](#function-buildbsvtxfromcreatetransactionresult) | [processPendingTransactions](#function-processpendingtransactions) |
+| [convertToDojoTxInputsApi](#function-converttodojotxinputsapi) | [processTransactionWithOutputs](#function-processtransactionwithoutputs) |
+| [createTransactionWithOutputs](#function-createtransactionwithoutputs) | [signAction](#function-signaction) |
+| [getTransactionWithOutputs](#function-gettransactionwithoutputs) | [signCreatedTransaction](#function-signcreatedtransaction) |
+| [getUnlockingScriptLength](#function-getunlockingscriptlength) | [submitDirectTransaction](#function-submitdirecttransaction) |
+| [invoice3241645161d8](#function-invoice3241645161d8) | [unpackFromCreateTransactionResult](#function-unpackfromcreatetransactionresult) |
+| [makeUnlockTestRawTxBabbageBsv](#function-makeunlocktestrawtxbabbagebsv) | [validateDefaultParams](#function-validatedefaultparams) |
+| [needsSignAction](#function-needssignaction) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -3567,6 +3581,24 @@ export function unpackFromCreateTransactionResult(ninjaInputs: Record<string, Ni
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+#### Function: processTransactionWithOutputs
+
+```ts
+export async function processTransactionWithOutputs(ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Function: validateDefaultParams
+
+```ts
+export function validateDefaultParams(params: NinjaGetTransactionWithOutputsParams, logLabel?: string) 
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 #### Function: createTransactionWithOutputs
 
 ```ts
@@ -3610,15 +3642,6 @@ Convert NinjaTxInputsApi to DojoTxInputsApi to protect unlocking scripts.
 
 ```ts
 export function convertToDojoTxInputsApi(inputs: Record<string, NinjaTxInputsApi>): Record<string, DojoTxInputsApi> 
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-#### Function: processTransactionWithOutputs
-
-```ts
-export async function processTransactionWithOutputs(ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
