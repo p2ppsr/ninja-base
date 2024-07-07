@@ -7,19 +7,22 @@ import {
 import { DojoCreateTransactionParams, DojoTxInputsApi, stampLog, validateInputSelection } from 'cwi-base';
 import { signCreatedTransaction } from './signCreatedTransaction';
 import { unpackFromCreateTransactionResult } from './unpackFromCreateTransactionResult';
+import { validateDefaultParams } from './processTransactionWithOutputs';
 
 export async function createTransactionWithOutputs(ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams)
 : Promise<NinjaTransactionWithOutputsResultApi> {
+
+  validateDefaultParams(params, 'start ninja createTransactionWithOutputs')
+
   const {
     outputs, labels, note, recipient, feePerKb, feeModel, lockTime, version, trustSelf
   } = params;
   let {
-    inputs
+    inputs,
+    log
   } = params;
 
   inputs ||= {};
-
-  let log = stampLog('', "start ninja createTransactionWithOutputs");
 
   const params2: DojoCreateTransactionParams = {
     inputs: convertToDojoTxInputsApi(inputs),
@@ -49,6 +52,7 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
   //////////////
 
   const createResult = await ninja.dojo.createTransaction(params2);
+  log = createResult.log
 
   let r: NinjaTransactionWithOutputsResultApi;
 
@@ -66,21 +70,15 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
     return r
   }
 
-  createResult.log = stampLog(createResult.log, '... ninja createTransactionWithOutputs signing transaction');
+  log = stampLog(log, '... ninja createTransactionWithOutputs signing transaction');
 
   /////////////
   // Ninja creates BSV signed transaction (unless some unlockingScripts specified by length only)
   ////////////
 
+  createResult.log = log
   r = await signCreatedTransaction(ninja, { inputs, createResult });
-
-  log = stampLog(r.log, "end ninja createTransactionWithOutputs");
-
-  if (typeof params.log === 'string')
-    r.log = params.log + log;
-  else {
-    r.log = log;
-  }
+  r.log = stampLog(r.log, "end ninja createTransactionWithOutputs");
 
   return r;
 }

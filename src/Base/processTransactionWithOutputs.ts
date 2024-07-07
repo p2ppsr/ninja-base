@@ -8,7 +8,7 @@ import { createTransactionWithOutputs } from './createTransactionWithOutputs';
 
 export async function processTransactionWithOutputs(ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> {
 
-  params.log = stampLog(params.log, "start ninja processTransactionWithOutputs");
+  validateDefaultParams(params, 'start ninja processTransactionWithOutputs')
 
   const cr = await createTransactionWithOutputs(ninja, params);
 
@@ -36,3 +36,12 @@ export async function processTransactionWithOutputs(ninja: NinjaBase, params: Ni
 
   return r
 }
+
+export function validateDefaultParams(params: NinjaGetTransactionWithOutputsParams, logLabel?: string) {
+  params.autoProcess = params.autoProcess === undefined ? true : params.autoProcess
+  params.acceptDelayedBroadcast = params.acceptDelayedBroadcast === undefined ? true : params.acceptDelayedBroadcast
+
+  if (logLabel)
+    params.log = stampLog(params.log, `${logLabel} autoProcess=${params.autoProcess} acceptDelayedBroadcast=${params.acceptDelayedBroadcast} trustSelf=${params.trustSelf}`);
+}
+

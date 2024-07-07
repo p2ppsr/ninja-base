@@ -1,4 +1,6 @@
 import {
+   GetInfoParams,
+   GetInfoResult,
    GetTransactionOutputResult, ListActionsTransaction, ListActionsTransactionInput,
    ListActionsTransactionOutput, OptionalEnvelopeEvidenceApi, SubmitDirectTransaction, SubmitDirectTransactionOutput,
    SubmitDirectTransactionResult, TransactionStatusApi,
@@ -417,6 +419,11 @@ export interface NinjaApi {
     * @returns merkle root for the given height or undefined, if height doesn't have a known merkle root or is invalid.
    */
    getMerkleRootForHeight(height: number): Promise<string | undefined>
+
+   /**
+    * @returns {Promise<GetInfoResult>} information about the metanet-client context (version, chain, height, user...).
+    */
+   getInfo(params: GetInfoParams) : Promise<GetInfoResult>
 }
 
 /**

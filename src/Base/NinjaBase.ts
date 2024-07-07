@@ -16,6 +16,7 @@ import {
   DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl,
   DojoTxLabelApi, DojoOutputApi, DojoTransactionApi,
   DojoGetTransactionLabelsOptions, CwiError, DojoProcessTransactionParams, identityKeyFromPrivateKey, EnvelopeApi, stampLog,
+  DojoClientUserApi,
 } from 'cwi-base'
 
 import {
@@ -41,10 +42,12 @@ import { submitDirectTransaction } from './submitDirectTransaction'
 import { DojoExpressClient } from '../DojoExpressClient'
 import { signAction } from './signAction'
 import { abortAction } from './abortAction'
+import { GetInfoParams, GetInfoResult } from '@babbage/sdk-ts'
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain
   userId?: number
+  user?: DojoClientUserApi
   _keyPair: KeyPairApi | undefined
   _isDojoAuthenticated: boolean
 
@@ -109,8 +112,8 @@ export class NinjaBase implements NinjaApi {
     identityKey ||= this.getClientChangeKeyPair().publicKey
 
     await this.dojo.authenticate(identityKey, addIfNew)
-    const user = await this.dojo.getUser()
-    this.userId = verifyId(user.userId)
+    this.user = await this.dojo.getUser()
+    this.userId = verifyId(this.user.userId)
     this._isDojoAuthenticated = true
 
     console.log(`NinjaBase authenticated as ${identityKey} ${this.userId}`)
@@ -481,4 +484,25 @@ export class NinjaBase implements NinjaApi {
     const r = await this.dojo.getMerkleRootForHeight(height)
     return r
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async getInfo(params: GetInfoParams): Promise<GetInfoResult> {
+    await this.verifyDojoAuthenticated()
+
+    const dojoIdent = await this.dojo.getDojoIdentity()
+
+    const r: GetInfoResult = {
+      metanetClientVersion: '',
+      chain: await this.getChain(),
+      height: await this.getHeight(),
+      userId: verifyId(this.userId),
+      userIdentityKey: this.user!.identityKey,
+      dojoIdentityKey: dojoIdent.dojoIdentityKey,
+      dojoIdentityName: dojoIdent.dojoName,
+      perferredCurrency: ''
+    }
+
+    return r
+  }
+
 }
