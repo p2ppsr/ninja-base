@@ -3,9 +3,8 @@ import {
   NinjaSignCreatedTransactionParams,
   NinjaTransactionWithOutputsResultApi} from '../Api/NinjaApi';
 import {
-  ERR_INTERNAL, ERR_INVALID_PARAMETER,
+  ERR_INVALID_PARAMETER,
   verifyTruthy} from 'cwi-base';
-import { NinjaTxBuilder } from '../NinjaTxBuilder';
 import { buildBsvTxFromCreateTransactionResult } from './buildBsvTxFromCreateTransactionResult';
 import { needsSignAction } from './createTransactionWithOutputs';
 
@@ -21,30 +20,12 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
   if (createResult.paymailHandle)
     throw new ERR_INVALID_PARAMETER('paymailHandle', 'undefined. It has be fully deprecated.')
 
-  ///////////////
-  // Begin Temporary code to confirm @bsv/sdk based transaction creation and signing...
-  const r2 = NinjaTxBuilder.buildJsTxFromCreateTransactionResult(ninja, inputs, createResult)
-
-  const rawTx2 = r2.tx.uncheckedSerialize()
-  const txid2 = r2.tx.id
-  // End Temporary code
-  //////////////////////
-
   const changeKeys = ninja.getClientChangeKeyPair();
 
   const { tx, outputMap, amount, log } = await buildBsvTxFromCreateTransactionResult(inputs, createResult, changeKeys);
 
   const rawTx = tx.toHex();
   const txid = tx.id("hex") as string;
-
-  ///////////////
-  // Begin Temporary code to confirm @bsv/sdk based transaction creation and signing...
-  if (rawTx !== rawTx2 || txid !== txid2) {
-    debugger
-    throw new ERR_INTERNAL()
-  }
-  // End Temporary code
-  //////////////////////
 
   const { inputs: txInputs, referenceNumber } = createResult;
 
@@ -66,6 +47,7 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
     note: createResult.note,
     referenceNumber,
     outputMap,
+    trustSelf: createResult.trustSelf,
     log
   };
 }
