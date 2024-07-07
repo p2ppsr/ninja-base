@@ -1,7 +1,8 @@
 import {
    GetTransactionOutputResult, ListActionsTransaction, ListActionsTransactionInput,
    ListActionsTransactionOutput, OptionalEnvelopeEvidenceApi, SubmitDirectTransaction, SubmitDirectTransactionOutput,
-   SubmitDirectTransactionResult, TransactionStatusApi
+   SubmitDirectTransactionResult, TransactionStatusApi,
+   TrustSelf
 } from '@babbage/sdk-ts'
 import {
   Chain, CwiError, DojoAvatarApi, DojoCertificateApi, DojoClientApi, EnvelopeEvidenceApi,
@@ -695,7 +696,7 @@ export interface NinjaTransactionWithOutputsResultApi {
   /**
    * The serialized, signed transaction that is ready for broadcast, or has been broadcast.
    * 
-   * Only valid if signActionRequired !== true
+   * Only valid if signActionRequired !== true and trustSelf is undefined
    */
   rawTx?: string
   /**
@@ -711,7 +712,7 @@ export interface NinjaTransactionWithOutputsResultApi {
   /**
    * This is the fully-formed `inputs` field of this transaction, as per the SPV Envelope specification.
    */
-  inputs: Record<string, EnvelopeEvidenceApi>
+  inputs: Record<string, OptionalEnvelopeEvidenceApi>
   /**
    * 
    */
@@ -732,6 +733,16 @@ export interface NinjaTransactionWithOutputsResultApi {
    * Only valid if signActionRequired !== true
    */
   mapiResponses?: MapiResponseApi[]
+
+  /**
+   * Copy of value used in `CreateActionParams`.
+   * 
+   * If undefined, normal case, results include new rawTx and proof chains for new outputs.
+   * 
+   * If 'known', results exclude rawTx and proof chains for new outputs (`inputs` is an empty object).
+   */
+  trustSelf?: TrustSelf
+
   /**
    * Optional transaction processing history
    */
@@ -904,7 +915,7 @@ export interface NinjaSubmitDirectTransactionOutputApi extends SubmitDirectTrans
 export interface NinjaSubmitDirectTransactionApi extends SubmitDirectTransaction {
   rawTx: string
   txid?: string
-  inputs?: Record<string, EnvelopeEvidenceApi>
+  inputs?: Record<string, OptionalEnvelopeEvidenceApi>
   mapiResponses?: MapiResponseApi[]
   proof?: TscMerkleProofApi
   /**
@@ -987,7 +998,7 @@ export interface NinjaGetTransactionWithOutputsParams {
   /**
      * A set of outputs to include, each with `script` and `satoshis`.
      */
-  outputs: DojoCreateTxOutputApi[]
+  outputs?: DojoCreateTxOutputApi[]
   /**
      * A set of label strings to affix to the transaction
      */
@@ -1081,6 +1092,15 @@ export interface NinjaGetTransactionWithOutputsParams {
    acceptDelayedBroadcast?: boolean
 
    /**
+   * If undefined, normal case, all inputs must be provably valid by chain of rawTx and merkle proof values,
+   * and results will include new rawTx and proof chains for new outputs.
+   * 
+   * If 'known', any input txid corresponding to a previously processed transaction may ommit its rawTx and proofs,
+   * and results will exclude new rawTx and proof chains for new outputs.
+   */
+   trustSelf?: TrustSelf
+
+   /**
     * Optional transaction processing log
     */
    log?: string
@@ -1152,7 +1172,7 @@ export interface NinjaSignActionResultApi extends NinjaTransactionWithOutputsRes
   /**
    * This is the fully-formed `inputs` field of this transaction, as per the SPV Envelope specification.
    */
-  inputs: Record<string, EnvelopeEvidenceApi>
+  inputs: Record<string, OptionalEnvelopeEvidenceApi>
   /**
    * 
    */

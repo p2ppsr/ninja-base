@@ -406,7 +406,7 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
-  async createTransaction (params: NinjaCreateTransactionParams): Promise<DojoCreateTransactionResultApi> {
+  async createTransaction(params: NinjaCreateTransactionParams): Promise<DojoCreateTransactionResultApi> {
     await this.verifyDojoAuthenticated()
     const r = await this.dojo.createTransaction(params)
     return r

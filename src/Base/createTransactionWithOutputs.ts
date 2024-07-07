@@ -11,7 +11,7 @@ import { unpackFromCreateTransactionResult } from './unpackFromCreateTransaction
 export async function createTransactionWithOutputs(ninja: NinjaBase, params: NinjaGetTransactionWithOutputsParams)
 : Promise<NinjaTransactionWithOutputsResultApi> {
   const {
-    outputs, labels, note, recipient, feePerKb, feeModel, lockTime, version
+    outputs, labels, note, recipient, feePerKb, feeModel, lockTime, version, trustSelf
   } = params;
   let {
     inputs
@@ -23,13 +23,14 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
 
   const params2: DojoCreateTransactionParams = {
     inputs: convertToDojoTxInputsApi(inputs),
-    outputs,
+    outputs: outputs || [],
     feeModel: feeModel || (feePerKb ? { model: 'sat/kb', value: feePerKb } : undefined),
     version,
     lockTime,
     labels,
     note,
     recipient,
+    trustSelf,
     log
   };
 
@@ -59,6 +60,7 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
       createResult,
       ...unpacked,
       note,
+      trustSelf,
       log
     }
     return r

@@ -1,5 +1,6 @@
+import { OptionalEnvelopeEvidenceApi } from '@babbage/sdk-ts';
 import { NinjaTxInputsApi } from '../Api/NinjaApi';
-import { DojoCreateTransactionResultApi, ERR_INTERNAL, ERR_INVALID_PARAMETER, EnvelopeEvidenceApi, asBsvSdkTx, verifyTruthy } from 'cwi-base';
+import { DojoCreateTransactionResultApi, ERR_INTERNAL, ERR_INVALID_PARAMETER, asBsvSdkTx, verifyTruthy } from 'cwi-base';
 
 export function unpackFromCreateTransactionResult(
   ninjaInputs: Record<string, NinjaTxInputsApi>,
@@ -7,7 +8,7 @@ export function unpackFromCreateTransactionResult(
 ): {
   amount: number,
   referenceNumber: string,
-  inputs: Record<string, EnvelopeEvidenceApi>
+  inputs: Record<string, OptionalEnvelopeEvidenceApi>
 }
 {
   const {

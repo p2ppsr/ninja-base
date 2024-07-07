@@ -17,12 +17,22 @@ export async function processTransactionWithOutputs(ninja: NinjaBase, params: Ni
     reference: cr.referenceNumber,
     outputMap: verifyTruthy(cr.outputMap),
     acceptDelayedBroadcast: params.acceptDelayedBroadcast,
+    trustSelf: params.trustSelf,
     log: cr.log
   });
 
-  return {
+  const r: NinjaTransactionWithOutputsResultApi = {
     ...cr,
     mapiResponses: pr.mapiResponses,
     log: stampLog(pr.log, "end ninja processTransactionWithOutputs")
   };
+
+  if (params.trustSelf === 'known' && !r.signActionRequired && r.txid) {
+    // In trustSelf 'known' mode, only the new txid needs to go back to the user.
+    r.rawTx = undefined
+    r.mapiResponses = undefined
+    r.inputs = {}
+  }
+
+  return r
 }
