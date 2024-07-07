@@ -71,6 +71,7 @@ export interface NinjaApi {
         labels: DojoTxLabelApi[];
         total: number;
     }>;
+    getEnvelopeForTransaction(txid: string): Promise<EnvelopeApi | undefined>;
     getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]>;
     updateTransactionStatus(params: {
         reference: string;
@@ -241,6 +242,28 @@ Return the private / public keypair used by the Ninja client for change UTXOs
 ```ts
 getClientChangeKeyPair(): KeyPairApi
 ```
+
+##### Method getEnvelopeForTransaction
+
+Returns an Everett Style envelope for the given txid.
+
+A transaction envelope is a tree of inputs where all the leaves are proven transactions.
+The trivial case is a single leaf: the envelope for a proven transaction is the rawTx and its proof.
+
+Each branching level of the tree corresponds to an unmined transaction without a proof,
+in which case the envelope is:
+- rawTx
+- mapiResponses from transaction processors (optional)
+- inputs object where keys are this transaction's input txids and values are recursive envelope for those txids.
+
+```ts
+getEnvelopeForTransaction(txid: string): Promise<EnvelopeApi | undefined>
+```
+
+Argument Details
+
++ **txid**
+  + double hash of raw transaction as hex string
 
 ##### Method getEnvelopesOfConflictingTransactions
 
@@ -927,7 +950,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 #### Interface: NinjaTxInputsApi
 
 ```ts
-export interface NinjaTxInputsApi extends EnvelopeEvidenceApi {
+export interface NinjaTxInputsApi extends OptionalEnvelopeEvidenceApi {
     outputsToRedeem: NinjaOutputToRedeemApi[];
 }
 ```
@@ -1292,11 +1315,12 @@ export interface NinjaTransactionWithOutputsResultApi {
     rawTx?: string;
     txid?: string;
     amount: number;
-    inputs: Record<string, EnvelopeEvidenceApi>;
+    inputs: Record<string, OptionalEnvelopeEvidenceApi>;
     note?: string;
     referenceNumber: string;
     outputMap?: Record<string, number>;
     mapiResponses?: MapiResponseApi[];
+    trustSelf?: TrustSelf;
     log?: string;
 }
 ```
@@ -1326,7 +1350,7 @@ createResult?: DojoCreateTransactionResultApi
 This is the fully-formed `inputs` field of this transaction, as per the SPV Envelope specification.
 
 ```ts
-inputs: Record<string, EnvelopeEvidenceApi>
+inputs: Record<string, OptionalEnvelopeEvidenceApi>
 ```
 
 ##### Property log
@@ -1361,7 +1385,7 @@ outputMap?: Record<string, number>
 
 The serialized, signed transaction that is ready for broadcast, or has been broadcast.
 
-Only valid if signActionRequired !== true
+Only valid if signActionRequired !== true and trustSelf is undefined
 
 ```ts
 rawTx?: string
@@ -1388,6 +1412,18 @@ depending on `acceptDelayedBroadcast` being true or false.
 
 ```ts
 signActionRequired?: boolean
+```
+
+##### Property trustSelf
+
+Copy of value used in `CreateActionParams`.
+
+If undefined, normal case, results include new rawTx and proof chains for new outputs.
+
+If 'known', results exclude rawTx and proof chains for new outputs (`inputs` is an empty object).
+
+```ts
+trustSelf?: TrustSelf
 ```
 
 ##### Property txid
@@ -1775,7 +1811,7 @@ Transaction input parameter to submitDirectTransaction method.
 export interface NinjaSubmitDirectTransactionApi extends SubmitDirectTransaction {
     rawTx: string;
     txid?: string;
-    inputs?: Record<string, EnvelopeEvidenceApi>;
+    inputs?: Record<string, OptionalEnvelopeEvidenceApi>;
     mapiResponses?: MapiResponseApi[];
     proof?: TscMerkleProofApi;
     outputs: NinjaSubmitDirectTransactionOutputApi[];
@@ -1938,7 +1974,7 @@ Input parameters to getTransactionWithOutputs method.
 
 ```ts
 export interface NinjaGetTransactionWithOutputsParams {
-    outputs: DojoCreateTxOutputApi[];
+    outputs?: DojoCreateTxOutputApi[];
     labels?: string[];
     inputs?: Record<string, NinjaTxInputsApi>;
     note?: string;
@@ -1949,6 +1985,7 @@ export interface NinjaGetTransactionWithOutputsParams {
     feePerKb?: number;
     feeModel?: DojoFeeModelApi;
     acceptDelayedBroadcast?: boolean;
+    trustSelf?: TrustSelf;
     log?: string;
 }
 ```
@@ -2027,15 +2064,16 @@ feePerKb?: number
 
 Input scripts to spend as part of this transaction.
 
-This is an object whose keys are TXIDs and whose values are Everett-style
-transaction envelopes that contain an additional field called `outputsToRedeem`.
+This is an object whose keys are TXIDs and whose values are, optionally, Everett-style
+transaction envelopes.
 
+The values must contain a field called `outputsToRedeem`.
 This is an array of objects, each containing `index` and `unlockingScript` properties.
 
 The `index` property is the output number in the transaction you are spending,
 and `unlockingScript` is the hex scriptcode that unlocks the satoshis or the maximum script length for signActionRequired.
 
-Note that you should create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
+If hex scriptcode is provided, create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
 so that the additional Dojo outputs can be added afterward without invalidating your signature.
 
 ```ts
@@ -2082,7 +2120,7 @@ note?: string
 A set of outputs to include, each with `script` and `satoshis`.
 
 ```ts
-outputs: DojoCreateTxOutputApi[]
+outputs?: DojoCreateTxOutputApi[]
 ```
 
 ##### Property recipient
@@ -2091,6 +2129,18 @@ Paymail recipient for transaction
 
 ```ts
 recipient?: string
+```
+
+##### Property trustSelf
+
+If undefined, normal case, all inputs must be provably valid by chain of rawTx and merkle proof values,
+and results will include new rawTx and proof chains for new outputs.
+
+If 'known', any input txid corresponding to a previously processed transaction may ommit its rawTx and proofs,
+and results will exclude new rawTx and proof chains for new outputs.
+
+```ts
+trustSelf?: TrustSelf
 ```
 
 ##### Property version
@@ -2205,7 +2255,7 @@ export interface NinjaSignActionResultApi extends NinjaTransactionWithOutputsRes
     rawTx?: string;
     txid?: string;
     amount: number;
-    inputs: Record<string, EnvelopeEvidenceApi>;
+    inputs: Record<string, OptionalEnvelopeEvidenceApi>;
     note?: string;
     referenceNumber: string;
     outputMap?: Record<string, number>;
@@ -2231,7 +2281,7 @@ amount: number
 This is the fully-formed `inputs` field of this transaction, as per the SPV Envelope specification.
 
 ```ts
-inputs: Record<string, EnvelopeEvidenceApi>
+inputs: Record<string, OptionalEnvelopeEvidenceApi>
 ```
 
 ##### Property log
@@ -2725,6 +2775,18 @@ export interface ProcessIncomingTransactionResultApi {
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+#### Interface: DojoExpressClientOptions
+
+```ts
+export interface DojoExpressClientOptions {
+    authrite?: AuthriteClient;
+    identityKey?: string;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 #### Interface: DojoTxBuilderInputApi
 
 ```ts
@@ -2765,32 +2827,20 @@ export interface DojoTxBuilderBaseOptions {
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-#### Interface: NinjaTxBuilderOptions
-
-```ts
-export interface NinjaTxBuilderOptions extends DojoTxBuilderBaseOptions {
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-#### Interface: DojoExpressClientOptions
-
-```ts
-export interface DojoExpressClientOptions {
-    authrite?: AuthriteClient;
-    identityKey?: string;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
 #### Interface: DojoTxBuilderOptions
 
 ```ts
 export interface DojoTxBuilderOptions extends DojoTxBuilderBaseOptions {
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Interface: NinjaTxBuilderOptions
+
+```ts
+export interface NinjaTxBuilderOptions extends DojoTxBuilderBaseOptions {
 }
 ```
 
@@ -2833,6 +2883,221 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ---
 
+#### Class: ERR_NINJA_INVALID_UNLOCK
+
+Unlocking script for vin ${vin} (${txid}.${vout}) of new transaction is invalid.
+
+```ts
+export class ERR_NINJA_INVALID_UNLOCK extends CwiError {
+    constructor(public vin: number, public txid: string, public vout: number, public signedRawTx: string, public e?: CwiError) 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Class: ERR_NINJA_MISSING_UNLOCK
+
+Unlocking script for vin ${vin} of new transaction is invalid.
+
+```ts
+export class ERR_NINJA_MISSING_UNLOCK extends CwiError {
+    constructor(vin: number) 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Class: DojoExpressClient
+
+Connects to a DojoExpress to implement `DojoApi`
+
+```ts
+export class DojoExpressClient implements DojoClientApi {
+    static createDojoExpressClientOptions(): DojoExpressClientOptions 
+    authrite?: AuthriteClient;
+    options: DojoExpressClientOptions;
+    get userId(): number 
+    get identityKey(): string 
+    get isAuthenticated(): boolean 
+    syncDojoConfig?: SyncDojoConfigBaseApi;
+    constructor(public chain: Chain, public serviceUrl: string, options?: DojoExpressClientOptions) 
+    isDojoExpressClient(): boolean 
+    async destroy(): Promise<void> 
+    async getChain(): Promise<Chain> 
+    async stats(): Promise<DojoStatsApi> 
+    async getDojoIdentity(): Promise<DojoIdentityApi> 
+    async authenticate(identityKey?: string, addIfNew?: boolean): Promise<void> 
+    getUser(): DojoClientUserApi 
+    async verifyAuthenticated(): Promise<void> 
+    async getSyncDojoConfig(): Promise<SyncDojoConfigBaseApi> 
+    setSyncDojos(dojos: DojoSyncApi[], syncOptions?: DojoSyncOptionsApi | undefined): void 
+    getSyncDojos(): {
+        dojos: DojoSyncApi[];
+        options: DojoSyncOptionsApi;
+    } 
+    async setSyncDojosByConfig(syncDojoConfigs: SyncDojoConfigBaseApi[], options?: DojoSyncOptionsApi | undefined): Promise<void> 
+    async getSyncDojosByConfig(): Promise<{
+        dojos: SyncDojoConfigBaseApi[];
+        options?: DojoSyncOptionsApi | undefined;
+    }> 
+    async sync(): Promise<void> 
+    async syncIdentify(params: DojoSyncIdentifyParams): Promise<DojoSyncIdentifyResultApi> 
+    async syncUpdate(params: DojoSyncUpdateParams): Promise<DojoSyncUpdateResultApi> 
+    async syncMerge(params: DojoSyncMergeParams): Promise<DojoSyncMergeResultApi> 
+    async getCurrentPaymails(): Promise<string[]> 
+    async getAvatar(): Promise<DojoAvatarApi> 
+    async setAvatar(avatar: DojoAvatarApi): Promise<void> 
+    async saveCertificate(certificate: DojoCertificateApi): Promise<number> 
+    async findCertificates(certifiers?: string[], types?: Record<string, string[]>): Promise<DojoCertificateApi[]> 
+    async getTotalOfUnspentOutputs(basket?: string): Promise<number | undefined> 
+    async updateOutpointStatus(txid: string, vout: number, spendable: boolean): Promise<void> 
+    async getTotalOfAmounts(direction: "incoming" | "outgoing", options?: DojoGetTotalOfAmountsOptions): Promise<number> 
+    async getNetOfAmounts(options?: DojoGetTotalOfAmountsOptions): Promise<number> 
+    async updateTransactionStatus(reference: string, status: DojoTransactionStatusApi): Promise<void> 
+    async getTransactions(options?: DojoGetTransactionsOptions): Promise<DojoGetTransactionsResultApi> 
+    async getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]> 
+    async getEnvelopeForTransaction(txid: string): Promise<EnvelopeApi | undefined> 
+    async getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> 
+    async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<DojoGetTransactionOutputsResultApi> 
+    async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<DojoGetTransactionLabelsResultApi> 
+    async createTransaction(params: DojoCreateTransactionParams): Promise<DojoCreateTransactionResultApi> 
+    async processTransaction(params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> 
+    async submitDirectTransaction(params: DojoSubmitDirectTransactionParams): Promise<DojoSubmitDirectTransactionResultApi> 
+    async copyState(): Promise<DojoUserStateApi> 
+    async getJsonOrUndefined<T>(path: string): Promise<T | undefined> 
+    async getJson<T>(path: string): Promise<T> 
+    handleError<T>(s: FetchStatus<T>, path: string): void 
+    async postJsonOrUndefined<T, R>(path: string, params: T, noAuth?: boolean): Promise<R | undefined> 
+    async postJson<T, R>(path: string, params: T, noAuth?: boolean): Promise<R> 
+    async postJsonVoid<T>(path: string, params: T, noAuth?: boolean): Promise<void> 
+    async softDeleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number> 
+    async softDeleteOutputTag(partial: Partial<DojoOutputTagApi>): Promise<number> 
+    async softDeleteTxLabel(partial: Partial<DojoTxLabelApi>): Promise<number> 
+    async softDeleteOutputBasket(partial: Partial<DojoOutputBasketApi>): Promise<number> 
+    async labelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> 
+    async unlabelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> 
+    async tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> 
+    async untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> 
+    async unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void> 
+    async getHeight(): Promise<number> 
+    async getMerkleRootForHeight(height: number): Promise<string | undefined> 
+}
+```
+
+<details>
+
+<summary>Class DojoExpressClient Details</summary>
+
+##### Constructor
+
+The authrite options setting may be left undefined if it will be created
+by NinjaBase.
+
+```ts
+constructor(public chain: Chain, public serviceUrl: string, options?: DojoExpressClientOptions) 
+```
+
+##### Property syncDojoConfig
+
+Only vaild if this dojo was created as a syncDojo by setSyncDojosByConfig
+
+```ts
+syncDojoConfig?: SyncDojoConfigBaseApi
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Class: NinjaBase
+
+```ts
+export class NinjaBase implements NinjaApi {
+    chain?: Chain;
+    userId?: number;
+    _keyPair: KeyPairApi | undefined;
+    _isDojoAuthenticated: boolean;
+    constructor(public dojo: DojoClientApi, clientPrivateKey?: string, public authrite?: AuthriteClient) 
+    getClientChangeKeyPair(): KeyPairApi 
+    async authenticate(identityKey?: string, addIfNew?: boolean): Promise<void> 
+    async verifyDojoAuthenticated() 
+    async sync(): Promise<void> 
+    async setSyncDojosByConfig(syncDojoConfigs: SyncDojoConfigBaseApi[], options?: DojoSyncOptionsApi | undefined): Promise<void> 
+    async getSyncDojosByConfig(): Promise<{
+        dojos: SyncDojoConfigBaseApi[];
+        options?: DojoSyncOptionsApi | undefined;
+    }> 
+    async getPaymail(): Promise<string> 
+    async setPaymail(paymail: string): Promise<void> 
+    async getChain(): Promise<Chain> 
+    async getNetwork(format?: "default" | "nonet"): Promise<string> 
+    async findCertificates(certifiers?: string[] | object, types?: Record<string, string[]>): Promise<{
+        status: "success";
+        certificates: DojoCertificateApi[];
+    }> 
+    async saveCertificate(certificate: DojoCertificateApi | object): Promise<void> 
+    async getTotalValue(basket?: string): Promise<{
+        total: number;
+    }> 
+    async getTotalOfAmounts(options: DojoGetTotalOfAmountsOptions): Promise<{
+        total: number;
+    }> 
+    async getNetOfAmounts(options?: DojoGetTotalOfAmountsOptions | undefined): Promise<number> 
+    async getAvatar(): Promise<DojoAvatarApi> 
+    async setAvatar(name: string, photoURL: string): Promise<void> 
+    async updateTransactionStatus(params: {
+        reference: string;
+        status: DojoTransactionStatusApi;
+    }): Promise<void> 
+    async updateOutpointStatus(params: {
+        txid: string;
+        vout: number;
+        spendable: boolean;
+    }): Promise<void> 
+    async getTransactions(options?: DojoGetTransactionsOptions): Promise<NinjaGetTransactionsResultApi> 
+    async getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]> 
+    async processPendingTransactions(onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler): Promise<void> 
+    async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<NinjaGetTransactionOutputsResultApi[]> 
+    async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<{
+        labels: DojoTxLabelApi[];
+        total: number;
+    }> 
+    async getEnvelopeForTransaction(txid: string): Promise<EnvelopeApi | undefined> 
+    async processTransaction(params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> 
+    async getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
+    async createTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
+    async processTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
+    async signAction(params: NinjaSignActionParams): Promise<NinjaSignActionResultApi> 
+    async abortAction(params: NinjaAbortActionParams): Promise<NinjaAbortActionResultApi> 
+    async createTransaction(params: NinjaCreateTransactionParams): Promise<DojoCreateTransactionResultApi> 
+    async deleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number> 
+    async labelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> 
+    async unlabelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> 
+    async tagOutput(output: {
+        txid: string;
+        vout: number;
+    }, tag: string): Promise<void> 
+    async untagOutput(output: {
+        txid: string;
+        vout: number;
+    }, tag: string): Promise<void> 
+    async unbasketOutput(output: {
+        txid: string;
+        vout: number;
+    }): Promise<void> 
+    async submitDirectTransaction(params: NinjaSubmitDirectTransactionParams): Promise<NinjaSubmitDirectTransactionResultApi> 
+    async getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> 
+    async getHeight(): Promise<number> 
+    async getMerkleRootForHeight(height: number): Promise<string | undefined> 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 #### Class: DojoTxBuilderBase
 
 ```ts
@@ -3069,26 +3334,11 @@ validate(noThrow = false): {
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-#### Class: ERR_NINJA_INVALID_UNLOCK
-
-Unlocking script for vin ${vin} (${txid}.${vout}) of new transaction is invalid.
+#### Class: DojoTxBuilder
 
 ```ts
-export class ERR_NINJA_INVALID_UNLOCK extends CwiError {
-    constructor(public vin: number, public txid: string, public vout: number, public signedRawTx: string, public e?: CwiError) 
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-#### Class: ERR_NINJA_MISSING_UNLOCK
-
-Unlocking script for vin ${vin} of new transaction is invalid.
-
-```ts
-export class ERR_NINJA_MISSING_UNLOCK extends CwiError {
-    constructor(vin: number) 
+export class DojoTxBuilder extends DojoTxBuilderBase {
+    constructor(dojo: DojoClientApi, public options?: DojoTxBuilderOptions) 
 }
 ```
 
@@ -3159,205 +3409,6 @@ Argument Details
   + All new outputs to be created
 
 </details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-#### Class: DojoExpressClient
-
-Connects to a DojoExpress to implement `DojoApi`
-
-```ts
-export class DojoExpressClient implements DojoClientApi {
-    static createDojoExpressClientOptions(): DojoExpressClientOptions 
-    authrite?: AuthriteClient;
-    options: DojoExpressClientOptions;
-    get userId(): number 
-    get identityKey(): string 
-    get isAuthenticated(): boolean 
-    syncDojoConfig?: SyncDojoConfigBaseApi;
-    constructor(public chain: Chain, public serviceUrl: string, options?: DojoExpressClientOptions) 
-    isDojoExpressClient(): boolean 
-    async destroy(): Promise<void> 
-    async getChain(): Promise<Chain> 
-    async stats(): Promise<DojoStatsApi> 
-    async getDojoIdentity(): Promise<DojoIdentityApi> 
-    async authenticate(identityKey?: string, addIfNew?: boolean): Promise<void> 
-    getUser(): DojoClientUserApi 
-    async verifyAuthenticated(): Promise<void> 
-    async getSyncDojoConfig(): Promise<SyncDojoConfigBaseApi> 
-    setSyncDojos(dojos: DojoSyncApi[], syncOptions?: DojoSyncOptionsApi | undefined): void 
-    getSyncDojos(): {
-        dojos: DojoSyncApi[];
-        options: DojoSyncOptionsApi;
-    } 
-    async setSyncDojosByConfig(syncDojoConfigs: SyncDojoConfigBaseApi[], options?: DojoSyncOptionsApi | undefined): Promise<void> 
-    async getSyncDojosByConfig(): Promise<{
-        dojos: SyncDojoConfigBaseApi[];
-        options?: DojoSyncOptionsApi | undefined;
-    }> 
-    async sync(): Promise<void> 
-    async syncIdentify(params: DojoSyncIdentifyParams): Promise<DojoSyncIdentifyResultApi> 
-    async syncUpdate(params: DojoSyncUpdateParams): Promise<DojoSyncUpdateResultApi> 
-    async syncMerge(params: DojoSyncMergeParams): Promise<DojoSyncMergeResultApi> 
-    async getCurrentPaymails(): Promise<string[]> 
-    async getAvatar(): Promise<DojoAvatarApi> 
-    async setAvatar(avatar: DojoAvatarApi): Promise<void> 
-    async saveCertificate(certificate: DojoCertificateApi): Promise<number> 
-    async findCertificates(certifiers?: string[], types?: Record<string, string[]>): Promise<DojoCertificateApi[]> 
-    async getTotalOfUnspentOutputs(basket?: string): Promise<number | undefined> 
-    async updateOutpointStatus(txid: string, vout: number, spendable: boolean): Promise<void> 
-    async getTotalOfAmounts(direction: "incoming" | "outgoing", options?: DojoGetTotalOfAmountsOptions): Promise<number> 
-    async getNetOfAmounts(options?: DojoGetTotalOfAmountsOptions): Promise<number> 
-    async updateTransactionStatus(reference: string, status: DojoTransactionStatusApi): Promise<void> 
-    async getTransactions(options?: DojoGetTransactionsOptions): Promise<DojoGetTransactionsResultApi> 
-    async getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]> 
-    async getEnvelopeForTransaction(txid: string): Promise<EnvelopeApi | undefined> 
-    async getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> 
-    async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<DojoGetTransactionOutputsResultApi> 
-    async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<DojoGetTransactionLabelsResultApi> 
-    async createTransaction(params: DojoCreateTransactionParams): Promise<DojoCreateTransactionResultApi> 
-    async processTransaction(params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> 
-    async submitDirectTransaction(params: DojoSubmitDirectTransactionParams): Promise<DojoSubmitDirectTransactionResultApi> 
-    async copyState(): Promise<DojoUserStateApi> 
-    async getJsonOrUndefined<T>(path: string): Promise<T | undefined> 
-    async getJson<T>(path: string): Promise<T> 
-    handleError<T>(s: FetchStatus<T>, path: string): void 
-    async postJsonOrUndefined<T, R>(path: string, params: T, noAuth?: boolean): Promise<R | undefined> 
-    async postJson<T, R>(path: string, params: T, noAuth?: boolean): Promise<R> 
-    async postJsonVoid<T>(path: string, params: T, noAuth?: boolean): Promise<void> 
-    async softDeleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number> 
-    async softDeleteOutputTag(partial: Partial<DojoOutputTagApi>): Promise<number> 
-    async softDeleteTxLabel(partial: Partial<DojoTxLabelApi>): Promise<number> 
-    async softDeleteOutputBasket(partial: Partial<DojoOutputBasketApi>): Promise<number> 
-    async labelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> 
-    async unlabelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> 
-    async tagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> 
-    async untagOutput(partial: Partial<DojoOutputApi>, tag: string): Promise<void> 
-    async unbasketOutput(partial: Partial<DojoOutputApi>): Promise<void> 
-    async getHeight(): Promise<number> 
-    async getMerkleRootForHeight(height: number): Promise<string | undefined> 
-}
-```
-
-<details>
-
-<summary>Class DojoExpressClient Details</summary>
-
-##### Constructor
-
-The authrite options setting may be left undefined if it will be created
-by NinjaBase.
-
-```ts
-constructor(public chain: Chain, public serviceUrl: string, options?: DojoExpressClientOptions) 
-```
-
-##### Property syncDojoConfig
-
-Only vaild if this dojo was created as a syncDojo by setSyncDojosByConfig
-
-```ts
-syncDojoConfig?: SyncDojoConfigBaseApi
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-#### Class: NinjaBase
-
-```ts
-export class NinjaBase implements NinjaApi {
-    chain?: Chain;
-    userId?: number;
-    _keyPair: KeyPairApi | undefined;
-    _isDojoAuthenticated: boolean;
-    constructor(public dojo: DojoClientApi, clientPrivateKey?: string, public authrite?: AuthriteClient) 
-    getClientChangeKeyPair(): KeyPairApi 
-    async authenticate(identityKey?: string, addIfNew?: boolean): Promise<void> 
-    async verifyDojoAuthenticated() 
-    async sync(): Promise<void> 
-    async setSyncDojosByConfig(syncDojoConfigs: SyncDojoConfigBaseApi[], options?: DojoSyncOptionsApi | undefined): Promise<void> 
-    async getSyncDojosByConfig(): Promise<{
-        dojos: SyncDojoConfigBaseApi[];
-        options?: DojoSyncOptionsApi | undefined;
-    }> 
-    async getPaymail(): Promise<string> 
-    async setPaymail(paymail: string): Promise<void> 
-    async getChain(): Promise<Chain> 
-    async getNetwork(format?: "default" | "nonet"): Promise<string> 
-    async findCertificates(certifiers?: string[] | object, types?: Record<string, string[]>): Promise<{
-        status: "success";
-        certificates: DojoCertificateApi[];
-    }> 
-    async saveCertificate(certificate: DojoCertificateApi | object): Promise<void> 
-    async getTotalValue(basket?: string): Promise<{
-        total: number;
-    }> 
-    async getTotalOfAmounts(options: DojoGetTotalOfAmountsOptions): Promise<{
-        total: number;
-    }> 
-    async getNetOfAmounts(options?: DojoGetTotalOfAmountsOptions | undefined): Promise<number> 
-    async getAvatar(): Promise<DojoAvatarApi> 
-    async setAvatar(name: string, photoURL: string): Promise<void> 
-    async updateTransactionStatus(params: {
-        reference: string;
-        status: DojoTransactionStatusApi;
-    }): Promise<void> 
-    async updateOutpointStatus(params: {
-        txid: string;
-        vout: number;
-        spendable: boolean;
-    }): Promise<void> 
-    async getTransactions(options?: DojoGetTransactionsOptions): Promise<NinjaGetTransactionsResultApi> 
-    async getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]> 
-    async processPendingTransactions(onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler): Promise<void> 
-    async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<NinjaGetTransactionOutputsResultApi[]> 
-    async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<{
-        labels: DojoTxLabelApi[];
-        total: number;
-    }> 
-    async processTransaction(params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> 
-    async getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
-    async createTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
-    async processTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
-    async signAction(params: NinjaSignActionParams): Promise<NinjaSignActionResultApi> 
-    async abortAction(params: NinjaAbortActionParams): Promise<NinjaAbortActionResultApi> 
-    async createTransaction(params: NinjaCreateTransactionParams): Promise<DojoCreateTransactionResultApi> 
-    async deleteCertificate(partial: Partial<DojoCertificateApi>): Promise<number> 
-    async labelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> 
-    async unlabelTransaction(txid: string | number | Partial<DojoTransactionApi>, label: string): Promise<void> 
-    async tagOutput(output: {
-        txid: string;
-        vout: number;
-    }, tag: string): Promise<void> 
-    async untagOutput(output: {
-        txid: string;
-        vout: number;
-    }, tag: string): Promise<void> 
-    async unbasketOutput(output: {
-        txid: string;
-        vout: number;
-    }): Promise<void> 
-    async submitDirectTransaction(params: NinjaSubmitDirectTransactionParams): Promise<NinjaSubmitDirectTransactionResultApi> 
-    async getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> 
-    async getHeight(): Promise<number> 
-    async getMerkleRootForHeight(height: number): Promise<string | undefined> 
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-#### Class: DojoTxBuilder
-
-```ts
-export class DojoTxBuilder extends DojoTxBuilderBase {
-    constructor(dojo: DojoClientApi, public options?: DojoTxBuilderOptions) 
-}
-```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -3509,7 +3560,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export function unpackFromCreateTransactionResult(ninjaInputs: Record<string, NinjaTxInputsApi>, createResult: DojoCreateTransactionResultApi): {
     amount: number;
     referenceNumber: string;
-    inputs: Record<string, EnvelopeEvidenceApi>;
+    inputs: Record<string, OptionalEnvelopeEvidenceApi>;
 } 
 ```
 
