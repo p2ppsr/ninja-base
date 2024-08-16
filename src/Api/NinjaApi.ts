@@ -751,6 +751,24 @@ export interface NinjaTransactionWithOutputsResultApi {
   trustSelf?: TrustSelf
 
   /**
+   * If the caller already has envelopes or BUMPS for certain txids, pass them in this
+   * array and they will be assumed to be valid and not returned again in the results.
+   */
+  knownTxids?: string[]
+  /**
+   * If 'beef', the results will format new transaction and supporting input proofs in BEEF format.
+   * Otherwise, the results will use `EnvelopeEvidenceApi` format.
+   */
+  resultFormat?: 'beef'
+  /**
+   * If true, successfully created transactions remain in the `unproven` state and are marked `noBroadcast`.
+   * A proof will be sought but it will not be considered an error if the txid remains unknown.
+   * 
+   * Supports testing, user control over broadcasting of transactions, and batching.
+   */
+  noBroadcast?: boolean
+
+  /**
    * Optional transaction processing history
    */
   log?: string
@@ -1002,70 +1020,70 @@ export interface NinjaSignCreatedTransactionParams {
  * Input parameters to getTransactionWithOutputs method.
  */
 export interface NinjaGetTransactionWithOutputsParams {
-  /**
-     * A set of outputs to include, each with `script` and `satoshis`.
-     */
-  outputs?: DojoCreateTxOutputApi[]
-  /**
-     * A set of label strings to affix to the transaction
-     */
-  labels?: string[]
-  /**
-     * Input scripts to spend as part of this transaction.
-     *
-     * This is an object whose keys are TXIDs and whose values are, optionally, Everett-style
-     * transaction envelopes.
-     * 
-     * The values must contain a field called `outputsToRedeem`.
-     * This is an array of objects, each containing `index` and `unlockingScript` properties.
-     *
-     * The `index` property is the output number in the transaction you are spending,
-     * and `unlockingScript` is the hex scriptcode that unlocks the satoshis or the maximum script length for signActionRequired.
-     *
-     * If hex scriptcode is provided, create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
-     * so that the additional Dojo outputs can be added afterward without invalidating your signature.
-     */
-  inputs?: Record<string, NinjaTxInputsApi>
-  /**
-     * A note about the transaction
-     */
+   /**
+      * A set of outputs to include, each with `script` and `satoshis`.
+      */
+   outputs?: DojoCreateTxOutputApi[]
+   /**
+      * A set of label strings to affix to the transaction
+      */
+   labels?: string[]
+   /**
+      * Input scripts to spend as part of this transaction.
+      *
+      * This is an object whose keys are TXIDs and whose values are, optionally, Everett-style
+      * transaction envelopes.
+      * 
+      * The values must contain a field called `outputsToRedeem`.
+      * This is an array of objects, each containing `index` and `unlockingScript` properties.
+      *
+      * The `index` property is the output number in the transaction you are spending,
+      * and `unlockingScript` is the hex scriptcode that unlocks the satoshis or the maximum script length for signActionRequired.
+      *
+      * If hex scriptcode is provided, create any signatures with `SIGHASH_NONE | ANYONECANPAY` or similar
+      * so that the additional Dojo outputs can be added afterward without invalidating your signature.
+      */
+   inputs?: Record<string, NinjaTxInputsApi>
+   /**
+      * A note about the transaction
+      */
    note?: string
-    /**
-     * Optional. Default is zero.
-     * When the transaction can be processed into a block:
-     * >= 500,000,000 values are interpreted as minimum required unix time stamps in seconds
-     * < 500,000,000 values are interpreted as minimum required block height
-     */
-    lockTime?: number;
-    /**
-     * Optional. Transaction version number, default is current standard transaction version value.
-     */
-    version?: number;
-  /**
-     * Paymail recipient for transaction
-     */
-  recipient?: string
-  /**
-     * Whether the transaction should be processed automatically
-     * with processTransaction. Note that this will return `mapiResponses` and `note`
-     * instead of referenceNumber
-     *
-     * default true
-     */
-  autoProcess?: boolean
-  /**
-     * Optional. The number of satoshis to pay per KB of block space used by this transaction.
-     * 
-     * If both feeModel and feePerKb are specified, feeModel takes precendence
-     */
-  feePerKb?: number
+   /**
+    * Optional. Default is zero.
+    * When the transaction can be processed into a block:
+    * >= 500,000,000 values are interpreted as minimum required unix time stamps in seconds
+    * < 500,000,000 values are interpreted as minimum required block height
+    */
+   lockTime?: number;
+   /**
+    * Optional. Transaction version number, default is current standard transaction version value.
+    */
+   version?: number;
+   /**
+      * Paymail recipient for transaction
+      */
+   recipient?: string
+   /**
+      * Whether the transaction should be processed automatically
+      * with processTransaction. Note that this will return `mapiResponses` and `note`
+      * instead of referenceNumber
+      *
+      * default true
+      */
+   autoProcess?: boolean
+   /**
+      * Optional. The number of satoshis to pay per KB of block space used by this transaction.
+      * 
+      * If both feeModel and feePerKb are specified, feeModel takes precendence
+      */
+   feePerKb?: number
 
-  /**
-     * Optional. The fee model used by this transaction.
-     * 
-     * If both feeModel and feePerKb are specified, feeModel takes precendence
-     */
-  feeModel?: DojoFeeModelApi
+   /**
+      * Optional. The fee model used by this transaction.
+      * 
+      * If both feeModel and feePerKb are specified, feeModel takes precendence
+      */
+   feeModel?: DojoFeeModelApi
 
    /**
     * Set to true for normal, high performance operation and offline
@@ -1106,6 +1124,26 @@ export interface NinjaGetTransactionWithOutputsParams {
    * and results will exclude new rawTx and proof chains for new outputs.
    */
    trustSelf?: TrustSelf
+
+   /**
+    * If the caller already has envelopes or BUMPS for certain txids, pass them in this
+    * array and they will be assumed to be valid and not returned again in the results.
+    */
+   knownTxids?: string[]
+
+   /**
+    * If 'beef', the results will format new transaction and supporting input proofs in BEEF format.
+    * Otherwise, the results will use `EnvelopeEvidenceApi` format.
+    */
+   resultFormat?: 'beef'
+
+   /**
+    * If true, successfully created transactions remain in the `unproven` state and are marked `noBroadcast`.
+    * A proof will be sought but it will not be considered an error if the txid remains unknown.
+    * 
+    * Supports testing, user control over broadcasting of transactions, and batching.
+    */
+   noBroadcast?: boolean
 
    /**
     * Optional transaction processing log
