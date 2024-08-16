@@ -1332,6 +1332,9 @@ export interface NinjaTransactionWithOutputsResultApi {
     outputMap?: Record<string, number>;
     mapiResponses?: MapiResponseApi[];
     trustSelf?: TrustSelf;
+    knownTxids?: string[];
+    resultFormat?: "beef";
+    noBroadcast?: boolean;
     log?: string;
 }
 ```
@@ -1364,6 +1367,15 @@ This is the fully-formed `inputs` field of this transaction, as per the SPV Enve
 inputs: Record<string, OptionalEnvelopeEvidenceApi>
 ```
 
+##### Property knownTxids
+
+If the caller already has envelopes or BUMPS for certain txids, pass them in this
+array and they will be assumed to be valid and not returned again in the results.
+
+```ts
+knownTxids?: string[]
+```
+
 ##### Property log
 
 Optional transaction processing history
@@ -1380,6 +1392,17 @@ Only valid if signActionRequired !== true
 
 ```ts
 mapiResponses?: MapiResponseApi[]
+```
+
+##### Property noBroadcast
+
+If true, successfully created transactions remain in the `unproven` state and are marked `noBroadcast`.
+A proof will be sought but it will not be considered an error if the txid remains unknown.
+
+Supports testing, user control over broadcasting of transactions, and batching.
+
+```ts
+noBroadcast?: boolean
 ```
 
 ##### Property outputMap
@@ -1408,6 +1431,15 @@ The reference number that should now be provided back to `processTransaction (or
 
 ```ts
 referenceNumber: string
+```
+
+##### Property resultFormat
+
+If 'beef', the results will format new transaction and supporting input proofs in BEEF format.
+Otherwise, the results will use `EnvelopeEvidenceApi` format.
+
+```ts
+resultFormat?: "beef"
 ```
 
 ##### Property signActionRequired
@@ -1997,6 +2029,9 @@ export interface NinjaGetTransactionWithOutputsParams {
     feeModel?: DojoFeeModelApi;
     acceptDelayedBroadcast?: boolean;
     trustSelf?: TrustSelf;
+    knownTxids?: string[];
+    resultFormat?: "beef";
+    noBroadcast?: boolean;
     log?: string;
 }
 ```
@@ -2091,6 +2126,15 @@ so that the additional Dojo outputs can be added afterward without invalidating 
 inputs?: Record<string, NinjaTxInputsApi>
 ```
 
+##### Property knownTxids
+
+If the caller already has envelopes or BUMPS for certain txids, pass them in this
+array and they will be assumed to be valid and not returned again in the results.
+
+```ts
+knownTxids?: string[]
+```
+
 ##### Property labels
 
 A set of label strings to affix to the transaction
@@ -2118,6 +2162,17 @@ Optional transaction processing log
 log?: string
 ```
 
+##### Property noBroadcast
+
+If true, successfully created transactions remain in the `unproven` state and are marked `noBroadcast`.
+A proof will be sought but it will not be considered an error if the txid remains unknown.
+
+Supports testing, user control over broadcasting of transactions, and batching.
+
+```ts
+noBroadcast?: boolean
+```
+
 ##### Property note
 
 A note about the transaction
@@ -2140,6 +2195,15 @@ Paymail recipient for transaction
 
 ```ts
 recipient?: string
+```
+
+##### Property resultFormat
+
+If 'beef', the results will format new transaction and supporting input proofs in BEEF format.
+Otherwise, the results will use `EnvelopeEvidenceApi` format.
+
+```ts
+resultFormat?: "beef"
 ```
 
 ##### Property trustSelf
