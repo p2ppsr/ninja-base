@@ -761,7 +761,7 @@ export interface NinjaTransactionWithOutputsResultApi {
    */
   resultFormat?: 'beef'
   /**
-   * If true, successfully created transactions remain in the `unproven` state and are marked `noBroadcast`.
+   * If true, successfully created transactions remain in the `nosend` state.
    * A proof will be sought but it will not be considered an error if the txid remains unknown.
    * 
    * Supports testing, user control over broadcasting of transactions, and batching.
@@ -1138,7 +1138,7 @@ export interface NinjaGetTransactionWithOutputsParams {
    resultFormat?: 'beef'
 
    /**
-    * If true, successfully created transactions remain in the `unproven` state and are marked `noBroadcast`.
+    * If true, successfully created transactions remain in the `nosend` state.
     * A proof will be sought but it will not be considered an error if the txid remains unknown.
     * 
     * Supports testing, user control over broadcasting of transactions, and batching.

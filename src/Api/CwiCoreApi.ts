@@ -79,8 +79,8 @@ export interface CreateActionResult {
      * by signing all remaining unsigned inputs and calling `signAction`. Failure to complete the process in
      * a timely manner will cause the transaction to transition to `failed`.
      * 
-     * If false or undefined, completed transaction will have status of `sending` or `unproven`,
-     * depending on `acceptDelayedBroadcast` being true or false.   
+     * If false or undefined, completed transaction will have status of `sending`, `nosend` or `unproven`,
+     * depending on `acceptDelayedBroadcast` and `noBroadcast`.   
      */
     signActionRequired?: boolean
     /**
