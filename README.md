@@ -2511,13 +2511,17 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export interface CreateActionParams {
     description: string;
-    inputs: Record<string, NinjaTxInputsApi>;
-    outputs: DojoCreateTxOutputApi[];
+    inputs?: Record<string, NinjaTxInputsApi>;
+    outputs?: DojoCreateTxOutputApi[];
     lockTime?: number;
     version?: number;
     labels?: string[];
     originator?: string;
     acceptDelayedBroadcast?: boolean;
+    trustSelf?: TrustSelf;
+    knownTxids?: string[];
+    resultFormat?: "beef";
+    noBroadcast?: boolean;
     log?: string;
 }
 ```
@@ -2558,7 +2562,16 @@ each input's outputsToRedeem:
   - unlockingScript is max byte length for `signActionRequired` mode, otherwise hex string.
 
 ```ts
-inputs: Record<string, NinjaTxInputsApi>
+inputs?: Record<string, NinjaTxInputsApi>
+```
+
+##### Property knownTxids
+
+If the caller already has envelopes or BUMPS for certain txids, pass them in this
+array and they will be assumed to be valid and not returned again in the results.
+
+```ts
+knownTxids?: string[]
 ```
 
 ##### Property labels
@@ -2589,6 +2602,17 @@ Optional operational and performance logging prior data.
 log?: string
 ```
 
+##### Property noBroadcast
+
+If true, successfully created transactions remain in the `nosend` state.
+A proof will be sought but it will not be considered an error if the txid remains unknown.
+
+Supports testing, user control over broadcasting of transactions, and batching.
+
+```ts
+noBroadcast?: boolean
+```
+
 ##### Property originator
 
 Reserved Admin originators
@@ -2606,7 +2630,28 @@ each output:
   - description length limit is 50, values are encrypted before leaving this device
 
 ```ts
-outputs: DojoCreateTxOutputApi[]
+outputs?: DojoCreateTxOutputApi[]
+```
+
+##### Property resultFormat
+
+If 'beef', the results will format new transaction and supporting input proofs in BEEF format.
+Otherwise, the results will use `EnvelopeEvidenceApi` format.
+
+```ts
+resultFormat?: "beef"
+```
+
+##### Property trustSelf
+
+If undefined, normal case, all inputs must be provably valid by chain of rawTx and merkle proof values,
+and results will include new rawTx and proof chains for new outputs.
+
+If 'known', any input txid corresponding to a previously processed transaction may ommit its rawTx and proofs,
+and results will exclude new rawTx and proof chains for new outputs.
+
+```ts
+trustSelf?: TrustSelf
 ```
 
 ##### Property version
@@ -3614,7 +3659,7 @@ Argument Details
 + **ninjaInputs**
   + Ninja inputs as passed to createAction
 + **createResult**
-  + Create transaction results returned by createAction when signActionRequires is true.
+  + Create transaction results returned by dojo createTransaction
 + **changeKeys**
   + Dummy keys can be used to create a transaction with which to generate Ninja input lockingScripts.
 
