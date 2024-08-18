@@ -15,7 +15,18 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
   validateDefaultParams(params, 'start ninja createTransactionWithOutputs')
 
   const {
-    outputs, labels, note, recipient, feePerKb, feeModel, lockTime, version, trustSelf
+    outputs,
+    labels,
+    note,
+    recipient,
+    feePerKb,
+    feeModel,
+    lockTime,
+    version,
+    trustSelf,
+    knownTxids,
+    resultFormat,
+    noBroadcast
   } = params;
   let {
     inputs,
@@ -33,7 +44,10 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
     labels,
     note,
     recipient,
-    trustSelf,
+    trustSelf, 
+    knownTxids,
+    resultFormat,
+    noBroadcast,
     log
   };
 
