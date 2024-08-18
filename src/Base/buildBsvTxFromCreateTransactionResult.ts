@@ -7,7 +7,7 @@ import { ERR_NINJA_INVALID_UNLOCK, ERR_NINJA_MISSING_UNLOCK } from '../ERR_NINJA
  * Constructs a @bsv/sdk `Transaction` from Ninja inputs and Dojo create transaction results. 
  * 
  * @param ninjaInputs Ninja inputs as passed to createAction
- * @param createResult Create transaction results returned by createAction when signActionRequires is true.
+ * @param createResult Create transaction results returned by dojo createTransaction
  * @param changeKeys Dummy keys can be used to create a transaction with which to generate Ninja input lockingScripts.
  */
 export async function buildBsvTxFromCreateTransactionResult(
@@ -37,6 +37,9 @@ export async function buildBsvTxFromCreateTransactionResult(
   // Add OUTPUTS
   /////////////
   for (const [i, out] of dojoOutputs.entries()) {
+    if (i !== out.vout)
+      throw new ERR_INVALID_PARAMETER('output.vout', `equal to array index. ${out.vout} !== ${i}`)
+
     // Add requested outputs to new bitcoin transaction tx
     let output: TransactionOutput;
 
