@@ -1,5 +1,6 @@
 import { DojoCreateTransactionResultApi, DojoCreateTxOutputApi, EnvelopeEvidenceApi, MapiResponseApi } from "cwi-base";
 import { NinjaTransactionWithOutputsResultApi, NinjaTxInputsApi } from "./NinjaApi";
+import { TrustSelf } from "@babbage/sdk-ts";
 
 /**
  * Starting point for cwi-core's typescript api.
@@ -26,12 +27,12 @@ export interface CreateActionParams {
      *   - spendingDescription length limit is 50, values are encrypted before leaving this device
      *   - unlockingScript is max byte length for `signActionRequired` mode, otherwise hex string.
      */
-    inputs: Record<string, NinjaTxInputsApi>;
+    inputs?: Record<string, NinjaTxInputsApi>;
     /**
      * each output:
      *   - description length limit is 50, values are encrypted before leaving this device
      */
-    outputs: DojoCreateTxOutputApi[];
+    outputs?: DojoCreateTxOutputApi[];
     /**
      * Optional. Default is zero.
      * When the transaction can be processed into a block:
@@ -65,6 +66,31 @@ export interface CreateActionParams {
      * default true
      */
     acceptDelayedBroadcast?: boolean;
+    /**
+     * If undefined, normal case, all inputs must be provably valid by chain of rawTx and merkle proof values,
+     * and results will include new rawTx and proof chains for new outputs.
+     * 
+     * If 'known', any input txid corresponding to a previously processed transaction may ommit its rawTx and proofs,
+     * and results will exclude new rawTx and proof chains for new outputs.
+     */
+    trustSelf?: TrustSelf
+    /**
+     * If the caller already has envelopes or BUMPS for certain txids, pass them in this
+     * array and they will be assumed to be valid and not returned again in the results.
+     */
+    knownTxids?: string[]
+    /**
+     * If 'beef', the results will format new transaction and supporting input proofs in BEEF format.
+     * Otherwise, the results will use `EnvelopeEvidenceApi` format.
+     */
+    resultFormat?: 'beef'
+    /**
+     * If true, successfully created transactions remain in the `nosend` state.
+     * A proof will be sought but it will not be considered an error if the txid remains unknown.
+     * 
+     * Supports testing, user control over broadcasting of transactions, and batching.
+     */
+    noBroadcast?: boolean
     /**
      * Optional operational and performance logging prior data.
      */
