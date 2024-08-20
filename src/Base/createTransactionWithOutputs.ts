@@ -22,18 +22,16 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
     feePerKb,
     feeModel,
     lockTime,
-    version,
-    trustSelf,
-    knownTxids,
-    resultFormat,
-    noBroadcast
+    version
   } = params;
   let {
     inputs,
+    options,
     log
   } = params;
 
   inputs ||= {};
+  options ||= {};
 
   const params2: DojoCreateTransactionParams = {
     inputs: convertToDojoTxInputsApi(inputs),
@@ -44,10 +42,7 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
     labels,
     note,
     recipient,
-    trustSelf, 
-    knownTxids,
-    resultFormat,
-    noBroadcast,
+    options,
     log
   };
 
@@ -78,7 +73,7 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
       createResult,
       ...unpacked,
       note,
-      trustSelf,
+      options,
       log
     }
     return r

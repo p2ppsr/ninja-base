@@ -10,14 +10,15 @@ export async function processTransactionWithOutputs(ninja: NinjaBase, params: Ni
 
   validateDefaultParams(params, 'start ninja processTransactionWithOutputs')
 
+  const options = verifyTruthy(params.options)
+
   const cr = await createTransactionWithOutputs(ninja, params);
 
   const pr = await ninja.processTransaction({
     submittedTransaction: verifyTruthy(cr.rawTx),
     reference: cr.referenceNumber,
     outputMap: verifyTruthy(cr.outputMap),
-    acceptDelayedBroadcast: params.acceptDelayedBroadcast,
-    trustSelf: params.trustSelf,
+    options,
     log: cr.log
   });
 
@@ -27,7 +28,7 @@ export async function processTransactionWithOutputs(ninja: NinjaBase, params: Ni
     log: stampLog(pr.log, "end ninja processTransactionWithOutputs")
   };
 
-  if (params.trustSelf === 'known' && !r.signActionRequired && r.txid) {
+  if (options.trustSelf === 'known' && !r.signActionRequired && r.txid) {
     // In trustSelf 'known' mode, only the new txid needs to go back to the user.
     r.rawTx = undefined
     r.mapiResponses = undefined
@@ -39,9 +40,11 @@ export async function processTransactionWithOutputs(ninja: NinjaBase, params: Ni
 
 export function validateDefaultParams(params: NinjaGetTransactionWithOutputsParams, logLabel?: string) {
   params.autoProcess = params.autoProcess === undefined ? true : params.autoProcess
-  params.acceptDelayedBroadcast = params.acceptDelayedBroadcast === undefined ? true : params.acceptDelayedBroadcast
+  params.options ||= {}
+  if (params.acceptDelayedBroadcast !== undefined) params.options.acceptDelayedBroadcast = params.acceptDelayedBroadcast
+  if (params.options.acceptDelayedBroadcast === undefined) params.options.acceptDelayedBroadcast = true
 
   if (logLabel)
-    params.log = stampLog(params.log, `${logLabel} autoProcess=${params.autoProcess} acceptDelayedBroadcast=${params.acceptDelayedBroadcast} trustSelf=${params.trustSelf}`);
+    params.log = stampLog(params.log, `${logLabel} autoProcess=${params.autoProcess} acceptDelayedBroadcast=${params.options.acceptDelayedBroadcast} trustSelf=${params.options.trustSelf}`);
 }
 

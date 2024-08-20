@@ -24,10 +24,10 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
 
   const { tx, outputMap, amount, log } = await buildBsvTxFromCreateTransactionResult(inputs, createResult, changeKeys);
 
+  const { inputs: txInputs, referenceNumber } = createResult;
+
   const rawTx = tx.toHex();
   const txid = tx.id("hex") as string;
-
-  const { inputs: txInputs, referenceNumber } = createResult;
 
   // The inputs are sanitized to remove non-envelope properties (instructions, outputsToRedeem, ...)
   const sanitizedInputs = Object.fromEntries(
@@ -47,7 +47,7 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
     note: createResult.note,
     referenceNumber,
     outputMap,
-    trustSelf: createResult.trustSelf,
+    options: createResult.options,
     log
   };
 }

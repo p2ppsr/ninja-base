@@ -1,4 +1,5 @@
 import {
+   CreateActionOptions,
    GetInfoParams,
    GetInfoResult,
    GetTransactionOutputResult, ListActionsTransaction, ListActionsTransactionInput,
@@ -703,7 +704,7 @@ export interface NinjaTransactionWithOutputsResultApi {
   /**
    * The serialized, signed transaction that is ready for broadcast, or has been broadcast.
    * 
-   * Only valid if signActionRequired !== true and trustSelf is undefined
+   * Only valid if signActionRequired !== true and `options.trustSelf` is undefined
    */
   rawTx?: string
   /**
@@ -742,31 +743,9 @@ export interface NinjaTransactionWithOutputsResultApi {
   mapiResponses?: MapiResponseApi[]
 
   /**
-   * Copy of value used in `CreateActionParams`.
-   * 
-   * If undefined, normal case, results include new rawTx and proof chains for new outputs.
-   * 
-   * If 'known', results exclude rawTx and proof chains for new outputs (`inputs` is an empty object).
+   * Processing options.
    */
-  trustSelf?: TrustSelf
-
-  /**
-   * If the caller already has envelopes or BUMPS for certain txids, pass them in this
-   * array and they will be assumed to be valid and not returned again in the results.
-   */
-  knownTxids?: string[]
-  /**
-   * If 'beef', the results will format new transaction and supporting input proofs in BEEF format.
-   * Otherwise, the results will use `EnvelopeEvidenceApi` format.
-   */
-  resultFormat?: 'beef'
-  /**
-   * If true, successfully created transactions remain in the `nosend` state.
-   * A proof will be sought but it will not be considered an error if the txid remains unknown.
-   * 
-   * Supports testing, user control over broadcasting of transactions, and batching.
-   */
-  noBroadcast?: boolean
+  options: CreateActionOptions
 
   /**
    * Optional transaction processing history
@@ -1086,6 +1065,13 @@ export interface NinjaGetTransactionWithOutputsParams {
    feeModel?: DojoFeeModelApi
 
    /**
+    * Processing options.
+    */
+   options?: CreateActionOptions
+
+   /**
+    * DEPRECATED: Use `options.acceptDelayedBroadcast`
+    * 
     * Set to true for normal, high performance operation and offline
     * operation if running locally.
     *
@@ -1115,35 +1101,6 @@ export interface NinjaGetTransactionWithOutputsParams {
     * - If spentBy is non-null, failure propagates to that transaction.
     */
    acceptDelayedBroadcast?: boolean
-
-   /**
-   * If undefined, normal case, all inputs must be provably valid by chain of rawTx and merkle proof values,
-   * and results will include new rawTx and proof chains for new outputs.
-   * 
-   * If 'known', any input txid corresponding to a previously processed transaction may ommit its rawTx and proofs,
-   * and results will exclude new rawTx and proof chains for new outputs.
-   */
-   trustSelf?: TrustSelf
-
-   /**
-    * If the caller already has envelopes or BUMPS for certain txids, pass them in this
-    * array and they will be assumed to be valid and not returned again in the results.
-    */
-   knownTxids?: string[]
-
-   /**
-    * If 'beef', the results will format new transaction and supporting input proofs in BEEF format.
-    * Otherwise, the results will use `EnvelopeEvidenceApi` format.
-    */
-   resultFormat?: 'beef'
-
-   /**
-    * If true, successfully created transactions remain in the `nosend` state.
-    * A proof will be sought but it will not be considered an error if the txid remains unknown.
-    * 
-    * Supports testing, user control over broadcasting of transactions, and batching.
-    */
-   noBroadcast?: boolean
 
    /**
     * Optional transaction processing log
