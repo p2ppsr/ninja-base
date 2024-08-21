@@ -49,7 +49,7 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const signActionRequired = needsSignAction(inputs);
 
-  if (params.acceptDelayedBroadcast) {
+  if (options.acceptDelayedBroadcast) {
     // Create inputSelection with default properties
     params2.inputSelection = validateInputSelection(undefined);
     // Include transaction outputs from transactions still waiting to be sent.
