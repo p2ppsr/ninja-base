@@ -15,9 +15,10 @@ export async function processTransactionWithOutputs(ninja: NinjaBase, params: Ni
   const cr = await createTransactionWithOutputs(ninja, params);
 
   const pr = await ninja.processTransaction({
-    submittedTransaction: verifyTruthy(cr.rawTx),
+    beef: cr.beef,
+    submittedTransaction: cr.rawTx,
     reference: cr.referenceNumber,
-    outputMap: verifyTruthy(cr.outputMap),
+    outputMap: cr.outputMap,
     options,
     log: cr.log
   });

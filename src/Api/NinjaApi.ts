@@ -702,6 +702,14 @@ export interface NinjaTransactionWithOutputsResultApi {
     */
   createResult?: DojoCreateTransactionResultApi
   /**
+   * valid if `options.resultFormat` is 'beef'
+   * 
+   * When valid, rawTx and inputs will be undefined and `{}` respectively.
+   * 
+   * may contain known txid's using the extended beef format if `options.knownTxids` is used.
+   */
+  beef?: number[]
+  /**
    * The serialized, signed transaction that is ready for broadcast, or has been broadcast.
    * 
    * Only valid if signActionRequired !== true and `options.trustSelf` is undefined

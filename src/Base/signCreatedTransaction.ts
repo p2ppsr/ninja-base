@@ -7,14 +7,16 @@ import {
   verifyTruthy} from 'cwi-base';
 import { buildBsvTxFromCreateTransactionResult } from './buildBsvTxFromCreateTransactionResult';
 import { needsSignAction } from './createTransactionWithOutputs';
+import { Beef } from '@babbage/sdk-ts';
 
 
 export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSignCreatedTransactionParams)
 : Promise<NinjaTransactionWithOutputsResultApi>
 {
-  const { inputs, createResult } = params;
+  const { inputs: ninjaInputs, createResult } = params;
+  const { inputs, inputBeef: inputBeef, referenceNumber, options } = createResult;
 
-  if (needsSignAction(inputs))
+  if (needsSignAction(ninjaInputs))
     throw new ERR_INVALID_PARAMETER('inputs', 'complete unlockingScript values.')
 
   if (createResult.paymailHandle)
@@ -22,34 +24,45 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
 
   const changeKeys = ninja.getClientChangeKeyPair();
 
-  const { tx, outputMap, amount, log } = await buildBsvTxFromCreateTransactionResult(inputs, createResult, changeKeys);
+  const { tx, outputMap, amount, log } = await buildBsvTxFromCreateTransactionResult(ninjaInputs, createResult, changeKeys);
 
-  const { inputs: txInputs, referenceNumber } = createResult;
-
-  const rawTx = tx.toHex();
   const txid = tx.id("hex") as string;
 
-  // The inputs are sanitized to remove non-envelope properties (instructions, outputsToRedeem, ...)
-  const sanitizedInputs = Object.fromEntries(
-    Object.entries(txInputs).map(([k, v]) => ([k, {
-      inputs: v.inputs,
-      mapiResponses: v.mapiResponses,
-      proof: v.proof,
-      rawTx: verifyTruthy(v.rawTx)
-    }]))
-  );
-
-  return {
-    rawTx,
+  const r: NinjaTransactionWithOutputsResultApi = {
     txid,
     amount,
-    inputs: sanitizedInputs,
-    note: createResult.note,
     referenceNumber,
+    options,
     outputMap,
-    options: createResult.options,
-    log
-  };
+    note: createResult.note,
+    log,
+
+    beef: undefined,
+    rawTx: undefined,
+    inputs: {},
+  }
+
+  if (options && options.resultFormat === 'beef') {
+    const beef = Beef.fromBinary(verifyTruthy(inputBeef))
+    beef.mergeTransaction(tx)
+    r.beef = beef.toBinary()
+  } else {
+    r.rawTx = tx.toHex();
+
+    // The inputs are sanitized to remove non-envelope properties (instructions, outputsToRedeem, ...)
+    const sanitizedInputs = Object.fromEntries(
+      Object.entries(inputs).map(([k, v]) => ([k, {
+        inputs: v.inputs,
+        mapiResponses: v.mapiResponses,
+        proof: v.proof,
+        rawTx: verifyTruthy(v.rawTx)
+      }]))
+    );
+
+    r.inputs = sanitizedInputs
+  }
+
+  return r
 }
 
 

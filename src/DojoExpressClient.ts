@@ -292,7 +292,7 @@ export class DojoExpressClient implements DojoClientApi {
   async processTransaction (params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> {
     this.verifyAuthenticated()
     params.log = stampLog(params.log, 'start dojo client createTransaction')
-    params.submittedTransaction = asString(params.submittedTransaction)
+    if (params.submittedTransaction) params.submittedTransaction = asString(params.submittedTransaction)
     const r = <DojoProcessTransactionResultApi>await this.postJson('/processTransaction', { identityKey: this.identityKey, params })
     r.log = stampLog(r.log, 'end dojo client processTransaction **NETWORK**')
     return r
