@@ -42,7 +42,9 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
     inputs: {},
   }
 
-  if (options && options.resultFormat === 'beef') {
+  if (options && options.resultFormat === 'none') {
+    /* no additional properties */
+  } else if (options && options.resultFormat === 'beef') {
     const beef = Beef.fromBinary(verifyTruthy(inputBeef))
     beef.mergeTransaction(tx)
     r.beef = beef.toBinary()
