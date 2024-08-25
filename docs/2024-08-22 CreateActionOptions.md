@@ -62,7 +62,7 @@ This can be useful to minimize the number of change outputs tied up in an unsent
 `sendWith` defaults to an empty array.
 
 Setting `sendWith` to an array of `txid` values for previously created `noSend` transactions causes all of them to be sent to the bitcoin network as a single batch of transactions.
-When using `sendWith`, `createAction` an be called without inputs or outputs, in which case previously created `noSend` transactions will be sent without creating a new transaction.
+When using `sendWith`, `createAction` can be called without inputs or outputs, in which case previously created `noSend` transactions will be sent without creating a new transaction.
 
 ## KnownTxids
 

@@ -89,6 +89,11 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
   r = await signCreatedTransaction(ninja, { inputs, createResult });
   r.log = stampLog(r.log, "end ninja createTransactionWithOutputs");
 
+  if (options.resultFormat === 'none') {
+    delete r.rawTx
+    r.inputs = {}
+    delete r.beef
+  }
   return r;
 }
 
