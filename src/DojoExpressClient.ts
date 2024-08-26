@@ -228,6 +228,7 @@ export class DojoExpressClient implements DojoClientApi {
       r.created_at = validateDate(r.created_at)
       r.updated_at = validateDate(r.updated_at)  
       r.rawTransaction = verifyBufferOrObjectOrNull(r.rawTransaction)
+      r.beef = verifyBufferOrObjectOrNull(r.beef)
     }
     return results
   }
