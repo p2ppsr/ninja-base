@@ -14,7 +14,8 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
 : Promise<NinjaTransactionWithOutputsResultApi>
 {
   const { inputs: ninjaInputs, createResult } = params;
-  const { inputs, inputBeef: inputBeef, referenceNumber, options } = createResult;
+  const { inputs, inputBeef, referenceNumber } = createResult;
+  const options = createResult.options || {}
 
   if (needsSignAction(ninjaInputs))
     throw new ERR_INVALID_PARAMETER('inputs', 'complete unlockingScript values.')
@@ -42,13 +43,14 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
     inputs: {},
   }
 
-  if (options && options.resultFormat === 'none') {
-    /* no additional properties */
-  } else if (options && options.resultFormat === 'beef') {
+  if (inputBeef) {
+
     const beef = Beef.fromBinary(verifyTruthy(inputBeef))
     beef.mergeTransaction(tx)
     r.beef = beef.toBinary()
+
   } else {
+
     r.rawTx = tx.toHex();
 
     // The inputs are sanitized to remove non-envelope properties (instructions, outputsToRedeem, ...)
@@ -62,6 +64,7 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
     );
 
     r.inputs = sanitizedInputs
+
   }
 
   return r

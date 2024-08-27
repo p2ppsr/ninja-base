@@ -14,6 +14,30 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
 
   validateDefaultParams(params, 'start ninja createTransactionWithOutputs')
 
+  let {
+    inputs,
+    options,
+    log
+  } = params;
+
+  inputs ||= {};
+  options ||= {};
+
+  const isSendWidth = options.sendWith && options.sendWith.length > 0
+  const withoutNewTx = (isSendWidth && (!params.inputs || Object.keys(params.inputs).length < 1) && (!params.outputs || params.outputs.length < 1))
+  if (withoutNewTx) {
+    log = stampLog(log, `... ninja createTransactionWithOutputs sendWith without inputs or outputs`)
+    log = stampLog(log, `end ninja createTransactionWithOutputs`) 
+    const r: NinjaTransactionWithOutputsResultApi = {
+      amount: 0,
+      inputs: {},
+      referenceNumber: '',
+      options,
+      log
+    }
+    return r
+  }
+
   const {
     outputs,
     labels,
@@ -24,14 +48,6 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
     lockTime,
     version
   } = params;
-  let {
-    inputs,
-    options,
-    log
-  } = params;
-
-  inputs ||= {};
-  options ||= {};
 
   const params2: DojoCreateTransactionParams = {
     inputs: convertToDojoTxInputsApi(inputs),
@@ -89,11 +105,6 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
   r = await signCreatedTransaction(ninja, { inputs, createResult });
   r.log = stampLog(r.log, "end ninja createTransactionWithOutputs");
 
-  if (options.resultFormat === 'none') {
-    delete r.rawTx
-    r.inputs = {}
-    delete r.beef
-  }
   return r;
 }
 
