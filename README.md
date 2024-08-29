@@ -12,21 +12,20 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
-| [CreateActionParams](#interface-createactionparams) | [NinjaGetPendingTransactionsInstructionsApi](#interface-ninjagetpendingtransactionsinstructionsapi) | [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi) |
-| [CreateActionResult](#interface-createactionresult) | [NinjaGetPendingTransactionsTxApi](#interface-ninjagetpendingtransactionstxapi) | [NinjaTransactionFailedApi](#interface-ninjatransactionfailedapi) |
-| [CwiCoreApi](#interface-cwicoreapi) | [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi) | [NinjaTransactionProcessedApi](#interface-ninjatransactionprocessedapi) |
-| [DojoExpressClientOptions](#interface-dojoexpressclientoptions) | [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams) | [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi) |
-| [DojoTxBuilderBaseOptions](#interface-dojotxbuilderbaseoptions) | [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi) | [NinjaTxBuilderOptions](#interface-ninjatxbuilderoptions) |
-| [DojoTxBuilderInputApi](#interface-dojotxbuilderinputapi) | [NinjaGetTransactionsTxApi](#interface-ninjagettransactionstxapi) | [NinjaTxInputsApi](#interface-ninjatxinputsapi) |
-| [DojoTxBuilderOptions](#interface-dojotxbuilderoptions) | [NinjaGetTransactionsTxInputApi](#interface-ninjagettransactionstxinputapi) | [NinjaV1Params](#interface-ninjav1params) |
-| [DojoTxBuilderOutputApi](#interface-dojotxbuilderoutputapi) | [NinjaGetTransactionsTxOutputApi](#interface-ninjagettransactionstxoutputapi) | [ProcessIncomingTransactionApi](#interface-processincomingtransactionapi) |
-| [KeyPairApi](#interface-keypairapi) | [NinjaOutputToRedeemApi](#interface-ninjaoutputtoredeemapi) | [ProcessIncomingTransactionInputApi](#interface-processincomingtransactioninputapi) |
-| [NinjaAbortActionParams](#interface-ninjaabortactionparams) | [NinjaSignActionParams](#interface-ninjasignactionparams) | [ProcessIncomingTransactionOutputApi](#interface-processincomingtransactionoutputapi) |
-| [NinjaAbortActionResultApi](#interface-ninjaabortactionresultapi) | [NinjaSignActionResultApi](#interface-ninjasignactionresultapi) | [ProcessIncomingTransactionResultApi](#interface-processincomingtransactionresultapi) |
-| [NinjaApi](#interface-ninjaapi) | [NinjaSignCreatedTransactionParams](#interface-ninjasigncreatedtransactionparams) | [SignActionParams](#interface-signactionparams) |
-| [NinjaCompleteCreateTransactionWithOutputsParams](#interface-ninjacompletecreatetransactionwithoutputsparams) | [NinjaSubmitDirectTransactionApi](#interface-ninjasubmitdirecttransactionapi) | [TxOutputApi](#interface-txoutputapi) |
-| [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams) | [NinjaSubmitDirectTransactionOutputApi](#interface-ninjasubmitdirecttransactionoutputapi) | [TxRedeemableOutputApi](#interface-txredeemableoutputapi) |
-| [NinjaGetPendingTransactionsInputApi](#interface-ninjagetpendingtransactionsinputapi) | [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams) |  |
+| [CwiCoreApi](#interface-cwicoreapi) | [NinjaGetPendingTransactionsTxApi](#interface-ninjagetpendingtransactionstxapi) | [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi) |
+| [DojoExpressClientOptions](#interface-dojoexpressclientoptions) | [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi) | [NinjaTransactionFailedApi](#interface-ninjatransactionfailedapi) |
+| [DojoTxBuilderBaseOptions](#interface-dojotxbuilderbaseoptions) | [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams) | [NinjaTransactionProcessedApi](#interface-ninjatransactionprocessedapi) |
+| [DojoTxBuilderInputApi](#interface-dojotxbuilderinputapi) | [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi) | [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi) |
+| [DojoTxBuilderOptions](#interface-dojotxbuilderoptions) | [NinjaGetTransactionsTxApi](#interface-ninjagettransactionstxapi) | [NinjaTxBuilderOptions](#interface-ninjatxbuilderoptions) |
+| [DojoTxBuilderOutputApi](#interface-dojotxbuilderoutputapi) | [NinjaGetTransactionsTxInputApi](#interface-ninjagettransactionstxinputapi) | [NinjaTxInputsApi](#interface-ninjatxinputsapi) |
+| [KeyPairApi](#interface-keypairapi) | [NinjaGetTransactionsTxOutputApi](#interface-ninjagettransactionstxoutputapi) | [NinjaV1Params](#interface-ninjav1params) |
+| [NinjaAbortActionParams](#interface-ninjaabortactionparams) | [NinjaOutputToRedeemApi](#interface-ninjaoutputtoredeemapi) | [ProcessIncomingTransactionApi](#interface-processincomingtransactionapi) |
+| [NinjaAbortActionResultApi](#interface-ninjaabortactionresultapi) | [NinjaSignActionParams](#interface-ninjasignactionparams) | [ProcessIncomingTransactionInputApi](#interface-processincomingtransactioninputapi) |
+| [NinjaApi](#interface-ninjaapi) | [NinjaSignActionResultApi](#interface-ninjasignactionresultapi) | [ProcessIncomingTransactionOutputApi](#interface-processincomingtransactionoutputapi) |
+| [NinjaCompleteCreateTransactionWithOutputsParams](#interface-ninjacompletecreatetransactionwithoutputsparams) | [NinjaSignCreatedTransactionParams](#interface-ninjasigncreatedtransactionparams) | [ProcessIncomingTransactionResultApi](#interface-processincomingtransactionresultapi) |
+| [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams) | [NinjaSubmitDirectTransactionApi](#interface-ninjasubmitdirecttransactionapi) | [SignActionParams](#interface-signactionparams) |
+| [NinjaGetPendingTransactionsInputApi](#interface-ninjagetpendingtransactionsinputapi) | [NinjaSubmitDirectTransactionOutputApi](#interface-ninjasubmitdirecttransactionoutputapi) | [TxOutputApi](#interface-txoutputapi) |
+| [NinjaGetPendingTransactionsInstructionsApi](#interface-ninjagetpendingtransactionsinstructionsapi) | [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams) | [TxRedeemableOutputApi](#interface-txredeemableoutputapi) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -1323,6 +1322,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export interface NinjaTransactionWithOutputsResultApi {
     signActionRequired?: boolean;
     createResult?: DojoCreateTransactionResultApi;
+    beef?: number[];
     rawTx?: string;
     txid?: string;
     amount: number;
@@ -1331,10 +1331,7 @@ export interface NinjaTransactionWithOutputsResultApi {
     referenceNumber: string;
     outputMap?: Record<string, number>;
     mapiResponses?: MapiResponseApi[];
-    trustSelf?: TrustSelf;
-    knownTxids?: string[];
-    resultFormat?: "beef";
-    noBroadcast?: boolean;
+    options: CreateActionOptions;
     log?: string;
 }
 ```
@@ -1351,6 +1348,18 @@ The amount of the transaction
 amount: number
 ```
 
+##### Property beef
+
+valid if `options.resultFormat` is 'beef'
+
+When valid, rawTx and inputs will be undefined and `{}` respectively.
+
+may contain known txid's using the extended beef format if `options.knownTxids` is used.
+
+```ts
+beef?: number[]
+```
+
 ##### Property createResult
 
 if signActionRequired, the dojo createTransaction results to be forwarded to signAction
@@ -1365,15 +1374,6 @@ This is the fully-formed `inputs` field of this transaction, as per the SPV Enve
 
 ```ts
 inputs: Record<string, OptionalEnvelopeEvidenceApi>
-```
-
-##### Property knownTxids
-
-If the caller already has envelopes or BUMPS for certain txids, pass them in this
-array and they will be assumed to be valid and not returned again in the results.
-
-```ts
-knownTxids?: string[]
 ```
 
 ##### Property log
@@ -1394,15 +1394,12 @@ Only valid if signActionRequired !== true
 mapiResponses?: MapiResponseApi[]
 ```
 
-##### Property noBroadcast
+##### Property options
 
-If true, successfully created transactions remain in the `nosend` state.
-A proof will be sought but it will not be considered an error if the txid remains unknown.
-
-Supports testing, user control over broadcasting of transactions, and batching.
+Processing options.
 
 ```ts
-noBroadcast?: boolean
+options: CreateActionOptions
 ```
 
 ##### Property outputMap
@@ -1419,7 +1416,7 @@ outputMap?: Record<string, number>
 
 The serialized, signed transaction that is ready for broadcast, or has been broadcast.
 
-Only valid if signActionRequired !== true and trustSelf is undefined
+Only valid if signActionRequired !== true and `options.trustSelf` is undefined
 
 ```ts
 rawTx?: string
@@ -1431,15 +1428,6 @@ The reference number that should now be provided back to `processTransaction (or
 
 ```ts
 referenceNumber: string
-```
-
-##### Property resultFormat
-
-If 'beef', the results will format new transaction and supporting input proofs in BEEF format.
-Otherwise, the results will use `EnvelopeEvidenceApi` format.
-
-```ts
-resultFormat?: "beef"
 ```
 
 ##### Property signActionRequired
@@ -1455,18 +1443,6 @@ depending on `acceptDelayedBroadcast` being true or false.
 
 ```ts
 signActionRequired?: boolean
-```
-
-##### Property trustSelf
-
-Copy of value used in `CreateActionParams`.
-
-If undefined, normal case, results include new rawTx and proof chains for new outputs.
-
-If 'known', results exclude rawTx and proof chains for new outputs (`inputs` is an empty object).
-
-```ts
-trustSelf?: TrustSelf
 ```
 
 ##### Property txid
@@ -2027,11 +2003,8 @@ export interface NinjaGetTransactionWithOutputsParams {
     autoProcess?: boolean;
     feePerKb?: number;
     feeModel?: DojoFeeModelApi;
+    options?: CreateActionOptions;
     acceptDelayedBroadcast?: boolean;
-    trustSelf?: TrustSelf;
-    knownTxids?: string[];
-    resultFormat?: "beef";
-    noBroadcast?: boolean;
     log?: string;
 }
 ```
@@ -2041,6 +2014,8 @@ export interface NinjaGetTransactionWithOutputsParams {
 <summary>Interface NinjaGetTransactionWithOutputsParams Details</summary>
 
 ##### Property acceptDelayedBroadcast
+
+DEPRECATED: Use `options.acceptDelayedBroadcast`
 
 Set to true for normal, high performance operation and offline
 operation if running locally.
@@ -2126,15 +2101,6 @@ so that the additional Dojo outputs can be added afterward without invalidating 
 inputs?: Record<string, NinjaTxInputsApi>
 ```
 
-##### Property knownTxids
-
-If the caller already has envelopes or BUMPS for certain txids, pass them in this
-array and they will be assumed to be valid and not returned again in the results.
-
-```ts
-knownTxids?: string[]
-```
-
 ##### Property labels
 
 A set of label strings to affix to the transaction
@@ -2162,23 +2128,20 @@ Optional transaction processing log
 log?: string
 ```
 
-##### Property noBroadcast
-
-If true, successfully created transactions remain in the `nosend` state.
-A proof will be sought but it will not be considered an error if the txid remains unknown.
-
-Supports testing, user control over broadcasting of transactions, and batching.
-
-```ts
-noBroadcast?: boolean
-```
-
 ##### Property note
 
 A note about the transaction
 
 ```ts
 note?: string
+```
+
+##### Property options
+
+Processing options.
+
+```ts
+options?: CreateActionOptions
 ```
 
 ##### Property outputs
@@ -2195,27 +2158,6 @@ Paymail recipient for transaction
 
 ```ts
 recipient?: string
-```
-
-##### Property resultFormat
-
-If 'beef', the results will format new transaction and supporting input proofs in BEEF format.
-Otherwise, the results will use `EnvelopeEvidenceApi` format.
-
-```ts
-resultFormat?: "beef"
-```
-
-##### Property trustSelf
-
-If undefined, normal case, all inputs must be provably valid by chain of rawTx and merkle proof values,
-and results will include new rawTx and proof chains for new outputs.
-
-If 'known', any input txid corresponding to a previously processed transaction may ommit its rawTx and proofs,
-and results will exclude new rawTx and proof chains for new outputs.
-
-```ts
-trustSelf?: TrustSelf
 ```
 
 ##### Property version
@@ -2502,261 +2444,6 @@ export interface CwiCoreApi {
     createAction(params: CreateActionParams): Promise<CreateActionResult>;
 }
 ```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-#### Interface: CreateActionParams
-
-```ts
-export interface CreateActionParams {
-    description: string;
-    inputs?: Record<string, NinjaTxInputsApi>;
-    outputs?: DojoCreateTxOutputApi[];
-    lockTime?: number;
-    version?: number;
-    labels?: string[];
-    originator?: string;
-    acceptDelayedBroadcast?: boolean;
-    trustSelf?: TrustSelf;
-    knownTxids?: string[];
-    resultFormat?: "beef";
-    noBroadcast?: boolean;
-    log?: string;
-}
-```
-
-<details>
-
-<summary>Interface CreateActionParams Details</summary>
-
-##### Property acceptDelayedBroadcast
-
-true if local validation and self-signed mapi response is sufficient.
-Upon return, transaction will have `sending` status. Watchman will proceed to send the transaction asynchronously.
-
-false if a valid mapi response from the bitcoin transaction processing network is required.
-Upon return, transaction will have `unproven` status. Watchman will proceed to prove transaction.
-
-default true
-
-```ts
-acceptDelayedBroadcast?: boolean
-```
-
-##### Property description
-
-Human readable string giving the purpose of this transaction.
-Value will be encrypted prior to leaving this device.
-Encrypted length limit is 500 characters.
-
-```ts
-description: string
-```
-
-##### Property inputs
-
-each input's outputsToRedeem:
-  - satoshis must be greater than zero, must match output's value.
-  - spendingDescription length limit is 50, values are encrypted before leaving this device
-  - unlockingScript is max byte length for `signActionRequired` mode, otherwise hex string.
-
-```ts
-inputs?: Record<string, NinjaTxInputsApi>
-```
-
-##### Property knownTxids
-
-If the caller already has envelopes or BUMPS for certain txids, pass them in this
-array and they will be assumed to be valid and not returned again in the results.
-
-```ts
-knownTxids?: string[]
-```
-
-##### Property labels
-
-transaction labels to apply to this transaction
-default []
-
-```ts
-labels?: string[]
-```
-
-##### Property lockTime
-
-Optional. Default is zero.
-When the transaction can be processed into a block:
->= 500,000,000 values are interpreted as minimum required unix time stamps in seconds
-< 500,000,000 values are interpreted as minimum required block height
-
-```ts
-lockTime?: number
-```
-
-##### Property log
-
-Optional operational and performance logging prior data.
-
-```ts
-log?: string
-```
-
-##### Property noBroadcast
-
-If true, successfully created transactions remain in the `nosend` state.
-A proof will be sought but it will not be considered an error if the txid remains unknown.
-
-Supports testing, user control over broadcasting of transactions, and batching.
-
-```ts
-noBroadcast?: boolean
-```
-
-##### Property originator
-
-Reserved Admin originators
-  'projectbabbage.com'
-  'staging-satoshiframe.babbage.systems'
-  'satoshiframe.babbage.systems'
-
-```ts
-originator?: string
-```
-
-##### Property outputs
-
-each output:
-  - description length limit is 50, values are encrypted before leaving this device
-
-```ts
-outputs?: DojoCreateTxOutputApi[]
-```
-
-##### Property resultFormat
-
-If 'beef', the results will format new transaction and supporting input proofs in BEEF format.
-Otherwise, the results will use `EnvelopeEvidenceApi` format.
-
-```ts
-resultFormat?: "beef"
-```
-
-##### Property trustSelf
-
-If undefined, normal case, all inputs must be provably valid by chain of rawTx and merkle proof values,
-and results will include new rawTx and proof chains for new outputs.
-
-If 'known', any input txid corresponding to a previously processed transaction may ommit its rawTx and proofs,
-and results will exclude new rawTx and proof chains for new outputs.
-
-```ts
-trustSelf?: TrustSelf
-```
-
-##### Property version
-
-Optional. Transaction version number, default is current standard transaction version value.
-
-```ts
-version?: number
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-#### Interface: CreateActionResult
-
-```ts
-export interface CreateActionResult {
-    signActionRequired?: boolean;
-    createResult?: DojoCreateTransactionResultApi;
-    txid?: string;
-    rawTx?: string;
-    inputs: Record<string, EnvelopeEvidenceApi>;
-    mapiResponses?: MapiResponseApi[];
-    log?: string;
-}
-```
-
-<details>
-
-<summary>Interface CreateActionResult Details</summary>
-
-##### Property createResult
-
-if signActionRequired, the dojo createTransaction results to be forwarded to signAction
-
-```ts
-createResult?: DojoCreateTransactionResultApi
-```
-
-##### Property inputs
-
-This is the fully-formed `inputs` field of this transaction, as per the SPV Envelope specification.
-
-```ts
-inputs: Record<string, EnvelopeEvidenceApi>
-```
-
-##### Property log
-
-operational and performance logging if enabled.
-
-```ts
-log?: string
-```
-
-##### Property mapiResponses
-
-If not `signActionRequired`, at least one valid mapi response.
-may be a self-signed response if `acceptDelayedBroadcast` is true.
-
-If `signActionRequired`, empty array.
-
-```ts
-mapiResponses?: MapiResponseApi[]
-```
-
-##### Property rawTx
-
-if not signActionRequired, fully signed transaction as LE hex string
-
-if signActionRequired:
-  - All length specified unlocking scripts are zero bytes
-  - All SABPPP template unlocking scripts have zero byte signatures
-  - All custom provided unlocking scripts fully copied.
-
-```ts
-rawTx?: string
-```
-
-##### Property signActionRequired
-
-true if at least one input's outputsToRedeem uses numeric max script byte length for unlockingScript
-
-If true, in-process transaction will have status `unsigned`. An `unsigned` transaction must be completed
-by signing all remaining unsigned inputs and calling `signAction`. Failure to complete the process in
-a timely manner will cause the transaction to transition to `failed`.
-
-If false or undefined, completed transaction will have status of `sending`, `nosend` or `unproven`,
-depending on `acceptDelayedBroadcast` and `noBroadcast`.
-
-```ts
-signActionRequired?: boolean
-```
-
-##### Property txid
-
-if not signActionRequired, signed transaction hash (double SHA256 BE hex string)
-
-```ts
-txid?: string
-```
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -3566,15 +3253,15 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | |
 | --- | --- |
-| [abortAction](#function-abortaction) | [processIncomingTransaction](#function-processincomingtransaction) |
-| [buildBsvTxFromCreateTransactionResult](#function-buildbsvtxfromcreatetransactionresult) | [processPendingTransactions](#function-processpendingtransactions) |
-| [convertToDojoTxInputsApi](#function-converttodojotxinputsapi) | [processTransactionWithOutputs](#function-processtransactionwithoutputs) |
-| [createTransactionWithOutputs](#function-createtransactionwithoutputs) | [signAction](#function-signaction) |
-| [getTransactionWithOutputs](#function-gettransactionwithoutputs) | [signCreatedTransaction](#function-signcreatedtransaction) |
-| [getUnlockingScriptLength](#function-getunlockingscriptlength) | [submitDirectTransaction](#function-submitdirecttransaction) |
-| [invoice3241645161d8](#function-invoice3241645161d8) | [unpackFromCreateTransactionResult](#function-unpackfromcreatetransactionresult) |
-| [makeUnlockTestRawTxBabbageBsv](#function-makeunlocktestrawtxbabbagebsv) | [validateDefaultParams](#function-validatedefaultparams) |
-| [needsSignAction](#function-needssignaction) |  |
+| [abortAction](#function-abortaction) | [ninjaProcessTransaction](#function-ninjaprocesstransaction) |
+| [buildBsvTxFromCreateTransactionResult](#function-buildbsvtxfromcreatetransactionresult) | [processIncomingTransaction](#function-processincomingtransaction) |
+| [convertToDojoTxInputsApi](#function-converttodojotxinputsapi) | [processPendingTransactions](#function-processpendingtransactions) |
+| [createTransactionWithOutputs](#function-createtransactionwithoutputs) | [processTransactionWithOutputs](#function-processtransactionwithoutputs) |
+| [getTransactionWithOutputs](#function-gettransactionwithoutputs) | [signAction](#function-signaction) |
+| [getUnlockingScriptLength](#function-getunlockingscriptlength) | [signCreatedTransaction](#function-signcreatedtransaction) |
+| [invoice3241645161d8](#function-invoice3241645161d8) | [submitDirectTransaction](#function-submitdirecttransaction) |
+| [makeUnlockTestRawTxBabbageBsv](#function-makeunlocktestrawtxbabbagebsv) | [unpackFromCreateTransactionResult](#function-unpackfromcreatetransactionresult) |
+| [needsSignAction](#function-needssignaction) | [validateDefaultParams](#function-validatedefaultparams) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -3787,6 +3474,15 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export async function abortAction(ninja: NinjaBase, params: NinjaAbortActionParams): Promise<NinjaAbortActionResultApi> 
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Function: ninjaProcessTransaction
+
+```ts
+export async function ninjaProcessTransaction(ninja: NinjaBase, params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> 
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
