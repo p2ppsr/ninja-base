@@ -44,11 +44,10 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
   }
 
   if (inputBeef) {
-
-    const beef = Beef.fromBinary(verifyTruthy(inputBeef))
+    // Add the new signed transaction to the BEEF
+    const beef = Beef.fromBinary(inputBeef)
     beef.mergeTransaction(tx)
     r.beef = beef.toBinary()
-
   } else {
 
     r.rawTx = tx.toHex();

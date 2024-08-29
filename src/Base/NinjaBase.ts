@@ -15,7 +15,7 @@ import {
   DojoTransactionStatusApi,
   DojoSyncOptionsApi, SyncDojoConfigBaseApi, SyncDojoConfigCloudUrl,
   DojoTxLabelApi, DojoOutputApi, DojoTransactionApi,
-  DojoGetTransactionLabelsOptions, CwiError, DojoProcessTransactionParams, identityKeyFromPrivateKey, EnvelopeApi, stampLog,
+  DojoGetTransactionLabelsOptions, DojoProcessTransactionParams, identityKeyFromPrivateKey, EnvelopeApi,
   DojoClientUserApi,
 } from 'cwi-base'
 
@@ -43,6 +43,7 @@ import { DojoExpressClient } from '../DojoExpressClient'
 import { signAction } from './signAction'
 import { abortAction } from './abortAction'
 import { GetInfoParams, GetInfoResult } from '@babbage/sdk-ts'
+import { ninjaProcessTransaction } from './ninjaProcessTransaction'
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain
@@ -352,31 +353,8 @@ export class NinjaBase implements NinjaApi {
 
   async processTransaction (params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> {
     await this.verifyDojoAuthenticated()
-    params.log = stampLog(params.log, `start ninja processTransaction acceptDelayedBroadcast=${params.acceptDelayedBroadcast}`)
-    try {
-      const r = await this.dojo.processTransaction(params)
-      r.log = stampLog(r.log, 'end ninja processTransaction')
-      return r
-    } catch (eu: unknown) {
-      const error = CwiError.fromUnknown(eu)
-
-      // Free up UTXOs since the transaction failed before throwing the error
-      // Unless there was a double spend error
-      if (params.reference) {
-        try {
-          await this.updateTransactionStatus({
-            reference: params.reference,
-            status: 'failed'
-          })
-        } catch (e) { /* ignore, we still need the code below */ }
-      }
-      
-      // In ninja v1, double spend processing occurred here which directly uses whatsonchain
-      // services to ultimately...
-      // 1. call `updateOutpointStatus` setting spendable false on UTXO's confirmed to have been spent
-      // 2. Update the envelope for the spending transaction
-      throw error
-    }
+    const r = await ninjaProcessTransaction(this, params)
+    return r
   }
 
   async getTransactionWithOutputs (params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> {
