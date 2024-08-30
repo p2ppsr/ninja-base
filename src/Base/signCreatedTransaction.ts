@@ -7,7 +7,6 @@ import {
   verifyTruthy} from 'cwi-base';
 import { buildBsvTxFromCreateTransactionResult } from './buildBsvTxFromCreateTransactionResult';
 import { needsSignAction } from './createTransactionWithOutputs';
-import { Beef } from '@babbage/sdk-ts';
 
 
 export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSignCreatedTransactionParams)
@@ -38,20 +37,12 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
     note: createResult.note,
     log,
 
-    beef: undefined,
-    rawTx: undefined,
+    beef: inputBeef,
+    rawTx: tx.toHex(),
     inputs: {},
   }
 
-  if (inputBeef) {
-    // Add the new signed transaction to the BEEF
-    const beef = Beef.fromBinary(inputBeef)
-    beef.mergeTransaction(tx)
-    r.beef = beef.toBinary()
-  } else {
-
-    r.rawTx = tx.toHex();
-
+  if (options.resultFormat === undefined) {
     // The inputs are sanitized to remove non-envelope properties (instructions, outputsToRedeem, ...)
     const sanitizedInputs = Object.fromEntries(
       Object.entries(inputs).map(([k, v]) => ([k, {
@@ -63,7 +54,6 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
     );
 
     r.inputs = sanitizedInputs
-
   }
 
   return r
