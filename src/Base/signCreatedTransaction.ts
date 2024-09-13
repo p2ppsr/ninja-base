@@ -56,6 +56,8 @@ export async function signCreatedTransaction(ninja: NinjaBase, params: NinjaSign
     r.inputs = sanitizedInputs
   }
 
+  //TODO: options handling...
+
   return r
 }
 
