@@ -12,12 +12,14 @@ import {
   DojoTxLabelApi, DojoOutputTagApi, DojoOutputBasketApi, DojoGetTransactionOutputsResultApi, DojoGetTransactionsResultApi,
   DojoGetTransactionLabelsResultApi, DojoSubmitDirectTransactionParams, DojoCreateTransactionParams,
   DojoProcessTransactionParams, verifyBufferOrObjectOrNull,
+  DojoGetBeefOptions,
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
 
 import fetch from 'node-fetch'
 import { stampLog } from 'cwi-base'
+import { Beef } from '@babbage/sdk-ts'
 
 interface FetchStatus<T> {
   status: 'success' | 'error'
@@ -237,6 +239,15 @@ export class DojoExpressClient implements DojoClientApi {
     this.verifyAuthenticated()
     const rs:DojoPendingTxApi[] = await this.postJson('/getPendingTransactions', { identityKey: this.identityKey, referenceNumber })
     return rs
+  }
+
+  async getBeefForTransaction(txid: string, options?: DojoGetBeefOptions): Promise<Beef> {
+    this.verifyAuthenticated()
+    // If options contains mergeToBeef, convert to serialized value if
+    const o: DojoGetBeefOptions = { ...(options || {}) }
+    if (o.mergeToBeef && !Array.isArray(o.mergeToBeef))
+      o.mergeToBeef = o.mergeToBeef.toBinary()
+    return await this.postJson('/getBeefForTransaction', { identityKey: this.identityKey, txid, options: o })
   }
 
   async getEnvelopeForTransaction (txid: string): Promise<EnvelopeApi | undefined> {
