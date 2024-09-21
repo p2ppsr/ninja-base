@@ -2765,6 +2765,7 @@ export class DojoExpressClient implements DojoClientApi {
     async updateTransactionStatus(reference: string, status: DojoTransactionStatusApi): Promise<void> 
     async getTransactions(options?: DojoGetTransactionsOptions): Promise<DojoGetTransactionsResultApi> 
     async getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]> 
+    async getBeefForTransaction(txid: string, options?: DojoGetBeefOptions): Promise<Beef> 
     async getEnvelopeForTransaction(txid: string): Promise<EnvelopeApi | undefined> 
     async getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> 
     async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<DojoGetTransactionOutputsResultApi> 
