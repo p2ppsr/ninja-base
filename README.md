@@ -1995,6 +1995,7 @@ export interface NinjaGetTransactionWithOutputsParams {
     outputs?: DojoCreateTxOutputApi[];
     labels?: string[];
     inputs?: Record<string, NinjaTxInputsApi>;
+    beef?: Beef | number[];
     note?: string;
     lockTime?: number;
     version?: number;
@@ -2058,6 +2059,15 @@ default true
 
 ```ts
 autoProcess?: boolean
+```
+
+##### Property beef
+
+Optional. Alternate source of validity proof data for `inputs`.
+If `number[]` it must be serialized `Beef`.
+
+```ts
+beef?: Beef | number[]
 ```
 
 ##### Property feeModel
