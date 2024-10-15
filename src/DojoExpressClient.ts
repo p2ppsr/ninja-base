@@ -245,9 +245,16 @@ export class DojoExpressClient implements DojoClientApi {
     this.verifyAuthenticated()
     // If options contains mergeToBeef, convert to serialized value if
     const o: DojoGetBeefOptions = { ...(options || {}) }
-    if (o.mergeToBeef && !Array.isArray(o.mergeToBeef))
-      o.mergeToBeef = o.mergeToBeef.toBinary()
-    return await this.postJson('/getBeefForTransaction', { identityKey: this.identityKey, txid, options: o })
+    let mergeToBeef = o.mergeToBeef
+    o.mergeToBeef = undefined
+    const beefBytes: number[] = await this.postJson('/getBeefForTransaction', { identityKey: this.identityKey, txid, options: o })
+    let r = Beef.fromBinary(beefBytes)
+    if (mergeToBeef) {
+      if (Array.isArray(mergeToBeef)) mergeToBeef = Beef.fromBinary(mergeToBeef);
+      mergeToBeef.mergeBeef(r)
+      r = mergeToBeef
+    }
+    return r
   }
 
   async getEnvelopeForTransaction (txid: string): Promise<EnvelopeApi | undefined> {
@@ -277,6 +284,9 @@ export class DojoExpressClient implements DojoClientApi {
           t.updated_at = validateDate(t.updated_at)  
         }
       }
+    }
+    if (results.beef) {
+      
     }
     return results
   }
