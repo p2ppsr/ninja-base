@@ -12,20 +12,19 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
-| [CwiCoreApi](#interface-cwicoreapi) | [NinjaGetPendingTransactionsTxApi](#interface-ninjagetpendingtransactionstxapi) | [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi) |
-| [DojoExpressClientOptions](#interface-dojoexpressclientoptions) | [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi) | [NinjaTransactionFailedApi](#interface-ninjatransactionfailedapi) |
-| [DojoTxBuilderBaseOptions](#interface-dojotxbuilderbaseoptions) | [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams) | [NinjaTransactionProcessedApi](#interface-ninjatransactionprocessedapi) |
-| [DojoTxBuilderInputApi](#interface-dojotxbuilderinputapi) | [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi) | [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi) |
-| [DojoTxBuilderOptions](#interface-dojotxbuilderoptions) | [NinjaGetTransactionsTxApi](#interface-ninjagettransactionstxapi) | [NinjaTxBuilderOptions](#interface-ninjatxbuilderoptions) |
-| [DojoTxBuilderOutputApi](#interface-dojotxbuilderoutputapi) | [NinjaGetTransactionsTxInputApi](#interface-ninjagettransactionstxinputapi) | [NinjaTxInputsApi](#interface-ninjatxinputsapi) |
-| [KeyPairApi](#interface-keypairapi) | [NinjaGetTransactionsTxOutputApi](#interface-ninjagettransactionstxoutputapi) | [NinjaV1Params](#interface-ninjav1params) |
-| [NinjaAbortActionParams](#interface-ninjaabortactionparams) | [NinjaOutputToRedeemApi](#interface-ninjaoutputtoredeemapi) | [ProcessIncomingTransactionApi](#interface-processincomingtransactionapi) |
-| [NinjaAbortActionResultApi](#interface-ninjaabortactionresultapi) | [NinjaSignActionParams](#interface-ninjasignactionparams) | [ProcessIncomingTransactionInputApi](#interface-processincomingtransactioninputapi) |
-| [NinjaApi](#interface-ninjaapi) | [NinjaSignActionResultApi](#interface-ninjasignactionresultapi) | [ProcessIncomingTransactionOutputApi](#interface-processincomingtransactionoutputapi) |
-| [NinjaCompleteCreateTransactionWithOutputsParams](#interface-ninjacompletecreatetransactionwithoutputsparams) | [NinjaSignCreatedTransactionParams](#interface-ninjasigncreatedtransactionparams) | [ProcessIncomingTransactionResultApi](#interface-processincomingtransactionresultapi) |
-| [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams) | [NinjaSubmitDirectTransactionApi](#interface-ninjasubmitdirecttransactionapi) | [SignActionParams](#interface-signactionparams) |
-| [NinjaGetPendingTransactionsInputApi](#interface-ninjagetpendingtransactionsinputapi) | [NinjaSubmitDirectTransactionOutputApi](#interface-ninjasubmitdirecttransactionoutputapi) | [TxOutputApi](#interface-txoutputapi) |
-| [NinjaGetPendingTransactionsInstructionsApi](#interface-ninjagetpendingtransactionsinstructionsapi) | [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams) | [TxRedeemableOutputApi](#interface-txredeemableoutputapi) |
+| [CwiCoreApi](#interface-cwicoreapi) | [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi) | [NinjaTransactionProcessedApi](#interface-ninjatransactionprocessedapi) |
+| [DojoExpressClientOptions](#interface-dojoexpressclientoptions) | [NinjaGetTransactionsTxApi](#interface-ninjagettransactionstxapi) | [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi) |
+| [KeyPairApi](#interface-keypairapi) | [NinjaGetTransactionsTxInputApi](#interface-ninjagettransactionstxinputapi) | [NinjaTxInputsApi](#interface-ninjatxinputsapi) |
+| [NinjaAbortActionParams](#interface-ninjaabortactionparams) | [NinjaGetTransactionsTxOutputApi](#interface-ninjagettransactionstxoutputapi) | [NinjaV1Params](#interface-ninjav1params) |
+| [NinjaAbortActionResultApi](#interface-ninjaabortactionresultapi) | [NinjaOutputToRedeemApi](#interface-ninjaoutputtoredeemapi) | [ProcessIncomingTransactionApi](#interface-processincomingtransactionapi) |
+| [NinjaApi](#interface-ninjaapi) | [NinjaSignActionParams](#interface-ninjasignactionparams) | [ProcessIncomingTransactionInputApi](#interface-processincomingtransactioninputapi) |
+| [NinjaCompleteCreateTransactionWithOutputsParams](#interface-ninjacompletecreatetransactionwithoutputsparams) | [NinjaSignActionResultApi](#interface-ninjasignactionresultapi) | [ProcessIncomingTransactionOutputApi](#interface-processincomingtransactionoutputapi) |
+| [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams) | [NinjaSignCreatedTransactionParams](#interface-ninjasigncreatedtransactionparams) | [ProcessIncomingTransactionResultApi](#interface-processincomingtransactionresultapi) |
+| [NinjaGetPendingTransactionsInputApi](#interface-ninjagetpendingtransactionsinputapi) | [NinjaSubmitDirectTransactionApi](#interface-ninjasubmitdirecttransactionapi) | [SignActionParams](#interface-signactionparams) |
+| [NinjaGetPendingTransactionsInstructionsApi](#interface-ninjagetpendingtransactionsinstructionsapi) | [NinjaSubmitDirectTransactionOutputApi](#interface-ninjasubmitdirecttransactionoutputapi) | [TxOutputApi](#interface-txoutputapi) |
+| [NinjaGetPendingTransactionsTxApi](#interface-ninjagetpendingtransactionstxapi) | [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams) | [TxRedeemableOutputApi](#interface-txredeemableoutputapi) |
+| [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi) | [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi) |  |
+| [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams) | [NinjaTransactionFailedApi](#interface-ninjatransactionfailedapi) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -2594,66 +2593,6 @@ export interface DojoExpressClientOptions {
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-#### Interface: DojoTxBuilderInputApi
-
-```ts
-export interface DojoTxBuilderInputApi {
-    txid: string;
-    vout: number;
-    satoshis: number;
-    scriptLength: number;
-    script?: string;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-#### Interface: DojoTxBuilderOutputApi
-
-```ts
-export interface DojoTxBuilderOutputApi {
-    satoshis: number;
-    script: string;
-    vout: number;
-    index: number;
-    change: boolean;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-#### Interface: DojoTxBuilderBaseOptions
-
-```ts
-export interface DojoTxBuilderBaseOptions {
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-#### Interface: DojoTxBuilderOptions
-
-```ts
-export interface DojoTxBuilderOptions extends DojoTxBuilderBaseOptions {
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-#### Interface: NinjaTxBuilderOptions
-
-```ts
-export interface NinjaTxBuilderOptions extends DojoTxBuilderBaseOptions {
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
 #### Interface: NinjaV1Params
 
 ```ts
@@ -2677,13 +2616,10 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | |
 | --- |
 | [DojoExpressClient](#class-dojoexpressclient) |
-| [DojoTxBuilder](#class-dojotxbuilder) |
-| [DojoTxBuilderBase](#class-dojotxbuilderbase) |
 | [ERR_NINJA_INVALID_UNLOCK](#class-err_ninja_invalid_unlock) |
 | [ERR_NINJA_MISSING_UNLOCK](#class-err_ninja_missing_unlock) |
 | [Ninja](#class-ninja) |
 | [NinjaBase](#class-ninjabase) |
-| [NinjaTxBuilder](#class-ninjatxbuilder) |
 | [NinjaV2](#class-ninjav2) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
@@ -2904,321 +2840,6 @@ export class NinjaBase implements NinjaApi {
     async getInfo(params: GetInfoParams): Promise<GetInfoResult> 
 }
 ```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-#### Class: DojoTxBuilderBase
-
-```ts
-export class DojoTxBuilderBase {
-    constructor(public dojo: DojoClientApi, public baseOptions?: DojoTxBuilderBaseOptions) 
-    inputs: DojoTxBuilderInputApi[];
-    outputs: DojoTxBuilderOutputApi[];
-    outputsChange: DojoTxBuilderOutputApi[];
-    funding(): number 
-    spending(): number 
-    change(): number 
-    amount(): number 
-    feeForSize(bytes: number): number 
-    feeRequired(): number 
-    feeExcess(): number 
-    addOutputs(outputs: Array<DojoCreateTxOutputApi | DojoCreatingTxOutputApi | DojoTxBuilderOutputApi>): void 
-    addChangeOutputs(outputs: Array<DojoCreateTxOutputApi | DojoCreatingTxOutputApi | DojoTxBuilderOutputApi>): void 
-    addInputs(inputs: Record<string, DojoCreatingTxInputsApi>): void 
-    addInputsToFundOutputs(inputs: DojoTxBuilderInputApi[]): void 
-    addChangeOutputsToRecoverExcessFee(getChangeOutput: () => DojoTxBuilderOutputApi | undefined): void 
-    validateOutput(o: DojoCreateTxOutputApi): void 
-    validate(noThrow = false): {
-        ok: boolean;
-        error: CwiError | undefined;
-    } 
-}
-```
-
-<details>
-
-<summary>Class DojoTxBuilderBase Details</summary>
-
-##### Property inputs
-
-inputs that will fund the transaction
-
-```ts
-inputs: DojoTxBuilderInputApi[]
-```
-
-##### Property outputs
-
-outputs with pre-determined, non-adjustable amounts that will be created by the transaction
-
-```ts
-outputs: DojoTxBuilderOutputApi[]
-```
-
-##### Property outputsChange
-
-change outputs generated to recapture excess funding
-owned by authenticated user.
-adjustable amounts.
-
-```ts
-outputsChange: DojoTxBuilderOutputApi[]
-```
-
-##### Method addChangeOutputs
-
-Add change outputs to transaction `outputsChange`.
-
-All change outputs are added.
-
-```ts
-addChangeOutputs(outputs: Array<DojoCreateTxOutputApi | DojoCreatingTxOutputApi | DojoTxBuilderOutputApi>): void 
-```
-
-Argument Details
-
-+ **outputs**
-  + to add to transaction `outputsChange`
-
-##### Method addChangeOutputsToRecoverExcessFee
-
-Repeatedly calls `getChangeOutput` and adds the new returned change output
-while `feeExcess` is positive and returned output is not undefined.
-
-If `getChangeOutput` returns an output that would overspend (feeExcess < 0)
-it is not added and the function returns.
-
-```ts
-addChangeOutputsToRecoverExcessFee(getChangeOutput: () => DojoTxBuilderOutputApi | undefined): void 
-```
-
-Argument Details
-
-+ **getChangeOutput**
-  + a function that returns a single new change output or undefined if done.
-
-##### Method addInputs
-
-Add inputs to transaction `inputs`.
-
-All inputs are added.
-
-```ts
-addInputs(inputs: Record<string, DojoCreatingTxInputsApi>): void 
-```
-
-Argument Details
-
-+ **inputs**
-  + to add to transaction `inputs`
-
-##### Method addInputsToFundOutputs
-
-Add inputs sequentially to transaction `inputs` while `feeExcess` is negative.
-
-```ts
-addInputsToFundOutputs(inputs: DojoTxBuilderInputApi[]): void 
-```
-
-Argument Details
-
-+ **inputs**
-  + to add to transaction `inputs`, removes inputs used from array
-
-##### Method addOutputs
-
-Add outputs to transaction `outputs`.
-
-All outputs are added.
-
-```ts
-addOutputs(outputs: Array<DojoCreateTxOutputApi | DojoCreatingTxOutputApi | DojoTxBuilderOutputApi>): void 
-```
-
-Argument Details
-
-+ **outputs**
-  + to add to transaction `outputs`
-
-##### Method amount
-
-The amount of this transaction as currently configured.
-
-`change` less `funding`
-
-Normally negative. The is the change in total value of authenticated user's unspent outputs.
-
-```ts
-amount(): number 
-```
-
-##### Method change
-
-The current total value in satoshis of the amounts for all outputsChange
-
-```ts
-change(): number 
-```
-
-##### Method feeExcess
-
-Must return the current excess fee for the transaction as currently configured.
-
-The base class defines this as funding() - spending() - change() - requiredFee()
-
-Because adding an input, or output, increments the counts,
-which are varints, compute the excess fee being paid for
-the transaction as a whole based on current choices:
-- inputs
-- outputs
-- changeOutputs
-
-The goal is an excess fee of zero.
-
-A positive value is okay if the cost of an additional change output is greater.
-
-A negative value means the transaction is under funded, or over spends, and may be rejected.
-
-```ts
-feeExcess(): number 
-```
-
-##### Method feeForSize
-
-Must return the fee required by miners for a transaction of a certain size.
-
-```ts
-feeForSize(bytes: number): number 
-```
-
-Argument Details
-
-+ **bytes**
-  + size in bytes
-
-##### Method feeRequired
-
-Must return the fee required by miners for the transaction as currently configured.
-
-The base class implementation computes the transaction size in bytes and applies
-the fee rate established by the abstract `feeForSize` function.
-
-```ts
-feeRequired(): number 
-```
-
-##### Method funding
-
-The current total value in satoshis of the selected inputs,
-
-```ts
-funding(): number 
-```
-
-##### Method spending
-
-The current total value in satoshis of the amounts for all outputs
-
-```ts
-spending(): number 
-```
-
-##### Method validate
-
-validate current transaction configuration
-
-if `ok` is true, a valid transaction can be created
-
-if `ok` is false, `error` is not undefined and has details one issue.
-
-```ts
-validate(noThrow = false): {
-    ok: boolean;
-    error: CwiError | undefined;
-} 
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-#### Class: DojoTxBuilder
-
-```ts
-export class DojoTxBuilder extends DojoTxBuilderBase {
-    constructor(dojo: DojoClientApi, public options?: DojoTxBuilderOptions) 
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-#### Class: NinjaTxBuilder
-
-NinjaTxBuilder is intended to complement DojoTxBuilder, implementing the signing functions
-that only Ninja can do with access to private keys.
-
-Ultimately most of the generically useful code that supports building and signing
-actual bitcoin transactions should be collected here.
-
-This is a work in progress...
-
-```ts
-export class NinjaTxBuilder extends DojoTxBuilderBase {
-    constructor(public ninja: NinjaApi, public options?: NinjaTxBuilderOptions) 
-    static buildJsTxFromPendingTx(ninja: NinjaBase, ptx: DojoPendingTxApi): {
-        tx: bsvJs.Transaction;
-        outputMap: Record<string, number>;
-        amount: number;
-    } 
-    static buildJsTxFromCreateTransactionResult(ninja: NinjaApi, inputs: Record<string, NinjaTxInputsApi>, createResult: DojoCreateTransactionResultApi): {
-        tx: bsvJs.Transaction;
-        outputMap: Record<string, number>;
-        amount: number;
-        log?: string;
-    } 
-    static buildJsTx(ninja: NinjaApi, ninjaInputs: Record<string, NinjaTxInputsApi>, dojoInputs: Record<string, DojoCreatingTxInputsApi>, dojoOutputs: DojoCreatingTxOutputApi[], derivationPrefix: string, version: number, lockTime: number, paymailHandle?: string, log?: string): {
-        tx: bsvJs.Transaction;
-        outputMap: Record<string, number>;
-        amount: number;
-        log?: string;
-    } 
-}
-```
-
-<details>
-
-<summary>Class NinjaTxBuilder Details</summary>
-
-##### Method buildJsTx
-
-```ts
-static buildJsTx(ninja: NinjaApi, ninjaInputs: Record<string, NinjaTxInputsApi>, dojoInputs: Record<string, DojoCreatingTxInputsApi>, dojoOutputs: DojoCreatingTxOutputApi[], derivationPrefix: string, version: number, lockTime: number, paymailHandle?: string, log?: string): {
-    tx: bsvJs.Transaction;
-    outputMap: Record<string, number>;
-    amount: number;
-    log?: string;
-} 
-```
-
-Returns
-
-new signed bitcoin transaction, output map, an impact amount on authority's balance
-
-Argument Details
-
-+ **ninja**
-  + The authority constructing this new transaction
-+ **ninjaInputs**
-  + External inputs to be added not known to ninja's dojo.
-+ **dojoInputs**
-  + Inputs to be added that are known to ninja's dojo.
-+ **dojoOutputs**
-  + All new outputs to be created
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
