@@ -1,11 +1,11 @@
 import {
+   Beef,
    CreateActionOptions,
    GetInfoParams,
    GetInfoResult,
    GetTransactionOutputResult, ListActionsTransaction, ListActionsTransactionInput,
    ListActionsTransactionOutput, OptionalEnvelopeEvidenceApi, SubmitDirectTransaction, SubmitDirectTransactionOutput,
    SubmitDirectTransactionResult, TransactionStatusApi,
-   TrustSelf
 } from '@babbage/sdk-ts'
 import {
   Chain, CwiError, DojoAvatarApi, DojoCertificateApi, DojoClientApi, EnvelopeEvidenceApi,
@@ -1031,6 +1031,11 @@ export interface NinjaGetTransactionWithOutputsParams {
       * so that the additional Dojo outputs can be added afterward without invalidating your signature.
       */
    inputs?: Record<string, NinjaTxInputsApi>
+   /**
+    * Optional. Alternate source of validity proof data for `inputs`.
+    * If `number[]` it must be serialized `Beef`.
+    */
+   beef?: Beef | number[],
    /**
       * A note about the transaction
       */

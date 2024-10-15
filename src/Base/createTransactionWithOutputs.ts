@@ -51,6 +51,7 @@ export async function createTransactionWithOutputs(ninja: NinjaBase, params: Nin
 
   const params2: DojoCreateTransactionParams = {
     inputs: convertToDojoTxInputsApi(inputs),
+    beef: params.beef,
     outputs: outputs || [],
     feeModel: feeModel || (feePerKb ? { model: 'sat/kb', value: feePerKb } : undefined),
     version,
