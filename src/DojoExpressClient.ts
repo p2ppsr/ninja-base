@@ -310,7 +310,7 @@ export class DojoExpressClient implements DojoClientApi {
       beef: Array.isArray(params.beef) ? params.beef : params.beef ? params.beef.toBinary() : undefined,
     }
     params2.log = stampLog(params.log, 'start dojo client createTransaction')
-    const r = <DojoCreateTransactionResultApi>await this.postJson('/createTransaction', { identityKey: this.identityKey, params2 })
+    const r = <DojoCreateTransactionResultApi>await this.postJson('/createTransaction', { identityKey: this.identityKey, params: params2 })
     r.log = stampLog(r.log, 'end dojo client createTransaction **NETWORK**')
     return r
   }
