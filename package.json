@@ -52,7 +52,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@babbage/sdk-ts": "^0.2.64",
+    "@babbage/sdk-ts": "^0.2.65",
     "@bsv/sdk": "^1.1.29",
     "authrite-js": "^0.4.36",
     "authrite-utils": "^0.3.36",
