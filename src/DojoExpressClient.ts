@@ -454,4 +454,8 @@ export class DojoExpressClient implements DojoClientApi {
     return await this.postJsonOrUndefined('/getMerkleRootForHeight', { identityKey: this.identityKey, height })
   }
 
+  async getHeaderForHeight(height: number): Promise<number[] | undefined> {
+    this.verifyAuthenticated()
+    return await this.postJsonOrUndefined('/getHeaderForHeight', { identityKey: this.identityKey, height })
+  }
 }

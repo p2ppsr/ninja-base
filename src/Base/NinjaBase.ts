@@ -463,6 +463,12 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
+  async getHeaderForHeight(height: number): Promise<number[] | undefined> {
+    await this.verifyDojoAuthenticated()
+    const r = await this.dojo.getHeaderForHeight(height)
+    return r
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getInfo(params: GetInfoParams): Promise<GetInfoResult> {
     await this.verifyDojoAuthenticated()

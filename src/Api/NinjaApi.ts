@@ -422,6 +422,11 @@ export interface NinjaApi {
    getMerkleRootForHeight(height: number): Promise<string | undefined>
 
    /**
+    * @returns serialized block header for the given height or undefined, if height is invalid or unknown.
+   */
+   getHeaderForHeight(height: number): Promise<number[] | undefined>
+
+   /**
     * @returns {Promise<GetInfoResult>} information about the metanet-client context (version, chain, height, user...).
     */
    getInfo(params: GetInfoParams) : Promise<GetInfoResult>
