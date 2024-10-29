@@ -39,6 +39,11 @@ export interface NinjaApi {
    authenticate(identityKey?: string, addIfNew?: boolean): Promise<void>
 
    /**
+    * @returns false until a call to `authenticate` succeeds
+    */
+   isAuthenticated() : boolean
+
+   /**
       * Sync's the dojo's state for the authenticated user with all of the configured syncDojos
       *
       * This method should only be called when either a local or remote state change occurs, or may have occurred.

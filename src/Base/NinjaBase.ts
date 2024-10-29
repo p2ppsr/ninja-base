@@ -120,6 +120,10 @@ export class NinjaBase implements NinjaApi {
     console.log(`NinjaBase authenticated as ${identityKey} ${this.userId}`)
   }
 
+  isAuthenticated() : boolean {
+    return !!this.user && this.userId !== undefined && this._isDojoAuthenticated
+  }
+
   async verifyDojoAuthenticated () {
     if (!this._isDojoAuthenticated) {
       await this.authenticate(undefined, true)
