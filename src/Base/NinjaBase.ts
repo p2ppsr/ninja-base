@@ -30,6 +30,8 @@ import {
   NinjaTransactionWithOutputsResultApi,
   NinjaGetTransactionsTxOutputApi,
   NinjaGetTransactionsTxInputApi,
+  NinjaCreateActionParams,
+  NinjaCreateActionResult,
 } from '../Api/NinjaApi'
 
 import { processPendingTransactions } from './processPendingTransactions'
@@ -44,6 +46,7 @@ import { signAction } from './signAction'
 import { abortAction } from './abortAction'
 import { GetInfoParams, GetInfoResult } from '@babbage/sdk-ts'
 import { ninjaProcessTransaction } from './ninjaProcessTransaction'
+import { ninjaCreateAction } from './ninjaCreateAction'
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain
@@ -358,6 +361,12 @@ export class NinjaBase implements NinjaApi {
   async processTransaction (params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> {
     await this.verifyDojoAuthenticated()
     const r = await ninjaProcessTransaction(this, params)
+    return r
+  }
+
+  async createAction(params: NinjaCreateActionParams): Promise<NinjaCreateActionResult> {
+    await this.verifyDojoAuthenticated()
+    const r = await ninjaCreateAction(this, params)
     return r
   }
 

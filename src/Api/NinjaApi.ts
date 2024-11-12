@@ -1,10 +1,12 @@
 import {
    Beef,
    CreateActionOptions,
+   CreateActionParams,
+   CreateActionResult,
    GetInfoParams,
    GetInfoResult,
    GetTransactionOutputResult, ListActionsTransaction, ListActionsTransactionInput,
-   ListActionsTransactionOutput, OptionalEnvelopeEvidenceApi, SubmitDirectTransaction, SubmitDirectTransactionOutput,
+   ListActionsTransactionOutput, OptionalEnvelopeEvidenceApi, OutPoint, SubmitDirectTransaction, SubmitDirectTransactionOutput,
    SubmitDirectTransactionResult, TransactionStatusApi,
 } from '@babbage/sdk-ts'
 import {
@@ -244,6 +246,19 @@ export interface NinjaApi {
    updateOutpointStatus(params: { txid: string, vout: number, spendable: boolean }): Promise<void>
 
    /**
+    * Create and process a new transaction with automatic funding.
+    * 
+    * Specific required inputs and new outputs can be specified.
+    * 
+    * An optional confirmation processing step can be provided prior to signing
+    * and processing the new transaction. This is typically used to confirm total
+    * spending.
+    * 
+    * @param params 
+    */
+   createAction(params: NinjaCreateActionParams): Promise<NinjaCreateActionResult>
+
+   /**
       * Signs and processes all pending transactions, useful when recovering from an
       * error or crash, or on startup. If a transaction fails to process, marks it
       * as failed.
@@ -435,6 +450,20 @@ export interface NinjaApi {
     * @returns {Promise<GetInfoResult>} information about the metanet-client context (version, chain, height, user...).
     */
    getInfo(params: GetInfoParams) : Promise<GetInfoResult>
+}
+
+export interface NinjaCreateActionConfirmResult {
+   proceedToSign: boolean
+}
+
+export interface NinjaCreateActionParams {
+   params: CreateActionParams
+   confirmCreateTransactionResult?: (result: NinjaTransactionWithOutputsResultApi) => Promise<NinjaCreateActionConfirmResult>
+}
+
+export interface NinjaCreateActionResult {
+   proceedToSign: boolean
+   result?: CreateActionResult
 }
 
 /**
@@ -719,6 +748,12 @@ export interface NinjaTransactionWithOutputsResultApi {
    * may contain known txid's using the extended beef format if `options.knownTxids` is used.
    */
   beef?: number[]
+   /**
+    * Valid for options.noSend true.
+    * 
+    * Change output(s) that may be forwarded to chained noSend transactions.
+    */
+   noSendChange?: OutPoint[]
   /**
    * The serialized, signed transaction that is ready for broadcast, or has been broadcast.
    * 
