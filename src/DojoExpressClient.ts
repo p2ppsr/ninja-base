@@ -19,7 +19,7 @@ import { AuthriteClient } from 'authrite-js'
 
 import fetch from 'node-fetch'
 import { stampLog } from 'cwi-base'
-import { Beef } from '@babbage/sdk-ts'
+import { sdk, Beef } from '@babbage/sdk-ts'
 
 interface FetchStatus<T> {
   status: 'success' | 'error'
@@ -221,6 +221,12 @@ export class DojoExpressClient implements DojoClientApi {
   async updateTransactionStatus (reference: string, status: DojoTransactionStatusApi): Promise<void> {
     this.verifyAuthenticated()
     await this.postJsonVoid('/updateTransactionStatus', { identityKey: this.identityKey, reference, status })
+  }
+
+  async listActions(args: sdk.ListActionsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListActionsResult> {
+    this.verifyAuthenticated()
+    const r: sdk.ListActionsResult = await this.postJson('/listActions', { identityKey: this.identityKey, args, originator })
+    return r
   }
 
   async getTransactions (options?: DojoGetTransactionsOptions): Promise<DojoGetTransactionsResultApi> {

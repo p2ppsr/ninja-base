@@ -44,7 +44,7 @@ import { submitDirectTransaction } from './submitDirectTransaction'
 import { DojoExpressClient } from '../DojoExpressClient'
 import { signAction } from './signAction'
 import { abortAction } from './abortAction'
-import { GetInfoParams, GetInfoResult } from '@babbage/sdk-ts'
+import { GetInfoParams, GetInfoResult, sdk } from '@babbage/sdk-ts'
 import { ninjaProcessTransaction } from './ninjaProcessTransaction'
 import { ninjaCreateAction } from './ninjaCreateAction'
 
@@ -367,6 +367,12 @@ export class NinjaBase implements NinjaApi {
   async createAction(params: NinjaCreateActionParams): Promise<NinjaCreateActionResult> {
     await this.verifyDojoAuthenticated()
     const r = await ninjaCreateAction(this, params)
+    return r
+  }
+
+  async listActions(args: sdk.ListActionsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListActionsResult> {
+    await this.verifyDojoAuthenticated()
+    const r = await this.dojo.listActions(args, originator)
     return r
   }
 
