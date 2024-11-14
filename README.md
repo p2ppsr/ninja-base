@@ -12,19 +12,20 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
-| [CwiCoreApi](#interface-cwicoreapi) | [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi) | [NinjaTransactionProcessedApi](#interface-ninjatransactionprocessedapi) |
-| [DojoExpressClientOptions](#interface-dojoexpressclientoptions) | [NinjaGetTransactionsTxApi](#interface-ninjagettransactionstxapi) | [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi) |
-| [KeyPairApi](#interface-keypairapi) | [NinjaGetTransactionsTxInputApi](#interface-ninjagettransactionstxinputapi) | [NinjaTxInputsApi](#interface-ninjatxinputsapi) |
-| [NinjaAbortActionParams](#interface-ninjaabortactionparams) | [NinjaGetTransactionsTxOutputApi](#interface-ninjagettransactionstxoutputapi) | [NinjaV1Params](#interface-ninjav1params) |
-| [NinjaAbortActionResultApi](#interface-ninjaabortactionresultapi) | [NinjaOutputToRedeemApi](#interface-ninjaoutputtoredeemapi) | [ProcessIncomingTransactionApi](#interface-processincomingtransactionapi) |
-| [NinjaApi](#interface-ninjaapi) | [NinjaSignActionParams](#interface-ninjasignactionparams) | [ProcessIncomingTransactionInputApi](#interface-processincomingtransactioninputapi) |
-| [NinjaCompleteCreateTransactionWithOutputsParams](#interface-ninjacompletecreatetransactionwithoutputsparams) | [NinjaSignActionResultApi](#interface-ninjasignactionresultapi) | [ProcessIncomingTransactionOutputApi](#interface-processincomingtransactionoutputapi) |
-| [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams) | [NinjaSignCreatedTransactionParams](#interface-ninjasigncreatedtransactionparams) | [ProcessIncomingTransactionResultApi](#interface-processincomingtransactionresultapi) |
-| [NinjaGetPendingTransactionsInputApi](#interface-ninjagetpendingtransactionsinputapi) | [NinjaSubmitDirectTransactionApi](#interface-ninjasubmitdirecttransactionapi) | [SignActionParams](#interface-signactionparams) |
-| [NinjaGetPendingTransactionsInstructionsApi](#interface-ninjagetpendingtransactionsinstructionsapi) | [NinjaSubmitDirectTransactionOutputApi](#interface-ninjasubmitdirecttransactionoutputapi) | [TxOutputApi](#interface-txoutputapi) |
-| [NinjaGetPendingTransactionsTxApi](#interface-ninjagetpendingtransactionstxapi) | [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams) | [TxRedeemableOutputApi](#interface-txredeemableoutputapi) |
-| [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi) | [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi) |  |
-| [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams) | [NinjaTransactionFailedApi](#interface-ninjatransactionfailedapi) |  |
+| [CwiCoreApi](#interface-cwicoreapi) | [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi) | [NinjaTransactionFailedApi](#interface-ninjatransactionfailedapi) |
+| [DojoExpressClientOptions](#interface-dojoexpressclientoptions) | [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams) | [NinjaTransactionProcessedApi](#interface-ninjatransactionprocessedapi) |
+| [KeyPairApi](#interface-keypairapi) | [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi) | [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi) |
+| [NinjaAbortActionParams](#interface-ninjaabortactionparams) | [NinjaGetTransactionsTxApi](#interface-ninjagettransactionstxapi) | [NinjaTxInputsApi](#interface-ninjatxinputsapi) |
+| [NinjaAbortActionResultApi](#interface-ninjaabortactionresultapi) | [NinjaGetTransactionsTxInputApi](#interface-ninjagettransactionstxinputapi) | [NinjaV1Params](#interface-ninjav1params) |
+| [NinjaApi](#interface-ninjaapi) | [NinjaGetTransactionsTxOutputApi](#interface-ninjagettransactionstxoutputapi) | [ProcessIncomingTransactionApi](#interface-processincomingtransactionapi) |
+| [NinjaCompleteCreateTransactionWithOutputsParams](#interface-ninjacompletecreatetransactionwithoutputsparams) | [NinjaOutputToRedeemApi](#interface-ninjaoutputtoredeemapi) | [ProcessIncomingTransactionInputApi](#interface-processincomingtransactioninputapi) |
+| [NinjaCreateActionConfirmResult](#interface-ninjacreateactionconfirmresult) | [NinjaSignActionParams](#interface-ninjasignactionparams) | [ProcessIncomingTransactionOutputApi](#interface-processincomingtransactionoutputapi) |
+| [NinjaCreateActionParams](#interface-ninjacreateactionparams) | [NinjaSignActionResultApi](#interface-ninjasignactionresultapi) | [ProcessIncomingTransactionResultApi](#interface-processincomingtransactionresultapi) |
+| [NinjaCreateActionResult](#interface-ninjacreateactionresult) | [NinjaSignCreatedTransactionParams](#interface-ninjasigncreatedtransactionparams) | [SignActionParams](#interface-signactionparams) |
+| [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams) | [NinjaSubmitDirectTransactionApi](#interface-ninjasubmitdirecttransactionapi) | [TxOutputApi](#interface-txoutputapi) |
+| [NinjaGetPendingTransactionsInputApi](#interface-ninjagetpendingtransactionsinputapi) | [NinjaSubmitDirectTransactionOutputApi](#interface-ninjasubmitdirecttransactionoutputapi) | [TxRedeemableOutputApi](#interface-txredeemableoutputapi) |
+| [NinjaGetPendingTransactionsInstructionsApi](#interface-ninjagetpendingtransactionsinstructionsapi) | [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams) |  |
+| [NinjaGetPendingTransactionsTxApi](#interface-ninjagetpendingtransactionstxapi) | [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -191,6 +192,7 @@ export interface NinjaApi {
         vout: number;
         spendable: boolean;
     }): Promise<void>;
+    createAction(params: NinjaCreateActionParams): Promise<NinjaCreateActionResult>;
     processPendingTransactions(onTransactionProcessed?: NinjaTransactionProcessedHandler, onTransactionFailed?: NinjaTransactionFailedHandler): Promise<void>;
     processTransaction(params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi>;
     getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi>;
@@ -223,7 +225,7 @@ export interface NinjaApi {
 }
 ```
 
-See also: [KeyPairApi](#interface-keypairapi), [NinjaAbortActionParams](#interface-ninjaabortactionparams), [NinjaAbortActionResultApi](#interface-ninjaabortactionresultapi), [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams), [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi), [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams), [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi), [NinjaSignActionParams](#interface-ninjasignactionparams), [NinjaSignActionResultApi](#interface-ninjasignactionresultapi), [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams), [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi), [NinjaTransactionFailedHandler](#type-ninjatransactionfailedhandler), [NinjaTransactionProcessedHandler](#type-ninjatransactionprocessedhandler), [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi), [abortAction](#function-abortaction), [createTransactionWithOutputs](#function-createtransactionwithoutputs), [getTransactionWithOutputs](#function-gettransactionwithoutputs), [processPendingTransactions](#function-processpendingtransactions), [processTransactionWithOutputs](#function-processtransactionwithoutputs), [signAction](#function-signaction), [submitDirectTransaction](#function-submitdirecttransaction)
+See also: [KeyPairApi](#interface-keypairapi), [NinjaAbortActionParams](#interface-ninjaabortactionparams), [NinjaAbortActionResultApi](#interface-ninjaabortactionresultapi), [NinjaCreateActionParams](#interface-ninjacreateactionparams), [NinjaCreateActionResult](#interface-ninjacreateactionresult), [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams), [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi), [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams), [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi), [NinjaSignActionParams](#interface-ninjasignactionparams), [NinjaSignActionResultApi](#interface-ninjasignactionresultapi), [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams), [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi), [NinjaTransactionFailedHandler](#type-ninjatransactionfailedhandler), [NinjaTransactionProcessedHandler](#type-ninjatransactionprocessedhandler), [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi), [abortAction](#function-abortaction), [createTransactionWithOutputs](#function-createtransactionwithoutputs), [getTransactionWithOutputs](#function-gettransactionwithoutputs), [processPendingTransactions](#function-processpendingtransactions), [processTransactionWithOutputs](#function-processtransactionwithoutputs), [signAction](#function-signaction), [submitDirectTransaction](#function-submitdirecttransaction)
 
 <details>
 
@@ -263,6 +265,21 @@ Argument Details
   + Optional. The user's public identity key. Must be authorized to act on behalf of this user.
 + **addIfNew**
   + Optional. Create new user records if identityKey is unknown.
+
+##### Method createAction
+
+Create and process a new transaction with automatic funding.
+
+Specific required inputs and new outputs can be specified.
+
+An optional confirmation processing step can be provided prior to signing
+and processing the new transaction. This is typically used to confirm total
+spending.
+
+```ts
+createAction(params: NinjaCreateActionParams): Promise<NinjaCreateActionResult>
+```
+See also: [NinjaCreateActionParams](#interface-ninjacreateactionparams), [NinjaCreateActionResult](#interface-ninjacreateactionresult)
 
 ##### Method createTransaction
 
@@ -948,6 +965,43 @@ inputs?: Record<string, NinjaTxInputsApi>
 See also: [NinjaTxInputsApi](#interface-ninjatxinputsapi)
 
 </details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Interface: NinjaCreateActionConfirmResult
+
+```ts
+export interface NinjaCreateActionConfirmResult {
+    proceedToSign: boolean;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Interface: NinjaCreateActionParams
+
+```ts
+export interface NinjaCreateActionParams {
+    params: CreateActionParams;
+    confirmCreateTransactionResult?: (result: NinjaTransactionWithOutputsResultApi) => Promise<NinjaCreateActionConfirmResult>;
+}
+```
+
+See also: [NinjaCreateActionConfirmResult](#interface-ninjacreateactionconfirmresult), [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Interface: NinjaCreateActionResult
+
+```ts
+export interface NinjaCreateActionResult {
+    proceedToSign: boolean;
+    result?: CreateActionResult;
+}
+```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -2318,6 +2372,7 @@ export interface NinjaTransactionWithOutputsResultApi {
     signActionRequired?: boolean;
     createResult?: DojoCreateTransactionResultApi;
     beef?: number[];
+    noSendChange?: OutPoint[];
     rawTx?: string;
     txid?: string;
     amount: number;
@@ -2387,6 +2442,16 @@ Only valid if signActionRequired !== true
 
 ```ts
 mapiResponses?: MapiResponseApi[]
+```
+
+##### Property noSendChange
+
+Valid for options.noSend true.
+
+Change output(s) that may be forwarded to chained noSend transactions.
+
+```ts
+noSendChange?: OutPoint[]
 ```
 
 ##### Property options
@@ -2756,6 +2821,8 @@ export class DojoExpressClient implements DojoClientApi {
     async getTotalOfAmounts(direction: "incoming" | "outgoing", options?: DojoGetTotalOfAmountsOptions): Promise<number> 
     async getNetOfAmounts(options?: DojoGetTotalOfAmountsOptions): Promise<number> 
     async updateTransactionStatus(reference: string, status: DojoTransactionStatusApi): Promise<void> 
+    async listActions(args: sdk.ListActionsArgs, originator?: sdk.OriginatorDomainNameString): Promise<sdk.ListActionsResult> 
+    async listOutputs(args: sdk.ListOutputsArgs, originator?: sdk.OriginatorDomainNameString): Promise<sdk.ListOutputsResult> 
     async getTransactions(options?: DojoGetTransactionsOptions): Promise<DojoGetTransactionsResultApi> 
     async getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]> 
     async getBeefForTransaction(txid: string, options?: DojoGetBeefOptions): Promise<Beef> 
@@ -2915,6 +2982,9 @@ export class NinjaBase implements NinjaApi {
     }> 
     async getEnvelopeForTransaction(txid: string): Promise<EnvelopeApi | undefined> 
     async processTransaction(params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> 
+    async createAction(params: NinjaCreateActionParams): Promise<NinjaCreateActionResult> 
+    async listActions(args: sdk.ListActionsArgs, originator?: sdk.OriginatorDomainNameString): Promise<sdk.ListActionsResult> 
+    async listOutputs(args: sdk.ListOutputsArgs, originator?: sdk.OriginatorDomainNameString): Promise<sdk.ListOutputsResult> 
     async getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
     async createTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
     async processTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
@@ -2945,7 +3015,7 @@ export class NinjaBase implements NinjaApi {
 }
 ```
 
-See also: [KeyPairApi](#interface-keypairapi), [NinjaAbortActionParams](#interface-ninjaabortactionparams), [NinjaAbortActionResultApi](#interface-ninjaabortactionresultapi), [NinjaApi](#interface-ninjaapi), [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams), [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi), [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams), [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi), [NinjaSignActionParams](#interface-ninjasignactionparams), [NinjaSignActionResultApi](#interface-ninjasignactionresultapi), [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams), [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi), [NinjaTransactionFailedHandler](#type-ninjatransactionfailedhandler), [NinjaTransactionProcessedHandler](#type-ninjatransactionprocessedhandler), [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi), [abortAction](#function-abortaction), [createTransactionWithOutputs](#function-createtransactionwithoutputs), [getTransactionWithOutputs](#function-gettransactionwithoutputs), [processPendingTransactions](#function-processpendingtransactions), [processTransactionWithOutputs](#function-processtransactionwithoutputs), [signAction](#function-signaction), [submitDirectTransaction](#function-submitdirecttransaction)
+See also: [KeyPairApi](#interface-keypairapi), [NinjaAbortActionParams](#interface-ninjaabortactionparams), [NinjaAbortActionResultApi](#interface-ninjaabortactionresultapi), [NinjaApi](#interface-ninjaapi), [NinjaCreateActionParams](#interface-ninjacreateactionparams), [NinjaCreateActionResult](#interface-ninjacreateactionresult), [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams), [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi), [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams), [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi), [NinjaSignActionParams](#interface-ninjasignactionparams), [NinjaSignActionResultApi](#interface-ninjasignactionresultapi), [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams), [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi), [NinjaTransactionFailedHandler](#type-ninjatransactionfailedhandler), [NinjaTransactionProcessedHandler](#type-ninjatransactionprocessedhandler), [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi), [abortAction](#function-abortaction), [createTransactionWithOutputs](#function-createtransactionwithoutputs), [getTransactionWithOutputs](#function-gettransactionwithoutputs), [processPendingTransactions](#function-processpendingtransactions), [processTransactionWithOutputs](#function-processtransactionwithoutputs), [signAction](#function-signaction), [submitDirectTransaction](#function-submitdirecttransaction)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -2979,6 +3049,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [invoice3241645161d8](#function-invoice3241645161d8) | [submitDirectTransaction](#function-submitdirecttransaction) |
 | [makeUnlockTestRawTxBabbageBsv](#function-makeunlocktestrawtxbabbagebsv) | [unpackFromCreateTransactionResult](#function-unpackfromcreatetransactionresult) |
 | [needsSignAction](#function-needssignaction) | [validateDefaultParams](#function-validatedefaultparams) |
+| [ninjaCreateAction](#function-ninjacreateaction) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -3133,6 +3204,17 @@ Returns
 true if at least one unlockingScript is specified only as a maximum length number.
 
 </details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Function: ninjaCreateAction
+
+```ts
+export async function ninjaCreateAction(ninja: NinjaBase, ninjaParams: NinjaCreateActionParams): Promise<NinjaCreateActionResult> 
+```
+
+See also: [NinjaBase](#class-ninjabase), [NinjaCreateActionParams](#interface-ninjacreateactionparams), [NinjaCreateActionResult](#interface-ninjacreateactionresult)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
