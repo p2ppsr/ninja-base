@@ -229,6 +229,12 @@ export class DojoExpressClient implements DojoClientApi {
     return r
   }
 
+  async listOutputs(args: sdk.ListOutputsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListOutputsResult> {
+    this.verifyAuthenticated()
+    const r: sdk.ListOutputsResult = await this.postJson('/listOutputs', { identityKey: this.identityKey, args, originator })
+    return r
+  }
+
   async getTransactions (options?: DojoGetTransactionsOptions): Promise<DojoGetTransactionsResultApi> {
     this.verifyAuthenticated()
     const results:{ txs: DojoTransactionApi[], total: number} = await this.postJson('/getTransactions', { identityKey: this.identityKey, options })

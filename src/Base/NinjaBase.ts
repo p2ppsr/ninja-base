@@ -376,6 +376,12 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
+  async listOutputs(args: sdk.ListOutputsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListOutputsResult> {
+    await this.verifyDojoAuthenticated()
+    const r = await this.dojo.listOutputs(args, originator)
+    return r
+  }
+
   async getTransactionWithOutputs (params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> {
     await this.verifyDojoAuthenticated()
     const r = await getTransactionWithOutputs(this, params)
