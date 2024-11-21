@@ -314,6 +314,14 @@ export class DojoExpressClient implements DojoClientApi {
     return results
   }
 
+  async createActionUnsigned(args: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameString)
+  : Promise<DojoCreateTransactionResultApi>
+  {
+    this.verifyAuthenticated()
+    const r = <DojoCreateTransactionResultApi>await this.postJson('/createActionUnsigned', { identityKey: this.identityKey, args, originator })
+    return r
+  }
+
   async createTransaction (params: DojoCreateTransactionParams)
   : Promise<DojoCreateTransactionResultApi> {
     this.verifyAuthenticated()

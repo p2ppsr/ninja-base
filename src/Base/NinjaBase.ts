@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { AuthriteClient } from 'authrite-js'
 
 import {
@@ -17,6 +18,7 @@ import {
   DojoTxLabelApi, DojoOutputApi, DojoTransactionApi,
   DojoGetTransactionLabelsOptions, DojoProcessTransactionParams, identityKeyFromPrivateKey, EnvelopeApi,
   DojoClientUserApi,
+  ERR_NOT_IMPLEMENTED,
 } from 'cwi-base'
 
 import {
@@ -47,6 +49,10 @@ import { abortAction } from './abortAction'
 import { GetInfoParams, GetInfoResult, sdk } from '@babbage/sdk-ts'
 import { ninjaProcessTransaction } from './ninjaProcessTransaction'
 import { ninjaCreateAction } from './ninjaCreateAction'
+import { createActionSdk } from './sdk/createActionSdk'
+import { signActionSdk } from './sdk/signActionSdk'
+import { internalizeActionSdk } from './sdk/internalizeAction'
+import { validateCreateActionArgs } from '@babbage/sdk-ts/src/sdk'
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain
@@ -367,6 +373,33 @@ export class NinjaBase implements NinjaApi {
   async createAction(params: NinjaCreateActionParams): Promise<NinjaCreateActionResult> {
     await this.verifyDojoAuthenticated()
     const r = await ninjaCreateAction(this, params)
+    return r
+  }
+
+  async createActionSdk(args: sdk.CreateActionArgs, originator?: sdk.OriginatorDomainNameString)
+  : Promise<sdk.CreateActionResult> {
+    await this.verifyDojoAuthenticated()
+    const r = await createActionSdk(this, validateCreateActionArgs(args), originator)
+    return r
+  }
+
+  async signActionSdk(args: sdk.SignActionArgs, originator?: sdk.OriginatorDomainNameString)
+  : Promise<sdk.SignActionResult> {
+    await this.verifyDojoAuthenticated()
+    const r = await signActionSdk(this, args, originator)
+    return r
+  }
+
+  async abortActionSdk(args: sdk.AbortActionArgs, originator?: sdk.OriginatorDomainNameString)
+  : Promise<sdk.AbortActionResult> {
+    await this.verifyDojoAuthenticated()
+    throw new ERR_NOT_IMPLEMENTED()
+  }
+
+  async internalizeAction(args: sdk.InternalizeActionArgs, originator?: sdk.OriginatorDomainNameString)
+  : Promise<sdk.InternalizeActionResult> {
+    await this.verifyDojoAuthenticated()
+    const r = await internalizeActionSdk(this, args, originator)
     return r
   }
 
