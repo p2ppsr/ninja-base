@@ -54,13 +54,11 @@ function addUnsignedTransactionResult(results: CreateActionSdkResults, ninja: Ni
 
   const { tx, amount, log } = buildUnsignedTransaction(dcr, args)
 
-  const beef = Beef.fromBinary(dcr.inputBeef!)
-  beef.mergeTransaction(tx)
-  const atomicTx = beef.findTransactionForSigning(tx.id('hex'))
-
   results.sdk.signableTransaction = {
     reference: results.dojoCreate!.referenceNumber,
-    tx: atomicTx!.toAtomicBEEF()
+    inputBeef: dcr.inputBeef!,
+    tx: tx.toBinary(),
+    amount
   }
 }
 
@@ -110,7 +108,10 @@ function removeUnlockScripts(args: sdk.ValidCreateActionArgs) {
   return dojoArgs;
 }
 
-function buildUnsignedTransaction(dctr: DojoCreateTransactionResultApi, args: sdk.ValidCreateActionArgs, changeKeys?: KeyPairApi)
+function buildUnsignedTransaction(
+  dctr: DojoCreateTransactionResultApi,
+  args: sdk.ValidCreateActionArgs,
+)
 : {
   tx: Transaction,
   amount: number,
@@ -118,21 +119,9 @@ function buildUnsignedTransaction(dctr: DojoCreateTransactionResultApi, args: sd
 }
 {
 
-  let isDummyKeys: boolean = false
-
-  if (!changeKeys) {
-    // Use dummy keys to create invalid scripts of expected size.
-    isDummyKeys = true
-    const privateKey = '0'.repeat(64)
-    const priv = PrivateKey.fromString(privateKey, 'hex')
-    changeKeys = { privateKey, publicKey: priv.toPublicKey().toString() }
-  }
-
   const {
     inputs: dojoInputs,
     outputs: dojoOutputs,
-    derivationPrefix,
-    log
   } = dctr;
 
   const tx = new Transaction(args.version, [], [], args.lockTime);
@@ -144,41 +133,29 @@ function buildUnsignedTransaction(dctr: DojoCreateTransactionResultApi, args: sd
     if (i !== out.vout)
       throw new ERR_INVALID_PARAMETER('output.vout', `equal to array index. ${out.vout} !== ${i}`)
 
-    // Add requested outputs to new bitcoin transaction tx
-    let output: TransactionOutput;
+    const change = out.providedBy === 'dojo' && out.purpose === 'change'
 
-    if (out.providedBy === 'dojo' && out.purpose === 'change') {
-
-      // Derive a change output locking script
-      const derivationSuffix = verifyTruthy(out.derivationSuffix);
-      const sabppp = new ScriptTemplateSABPPP({ derivationPrefix, derivationSuffix });
-      ScriptTemplateSABPPP.length
-      output = {
-        satoshis: out.satoshis,
-        lockingScript: sabppp.lock(changeKeys.privateKey, changeKeys.publicKey),
-        change: true
-      };
-    } else {
-      // Add transaction output with external supplied locking script.
-      output = {
-        satoshis: out.satoshis,
-        lockingScript: asBsvSdkScript(out.script),
-        change: false
-      };
+    const output = {
+      satoshis: out.satoshis,
+      lockingScript: new Script(), // zero length script
+      change
     }
     tx.addOutput(output);
   }
 
+  //////////////
+  // Merge and sort INPUTS info by vin order.
+  /////////////
   const inputs: {
-    sdk: sdk.ValidCreateActionInput | undefined,
-    input: DojoCreateTxResultInputsApi,
+    argsInput: sdk.ValidCreateActionInput | undefined,
+    dojoInput: DojoCreateTxResultInputsApi,
     otr: DojoOutputToRedeemApi,
     instructions: DojoCreateTxResultInstructionsApi | undefined 
   }[] = []
-  for (const [inputTXID, input] of Object.entries(dojoInputs)) {
-    for (const otr of input.outputsToRedeem) {
-      const sdk = (otr.vin !== undefined && otr.vin < args.inputs.length) ? args.inputs[otr.vin] : undefined
-      inputs.push({ sdk, input, otr, instructions: input.instructions[otr.index] })
+  for (const [inputTXID, dojoInput] of Object.entries(dojoInputs)) {
+    for (const otr of dojoInput.outputsToRedeem) {
+      const argsInput = (otr.vin !== undefined && otr.vin < args.inputs.length) ? args.inputs[otr.vin] : undefined
+      inputs.push({ argsInput, dojoInput, otr, instructions: dojoInput.instructions[otr.index] })
     }
   }
   inputs.sort((a, b) => a.otr.vin! < b.otr.vin! ? -1 : a.otr.vin! === b.otr.vin! ? 0 : 1)
@@ -187,16 +164,16 @@ function buildUnsignedTransaction(dctr: DojoCreateTransactionResultApi, args: sd
   // Add INPUTS
   /////////////
   let totalChangeInputs = 0
-  for (const { input, otr, instructions, sdk } of inputs) {
+  for (const { dojoInput, otr, instructions, argsInput } of inputs) {
 
     // Two types of inputs are handled: user specified wth unlockingScript and dojo specified using SABPPP template.
-    if (sdk) {
+    if (argsInput) {
       // Type1: An already signed unlock script is provided as a hex string in otrNinja.unlockingScript
       const inputToAdd: TransactionInput = {
-        sourceTXID: sdk.outpoint.txid,
-        sourceOutputIndex: sdk.outpoint.vout,
-        unlockingScript: asBsvSdkScript(sdk.unlockingScript ? sdk.unlockingScript : '00'.repeat(sdk.unlockingScriptLength!)),
-        sequence: sdk.sequenceNumber
+        sourceTXID: argsInput.outpoint.txid,
+        sourceOutputIndex: argsInput.outpoint.vout,
+        unlockingScript: new Script(), // zero length script
+        sequence: argsInput.sequenceNumber
       };
       tx.addInput(inputToAdd);
     } else {
@@ -206,15 +183,10 @@ function buildUnsignedTransaction(dctr: DojoCreateTransactionResultApi, args: sd
       if (instructions.type !== 'P2PKH')
         throw new ERR_INVALID_PARAMETER('instructions.type', `vin ${otr.vin}, "${instructions.type}" is not a supported unlocking script type.`);
 
-      // Sign inputs using type42 derived key
-      const sabppp = new ScriptTemplateSABPPP({
-        derivationPrefix: verifyTruthy(instructions.derivationPrefix),
-        derivationSuffix: verifyTruthy(instructions.derivationSuffix)
-      });
       const inputToAdd: TransactionInput = {
-        sourceTXID: input.txid,
+        sourceTXID: dojoInput.txid,
         sourceOutputIndex: otr.index,
-        unlockingScriptTemplate: sabppp.unlock(changeKeys.privateKey, verifyTruthy(instructions.senderIdentityKey)),
+        unlockingScript: new Script(),
         sequence: 0xffffffff
       };
       tx.addInput(inputToAdd);

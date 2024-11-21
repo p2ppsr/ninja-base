@@ -379,7 +379,8 @@ export class NinjaBase implements NinjaApi {
   async createActionSdk(args: sdk.CreateActionArgs, originator?: sdk.OriginatorDomainNameString)
   : Promise<sdk.CreateActionResult> {
     await this.verifyDojoAuthenticated()
-    const r = await createActionSdk(this, validateCreateActionArgs(args), originator)
+    const vargs = validateCreateActionArgs(args)
+    const r = await createActionSdk(this, vargs, originator)
     return r
   }
 
