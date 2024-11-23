@@ -19,6 +19,7 @@ import {
   DojoGetTransactionLabelsOptions, DojoProcessTransactionParams, identityKeyFromPrivateKey, EnvelopeApi,
   DojoClientUserApi,
   ERR_NOT_IMPLEMENTED,
+  DojoIdentityApi,
 } from 'cwi-base'
 
 import {
@@ -67,6 +68,7 @@ export class NinjaBase implements NinjaApi {
   user?: DojoClientUserApi
   _keyPair: KeyPairApi | undefined
   _isDojoAuthenticated: boolean
+  dojoIdentity?: DojoIdentityApi
   pendingSignActions: Record<string, PendingSignAction>
 
   constructor (public dojo: DojoClientApi, clientPrivateKey?: string, public authrite?: AuthriteClient) {
@@ -133,6 +135,7 @@ export class NinjaBase implements NinjaApi {
     await this.dojo.authenticate(identityKey, addIfNew)
     this.user = await this.dojo.getUser()
     this.userId = verifyId(this.user.userId)
+    this.dojoIdentity = await this.dojo.getDojoIdentity()
     this._isDojoAuthenticated = true
 
     console.log(`NinjaBase authenticated as ${identityKey} ${this.userId}`)
@@ -385,10 +388,9 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
-  async createActionSdk(args: sdk.CreateActionArgs, originator?: sdk.OriginatorDomainNameString)
+  async createActionSdk(vargs: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameString)
   : Promise<sdk.CreateActionResult> {
     await this.verifyDojoAuthenticated()
-    const vargs = validateCreateActionArgs(args)
     const r = await createActionSdk(this, vargs, originator)
     return r
   }
@@ -421,9 +423,8 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
-  async listOutputs(args: sdk.ListOutputsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListOutputsResult> {
+  async listOutputs(vargs: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListOutputsResult> {
     await this.verifyDojoAuthenticated()
-    const vargs = validateListOutputsArgs(args)
     const r = await this.dojo.listOutputs(vargs, originator)
     return r
   }
