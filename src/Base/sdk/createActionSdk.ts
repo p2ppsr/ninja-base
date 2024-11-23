@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { OutPoint, sdk, TrustSelf, WERR_INTERNAL } from "@babbage/sdk-ts";
 import { NinjaBase } from "../NinjaBase";
-import { asBsvSdkScript, asBsvSdkTx, DojoCreateTransactionResultApi, DojoCreateTxResultInputsApi, DojoCreateTxResultInstructionsApi, DojoOutputToRedeemApi, ERR_INTERNAL, ERR_INVALID_PARAMETER, ERR_NOT_IMPLEMENTED, ScriptTemplateSABPPP, verifyTruthy } from "cwi-base";
+import { asBsvSdkScript, asBsvSdkTx, DojoCreateTransactionResultApi, DojoCreateTxResultInputsApi, DojoCreateTxResultInstructionsApi, DojoCreateTxResultOutputApi, DojoOutputToRedeemApi, ERR_INTERNAL, ERR_INVALID_PARAMETER, ERR_NOT_IMPLEMENTED, ScriptTemplateSABPPP, verifyTruthy } from "cwi-base";
 import { KeyPairApi } from "../../Api/NinjaApi";
 import { Beef, PrivateKey, Script, Transaction, TransactionInput, TransactionOutput } from "@bsv/sdk";
 
@@ -51,17 +51,21 @@ export async function createActionSdk(ninja: NinjaBase, args: sdk.ValidCreateAct
 function addUnsignedTransactionResult(results: CreateActionSdkResults, ninja: NinjaBase, args: sdk.ValidCreateActionArgs) {
 
   const dcr = results.dojoCreate!
+  const reference = dcr.referenceNumber
 
-  const { tx, amount, log } = buildUnsignedTransaction(dcr, args)
+  const { tx, amount, log } = buildSignableTransaction(dcr, args, ninja.getClientChangeKeyPair())
 
+  const beef = Beef.fromBinary(dcr.inputBeef!)
+  beef.mergeTransaction(tx)
+  const atomicBeef = beef.toBinaryAtomic(tx.id('hex'))
+  
   results.sdk.signableTransaction = {
-    reference: results.dojoCreate!.referenceNumber,
-    inputBeef: dcr.inputBeef!,
-    tx: tx.toBinary(),
-    amount
+    reference,
+    tx: atomicBeef
   }
-}
 
+  ninja.pendingSignActions[dcr.referenceNumber] = { reference, dcr, args, amount }
+}
 
 function addSignedTransactionResult(results: CreateActionSdkResults, ninja: NinjaBase, args: sdk.ValidCreateActionArgs) {
   throw new Error("Function not implemented.");
@@ -108,15 +112,12 @@ function removeUnlockScripts(args: sdk.ValidCreateActionArgs) {
   return dojoArgs;
 }
 
-function buildUnsignedTransaction(
+function buildSignableTransaction(
   dctr: DojoCreateTransactionResultApi,
   args: sdk.ValidCreateActionArgs,
+  changeKeys: KeyPairApi
 )
-: {
-  tx: Transaction,
-  amount: number,
-  log: string
-}
+: { tx: Transaction, amount: number, log: string }
 {
 
   const {
@@ -135,9 +136,11 @@ function buildUnsignedTransaction(
 
     const change = out.providedBy === 'dojo' && out.purpose === 'change'
 
+    const lockingScript = change ? makeChangeLock(out, dctr, args, changeKeys) : asBsvSdkScript(out.script)
+
     const output = {
       satoshis: out.satoshis,
-      lockingScript: new Script(), // zero length script
+      lockingScript,
       change
     }
     tx.addOutput(output);
@@ -165,14 +168,16 @@ function buildUnsignedTransaction(
   /////////////
   let totalChangeInputs = 0
   for (const { dojoInput, otr, instructions, argsInput } of inputs) {
-
-    // Two types of inputs are handled: user specified wth unlockingScript and dojo specified using SABPPP template.
+    // Two types of inputs are handled: user specified wth/without unlockingScript and dojo specified using SABPPP template.
     if (argsInput) {
-      // Type1: An already signed unlock script is provided as a hex string in otrNinja.unlockingScript
+      // Type 1: User supplied input, with or without an explicit unlockingScript.
+      // If without, signAction must be used to provide the actual unlockScript.
+      const hasUnlock = typeof argsInput.unlockingScript === 'string'
+      const unlock = hasUnlock ? asBsvSdkScript(argsInput.unlockingScript!) : new Script()
       const inputToAdd: TransactionInput = {
         sourceTXID: argsInput.outpoint.txid,
         sourceOutputIndex: argsInput.outpoint.vout,
-        unlockingScript: new Script(), // zero length script
+        unlockingScript: unlock,
         sequence: argsInput.sequenceNumber
       };
       tx.addInput(inputToAdd);
@@ -204,4 +209,21 @@ function buildUnsignedTransaction(
     amount,
     log: ''
   };
+}
+
+/**
+ * Derive a change output locking script
+ */
+function makeChangeLock(
+  out: DojoCreateTxResultOutputApi,
+  dctr: DojoCreateTransactionResultApi,
+  args: sdk.ValidCreateActionArgs,
+  changeKeys: KeyPairApi)
+: Script
+{
+  const derivationPrefix = dctr.derivationPrefix
+  const derivationSuffix = verifyTruthy(out.derivationSuffix);
+  const sabppp = new ScriptTemplateSABPPP({ derivationPrefix, derivationSuffix });
+  const lockingScript = sabppp.lock(changeKeys.privateKey, changeKeys.publicKey)
+  return lockingScript
 }

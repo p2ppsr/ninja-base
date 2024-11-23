@@ -223,18 +223,6 @@ export class DojoExpressClient implements DojoClientApi {
     await this.postJsonVoid('/updateTransactionStatus', { identityKey: this.identityKey, reference, status })
   }
 
-  async listActions(args: sdk.ListActionsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListActionsResult> {
-    this.verifyAuthenticated()
-    const r: sdk.ListActionsResult = await this.postJson('/listActions', { identityKey: this.identityKey, args, originator })
-    return r
-  }
-
-  async listOutputs(args: sdk.ListOutputsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListOutputsResult> {
-    this.verifyAuthenticated()
-    const r: sdk.ListOutputsResult = await this.postJson('/listOutputs', { identityKey: this.identityKey, args, originator })
-    return r
-  }
-
   async getTransactions (options?: DojoGetTransactionsOptions): Promise<DojoGetTransactionsResultApi> {
     this.verifyAuthenticated()
     const results:{ txs: DojoTransactionApi[], total: number} = await this.postJson('/getTransactions', { identityKey: this.identityKey, options })
@@ -312,6 +300,18 @@ export class DojoExpressClient implements DojoClientApi {
       r.whenLastUsed = validateDate(r.whenLastUsed)
     }
     return results
+  }
+
+  async listActions(args: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListActionsResult> {
+    this.verifyAuthenticated()
+    const r: sdk.ListActionsResult = await this.postJson('/listActions', { identityKey: this.identityKey, args, originator })
+    return r
+  }
+
+  async listOutputs(args: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListOutputsResult> {
+    this.verifyAuthenticated()
+    const r: sdk.ListOutputsResult = await this.postJson('/listOutputs', { identityKey: this.identityKey, args, originator })
+    return r
   }
 
   async createActionUnsigned(args: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameString)

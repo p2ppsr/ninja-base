@@ -52,7 +52,14 @@ import { ninjaCreateAction } from './ninjaCreateAction'
 import { createActionSdk } from './sdk/createActionSdk'
 import { signActionSdk } from './sdk/signActionSdk'
 import { internalizeActionSdk } from './sdk/internalizeAction'
-import { validateCreateActionArgs } from '@babbage/sdk-ts/src/sdk'
+import { validateCreateActionArgs, validateListActionsArgs, validateListOutputsArgs, validateSignActionArgs } from '@babbage/sdk-ts/src/sdk'
+
+export interface PendingSignAction {
+  reference: string
+  dcr: DojoCreateTransactionResultApi
+  args: sdk.ValidCreateActionArgs
+  amount: number
+}
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain
@@ -60,6 +67,7 @@ export class NinjaBase implements NinjaApi {
   user?: DojoClientUserApi
   _keyPair: KeyPairApi | undefined
   _isDojoAuthenticated: boolean
+  pendingSignActions: Record<string, PendingSignAction>
 
   constructor (public dojo: DojoClientApi, clientPrivateKey?: string, public authrite?: AuthriteClient) {
     if (clientPrivateKey && authrite) throw new ERR_INVALID_PARAMETER('clientPrivateKey and authrite', 'only one provided')
@@ -95,6 +103,7 @@ export class NinjaBase implements NinjaApi {
     }
 
     this._isDojoAuthenticated = false
+    this.pendingSignActions = {}
   }
 
   getClientChangeKeyPair (): KeyPairApi {
@@ -387,7 +396,8 @@ export class NinjaBase implements NinjaApi {
   async signActionSdk(args: sdk.SignActionArgs, originator?: sdk.OriginatorDomainNameString)
   : Promise<sdk.SignActionResult> {
     await this.verifyDojoAuthenticated()
-    const r = await signActionSdk(this, args, originator)
+    const vargs = validateSignActionArgs(args)
+    const r = await signActionSdk(this, vargs, originator)
     return r
   }
 
@@ -406,13 +416,15 @@ export class NinjaBase implements NinjaApi {
 
   async listActions(args: sdk.ListActionsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListActionsResult> {
     await this.verifyDojoAuthenticated()
-    const r = await this.dojo.listActions(args, originator)
+    const vargs = validateListActionsArgs(args)
+    const r = await this.dojo.listActions(vargs, originator)
     return r
   }
 
   async listOutputs(args: sdk.ListOutputsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListOutputsResult> {
     await this.verifyDojoAuthenticated()
-    const r = await this.dojo.listOutputs(args, originator)
+    const vargs = validateListOutputsArgs(args)
+    const r = await this.dojo.listOutputs(vargs, originator)
     return r
   }
 
