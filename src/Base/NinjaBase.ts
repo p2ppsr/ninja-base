@@ -53,12 +53,13 @@ import { ninjaCreateAction } from './ninjaCreateAction'
 import { createActionSdk } from './sdk/createActionSdk'
 import { signActionSdk } from './sdk/signActionSdk'
 import { internalizeActionSdk } from './sdk/internalizeAction'
-import { validateCreateActionArgs, validateListActionsArgs, validateListOutputsArgs, validateSignActionArgs } from '@babbage/sdk-ts/src/sdk'
+import { Transaction } from '@bsv/sdk'
 
 export interface PendingSignAction {
   reference: string
   dcr: DojoCreateTransactionResultApi
   args: sdk.ValidCreateActionArgs
+  tx: Transaction
   amount: number
 }
 
@@ -392,13 +393,12 @@ export class NinjaBase implements NinjaApi {
   : Promise<sdk.CreateActionResult> {
     await this.verifyDojoAuthenticated()
     const r = await createActionSdk(this, vargs, originator)
-    return r
+    return r.sdk
   }
 
-  async signActionSdk(args: sdk.SignActionArgs, originator?: sdk.OriginatorDomainNameString)
+  async signActionSdk(vargs: sdk.ValidSignActionArgs, originator?: sdk.OriginatorDomainNameString)
   : Promise<sdk.SignActionResult> {
     await this.verifyDojoAuthenticated()
-    const vargs = validateSignActionArgs(args)
     const r = await signActionSdk(this, vargs, originator)
     return r
   }
@@ -416,9 +416,8 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
-  async listActions(args: sdk.ListActionsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListActionsResult> {
+  async listActions(vargs: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListActionsResult> {
     await this.verifyDojoAuthenticated()
-    const vargs = validateListActionsArgs(args)
     const r = await this.dojo.listActions(vargs, originator)
     return r
   }

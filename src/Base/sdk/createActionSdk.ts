@@ -11,7 +11,7 @@ interface CreateActionSdkResults {
 }
 
 export async function createActionSdk(ninja: NinjaBase, args: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameString)
-: Promise<sdk.CreateActionResult> {
+: Promise<CreateActionSdkResults> {
   
   const results: CreateActionSdkResults = {
     sdk: {},
@@ -25,7 +25,7 @@ export async function createActionSdk(ninja: NinjaBase, args: sdk.ValidCreateAct
     if (args.isSignAction) {
       addUnsignedTransactionResult(results, ninja, args)
       // isSendWith is ignored, can happen in signAction
-      return results.sdk
+      return results
     }
 
     addSignedTransactionResult(results, ninja, args)
@@ -45,7 +45,7 @@ export async function createActionSdk(ninja: NinjaBase, args: sdk.ValidCreateAct
     }
   }
 
-  return results.sdk
+  return results
 }
 
 function addUnsignedTransactionResult(results: CreateActionSdkResults, ninja: NinjaBase, args: sdk.ValidCreateActionArgs) {
@@ -64,7 +64,7 @@ function addUnsignedTransactionResult(results: CreateActionSdkResults, ninja: Ni
     tx: atomicBeef
   }
 
-  ninja.pendingSignActions[dcr.referenceNumber] = { reference, dcr, args, amount }
+  ninja.pendingSignActions[dcr.referenceNumber] = { reference, dcr, args, amount, tx }
 }
 
 function addSignedTransactionResult(results: CreateActionSdkResults, ninja: NinjaBase, args: sdk.ValidCreateActionArgs) {
