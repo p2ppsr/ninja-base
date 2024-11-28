@@ -50,18 +50,10 @@ import { abortAction } from './abortAction'
 import { GetInfoParams, GetInfoResult, sdk } from '@babbage/sdk-ts'
 import { ninjaProcessTransaction } from './ninjaProcessTransaction'
 import { ninjaCreateAction } from './ninjaCreateAction'
-import { createActionSdk } from './sdk/createActionSdk'
+import { createActionSdk, PendingSignAction } from './sdk/createActionSdk'
 import { signActionSdk } from './sdk/signActionSdk'
 import { internalizeActionSdk } from './sdk/internalizeAction'
 import { Transaction } from '@bsv/sdk'
-
-export interface PendingSignAction {
-  reference: string
-  dcr: DojoCreateTransactionResultApi
-  args: sdk.ValidCreateActionArgs
-  tx: Transaction
-  amount: number
-}
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain
@@ -393,7 +385,7 @@ export class NinjaBase implements NinjaApi {
   : Promise<sdk.CreateActionResult> {
     await this.verifyDojoAuthenticated()
     const r = await createActionSdk(this, vargs, originator)
-    return r.sdk
+    return r
   }
 
   async signActionSdk(vargs: sdk.ValidSignActionArgs, originator?: sdk.OriginatorDomainNameString)

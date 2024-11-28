@@ -1,98 +1,113 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { OutPoint, sdk, TrustSelf, WERR_INTERNAL } from "@babbage/sdk-ts";
+import { sdk, WERR_INTERNAL } from "@babbage/sdk-ts";
 import { NinjaBase } from "../NinjaBase";
-import { asBsvSdkScript, asBsvSdkTx, DojoCreateTransactionResultApi, DojoCreateTxResultInputsApi, DojoCreateTxResultInstructionsApi, DojoCreateTxResultOutputApi, DojoOutputToRedeemApi, ERR_INTERNAL, ERR_INVALID_PARAMETER, ERR_NOT_IMPLEMENTED, ScriptTemplateSABPPP, verifyTruthy } from "cwi-base";
+import {
+  asBsvSdkScript,
+  DojoCreateTransactionResultApi,
+  DojoCreateTxResultInputsApi,
+  DojoCreateTxResultInstructionsApi,
+  DojoCreateTxResultOutputApi,
+  DojoOutputToRedeemApi,
+  DojoProcessActionSdkParams,
+  DojoProcessActionSdkResults,
+  ERR_INVALID_PARAMETER,
+  ScriptTemplateSABPPP,
+  verifyTruthy
+} from "cwi-base";
 import { KeyPairApi } from "../../Api/NinjaApi";
-import { Beef, PrivateKey, Script, Transaction, TransactionInput, TransactionOutput } from "@bsv/sdk";
+import { Script, Transaction, TransactionInput } from "@bsv/sdk";
+import { completeSignedTransaction, makeAtomicBeef } from "./signActionSdk";
 
-interface CreateActionSdkResults {
-    sdk: sdk.CreateActionResult
-    dojoCreate?: DojoCreateTransactionResultApi
+export interface PendingDojoInput {
+  vin: number,
+  derivationPrefix: string,
+  derivationSuffix: string,
+  unlockerPubKey: string,
+  sourceSatoshis: number,
+  lockingScript: string
 }
 
-export async function createActionSdk(ninja: NinjaBase, args: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameString)
-: Promise<CreateActionSdkResults> {
+export interface PendingSignAction {
+  reference: string
+  dcr: DojoCreateTransactionResultApi
+  args: sdk.ValidCreateActionArgs
+  tx: Transaction
+  amount: number
+  pdi: PendingDojoInput[]
+}
+
+export async function createActionSdk(ninja: NinjaBase, vargs: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameString)
+: Promise<sdk.CreateActionResult>
+{
+  const r: sdk.CreateActionResult = {}
   
-  const results: CreateActionSdkResults = {
-    sdk: {},
-    dojoCreate: undefined
-  }
+  let prior: PendingSignAction | undefined = undefined
 
-  if (args.isNewTx) {
-    const dojoArgs = removeUnlockScripts(args);
-    results.dojoCreate = await ninja.dojo.createActionUnsigned(dojoArgs, originator)
+  if (vargs.isNewTx) {
+    prior = await createNewTx(ninja, vargs, originator)
 
-    if (args.isSignAction) {
-      addUnsignedTransactionResult(results, ninja, args)
-      // isSendWith is ignored, can happen in signAction
-      return results
+    if (vargs.isSignAction) {
+      return makeSignableTransactionResult(prior, ninja, vargs)
     }
 
-    addSignedTransactionResult(results, ninja, args)
+    prior.tx = await completeSignedTransaction(prior, {}, ninja)
 
-    if (args.isDelayed) {
-      await processNewTransactionDelayed(results, ninja, args)
-    } else {
-      await processNewTransactionNow(results, ninja, args)
-    }
+    r.txid = prior.tx.id('hex')
+    if (!vargs.options.returnTXIDOnly)
+      r.tx = makeAtomicBeef(prior.tx, prior.dcr.inputBeef!)
   }
 
-  if (args.isSendWidth) {
-    if (args.isDelayed) {
-      await processSendWithTransactionDelayed(results, ninja, args)
-    } else {
-      await processSendWithTransactionNow(results, ninja, args)
-    }
-  }
+  r.sendWithResults = await processActionSdk(prior, ninja, vargs, originator)
 
-  return results
+  return r
 }
 
-function addUnsignedTransactionResult(results: CreateActionSdkResults, ninja: NinjaBase, args: sdk.ValidCreateActionArgs) {
+function makeSignableTransactionResult(prior: PendingSignAction, ninja: NinjaBase, args: sdk.ValidCreateActionArgs)
+: sdk.CreateActionResult
+{
+  if (!prior.dcr.inputBeef)
+    throw new WERR_INTERNAL('prior.dcr.inputBeef must be valid')
 
-  const dcr = results.dojoCreate!
+  const r: sdk.SignableTransaction = {
+    reference: prior.dcr.referenceNumber,
+    tx: makeAtomicBeef(prior.tx, prior.dcr.inputBeef)
+  }
+
+  ninja.pendingSignActions[r.reference] = prior
+
+  return { signableTransaction: r }
+}
+
+export async function processActionSdk(prior: PendingSignAction | undefined, ninja: NinjaBase, args: sdk.ValidProcessActionArgs, originator?: sdk.OriginatorDomainNameString)
+: Promise<sdk.SendWithResult[] | undefined>
+{
+  const params: DojoProcessActionSdkParams = {
+    isNewTx: args.isNewTx,
+    isSendWith: args.isSendWidth,
+    isNoSend: args.isNoSend,
+    isDelayed: args.isDelayed,
+    reference: prior ? prior.reference : undefined,
+    txid: prior ? prior.tx.id('hex') : undefined,
+    rawTx: prior ? prior.tx.toBinary() : undefined,
+    sendWith: args.isSendWidth ? args.options.sendWith : [],
+  }
+  const r: DojoProcessActionSdkResults = await ninja.dojo.processActionSdk(params)
+  return r.sendWithResults
+}
+
+async function createNewTx(ninja: NinjaBase, args: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameString)
+: Promise<PendingSignAction>
+{
+  const dojoArgs = removeUnlockScripts(args);
+  const dcr = await ninja.dojo.createActionUnsigned(dojoArgs, originator)
+
   const reference = dcr.referenceNumber
 
-  const { tx, amount, log } = buildSignableTransaction(dcr, args, ninja.getClientChangeKeyPair())
+  const { tx, amount, pdi } = buildSignableTransaction(dcr, args, ninja.getClientChangeKeyPair())
 
-  const beef = Beef.fromBinary(dcr.inputBeef!)
-  beef.mergeTransaction(tx)
-  const atomicBeef = beef.toBinaryAtomic(tx.id('hex'))
-  
-  results.sdk.signableTransaction = {
-    reference,
-    tx: atomicBeef
-  }
+  const prior: PendingSignAction = { reference, dcr, args, amount, tx, pdi }
 
-  ninja.pendingSignActions[dcr.referenceNumber] = { reference, dcr, args, amount, tx }
-}
-
-function addSignedTransactionResult(results: CreateActionSdkResults, ninja: NinjaBase, args: sdk.ValidCreateActionArgs) {
-  throw new Error("Function not implemented.");
-}
-
-
-function processNewTransactionDelayed(results: CreateActionSdkResults, ninja: NinjaBase, args: sdk.ValidCreateActionArgs) {
-  throw new Error("Function not implemented.");
-}
-
-
-function processNewTransactionNow(results: CreateActionSdkResults, ninja: NinjaBase, args: sdk.ValidCreateActionArgs) {
-  throw new Error("Function not implemented.");
-}
-
-
-function processSendWithTransactionDelayed(results: CreateActionSdkResults, ninja: NinjaBase, args: sdk.ValidCreateActionArgs) {
-  throw new Error("Function not implemented.");
-}
-
-
-function processSendWithTransactionNow(results: CreateActionSdkResults, ninja: NinjaBase, args: sdk.ValidCreateActionArgs) {
-  throw new Error("Function not implemented.");
-}
-
-function validateUnlockScriptWithBsvSdk(tx: Transaction, vin: number, lockingScript: Script, amount: number): boolean {
-  throw new Error("Function not implemented.");
+  return prior
 }
 
 function removeUnlockScripts(args: sdk.ValidCreateActionArgs) {
@@ -117,7 +132,7 @@ function buildSignableTransaction(
   args: sdk.ValidCreateActionArgs,
   changeKeys: KeyPairApi
 )
-: { tx: Transaction, amount: number, log: string }
+: { tx: Transaction, amount: number, pdi: PendingDojoInput[], log: string }
 {
 
   const {
@@ -163,6 +178,8 @@ function buildSignableTransaction(
   }
   inputs.sort((a, b) => a.otr.vin! < b.otr.vin! ? -1 : a.otr.vin! === b.otr.vin! ? 0 : 1)
 
+  const pendingDojoInputs: PendingDojoInput[] = []
+
   //////////////
   // Add INPUTS
   /////////////
@@ -188,6 +205,15 @@ function buildSignableTransaction(
       if (instructions.type !== 'P2PKH')
         throw new ERR_INVALID_PARAMETER('instructions.type', `vin ${otr.vin}, "${instructions.type}" is not a supported unlocking script type.`);
 
+      pendingDojoInputs.push({
+        vin: tx.inputs.length,
+        derivationPrefix: verifyTruthy(instructions.derivationPrefix),
+        derivationSuffix: verifyTruthy(instructions.derivationSuffix),
+        unlockerPubKey: verifyTruthy(instructions.senderIdentityKey),
+        sourceSatoshis: otr.satoshis!,
+        lockingScript: otr.lockingScript!
+      })
+
       const inputToAdd: TransactionInput = {
         sourceTXID: dojoInput.txid,
         sourceOutputIndex: otr.index,
@@ -207,6 +233,7 @@ function buildSignableTransaction(
   return {
     tx,
     amount,
+    pdi: pendingDojoInputs,
     log: ''
   };
 }
@@ -227,3 +254,4 @@ function makeChangeLock(
   const lockingScript = sabppp.lock(changeKeys.privateKey, changeKeys.publicKey)
   return lockingScript
 }
+

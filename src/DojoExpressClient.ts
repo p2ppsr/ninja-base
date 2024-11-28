@@ -13,6 +13,8 @@ import {
   DojoGetTransactionLabelsResultApi, DojoSubmitDirectTransactionParams, DojoCreateTransactionParams,
   DojoProcessTransactionParams, verifyBufferOrObjectOrNull,
   DojoGetBeefOptions,
+  DojoProcessActionSdkParams,
+  DojoProcessActionSdkResults,
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -319,6 +321,11 @@ export class DojoExpressClient implements DojoClientApi {
   {
     this.verifyAuthenticated()
     const r = <DojoCreateTransactionResultApi>await this.postJson('/createActionUnsigned', { identityKey: this.identityKey, args, originator })
+    return r
+  }
+  async processActionSdk(params: DojoProcessActionSdkParams, originator?: sdk.OriginatorDomainNameString): Promise<DojoProcessActionSdkResults> {
+    this.verifyAuthenticated()
+    const r = <DojoProcessActionSdkResults>await this.postJson('/processActionSdk', { identityKey: this.identityKey, params, originator })
     return r
   }
 
