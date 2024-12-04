@@ -36,7 +36,7 @@ export interface PendingSignAction {
   pdi: PendingDojoInput[]
 }
 
-export async function createActionSdk(ninja: NinjaBase, vargs: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameString)
+export async function createActionSdk(ninja: NinjaBase, vargs: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
 : Promise<sdk.CreateActionResult>
 {
   const r: sdk.CreateActionResult = {}
@@ -53,6 +53,7 @@ export async function createActionSdk(ninja: NinjaBase, vargs: sdk.ValidCreateAc
     prior.tx = await completeSignedTransaction(prior, {}, ninja)
 
     r.txid = prior.tx.id('hex')
+    r.noSendChange = prior.dcr.noSendChangeOutputVouts?.map(vout => `${r.txid}.${vout}`)
     if (!vargs.options.returnTXIDOnly)
       r.tx = makeAtomicBeef(prior.tx, prior.dcr.inputBeef!)
   }
@@ -68,44 +69,65 @@ function makeSignableTransactionResult(prior: PendingSignAction, ninja: NinjaBas
   if (!prior.dcr.inputBeef)
     throw new WERR_INTERNAL('prior.dcr.inputBeef must be valid')
 
-  const r: sdk.SignableTransaction = {
-    reference: prior.dcr.referenceNumber,
-    tx: makeAtomicBeef(prior.tx, prior.dcr.inputBeef)
+  const txid = prior.tx.id('hex')
+
+  const r: sdk.CreateActionResult = {
+    noSendChange: args.isNoSend ? prior.dcr.noSendChangeOutputVouts?.map(vout => `${txid}.${vout}`) : undefined,
+    signableTransaction: {
+      reference: prior.dcr.referenceNumber,
+      tx: makeAtomicBeef(prior.tx, prior.dcr.inputBeef)
+    }
   }
 
-  ninja.pendingSignActions[r.reference] = prior
+  ninja.pendingSignActions[r.signableTransaction!.reference] = prior
 
-  return { signableTransaction: r }
+  return r
 }
 
-export async function processActionSdk(prior: PendingSignAction | undefined, ninja: NinjaBase, args: sdk.ValidProcessActionArgs, originator?: sdk.OriginatorDomainNameString)
+export async function processActionSdk(prior: PendingSignAction | undefined, ninja: NinjaBase, args: sdk.ValidProcessActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
 : Promise<sdk.SendWithResult[] | undefined>
 {
   const params: DojoProcessActionSdkParams = {
     isNewTx: args.isNewTx,
-    isSendWith: args.isSendWidth,
+    isSendWith: args.isSendWith,
     isNoSend: args.isNoSend,
     isDelayed: args.isDelayed,
     reference: prior ? prior.reference : undefined,
     txid: prior ? prior.tx.id('hex') : undefined,
     rawTx: prior ? prior.tx.toBinary() : undefined,
-    sendWith: args.isSendWidth ? args.options.sendWith : [],
+    sendWith: args.isSendWith ? args.options.sendWith : [],
   }
   const r: DojoProcessActionSdkResults = await ninja.dojo.processActionSdk(params)
+
   return r.sendWithResults
 }
 
-async function createNewTx(ninja: NinjaBase, args: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameString)
+async function createNewTx(ninja: NinjaBase, args: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
 : Promise<PendingSignAction>
 {
   const dojoArgs = removeUnlockScripts(args);
-  const dcr = await ninja.dojo.createActionUnsigned(dojoArgs, originator)
+  const dcr = await ninja.dojo.createTransactionSdk(dojoArgs, originator)
 
   const reference = dcr.referenceNumber
 
-  const { tx, amount, pdi } = buildSignableTransaction(dcr, args, ninja.getClientChangeKeyPair())
+//  const { tx, amount, pdi } = buildSignableTransaction(dcr, args, ninja.getClientChangeKeyPair())
 
-  const prior: PendingSignAction = { reference, dcr, args, amount, tx, pdi }
+  const prior: PendingSignAction = {
+    reference: "",
+    dcr: {
+      inputs: {},
+      outputs: [],
+      derivationPrefix: "",
+      version: 0,
+      lockTime: 0,
+      referenceNumber: "",
+      options: {}
+    },
+    args: args,
+    tx: new Transaction(),
+    amount: 0,
+    pdi: []
+  } // = { reference, dcr, args, amount, tx, pdi }
 
   return prior
 }

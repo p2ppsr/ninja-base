@@ -6,7 +6,7 @@ import { ValidSignActionArgs, WERR_INTERNAL, WERR_INVALID_PARAMETER, WERR_NOT_IM
 import { asBsvSdkScript, ScriptTemplateSABPPP } from "cwi-base";
 import { PendingSignAction, processActionSdk } from "./createActionSdk";
 
-export async function signActionSdk(ninja: NinjaBase, vargs: ValidSignActionArgs, originator?: sdk.OriginatorDomainNameString)
+export async function signActionSdk(ninja: NinjaBase, vargs: ValidSignActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
 : Promise<sdk.SignActionResult>
 {
   const prior = ninja.pendingSignActions[vargs.reference]

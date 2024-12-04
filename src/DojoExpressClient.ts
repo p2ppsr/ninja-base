@@ -15,6 +15,7 @@ import {
   DojoGetBeefOptions,
   DojoProcessActionSdkParams,
   DojoProcessActionSdkResults,
+  DojoCreateTransactionSdkResult,
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -304,26 +305,26 @@ export class DojoExpressClient implements DojoClientApi {
     return results
   }
 
-  async listActions(args: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListActionsResult> {
+  async listActions(args: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListActionsResult> {
     this.verifyAuthenticated()
     const r: sdk.ListActionsResult = await this.postJson('/listActions', { identityKey: this.identityKey, args, originator })
     return r
   }
 
-  async listOutputs(args: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListOutputsResult> {
+  async listOutputs(args: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListOutputsResult> {
     this.verifyAuthenticated()
     const r: sdk.ListOutputsResult = await this.postJson('/listOutputs', { identityKey: this.identityKey, args, originator })
     return r
   }
 
-  async createActionUnsigned(args: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameString)
-  : Promise<DojoCreateTransactionResultApi>
+  async createTransactionSdk(args: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
+  : Promise<DojoCreateTransactionSdkResult>
   {
     this.verifyAuthenticated()
-    const r = <DojoCreateTransactionResultApi>await this.postJson('/createActionUnsigned', { identityKey: this.identityKey, args, originator })
+    const r = <DojoCreateTransactionSdkResult>await this.postJson('/createTransactionSdk', { identityKey: this.identityKey, args, originator })
     return r
   }
-  async processActionSdk(params: DojoProcessActionSdkParams, originator?: sdk.OriginatorDomainNameString): Promise<DojoProcessActionSdkResults> {
+  async processActionSdk(params: DojoProcessActionSdkParams, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<DojoProcessActionSdkResults> {
     this.verifyAuthenticated()
     const r = <DojoProcessActionSdkResults>await this.postJson('/processActionSdk', { identityKey: this.identityKey, params, originator })
     return r

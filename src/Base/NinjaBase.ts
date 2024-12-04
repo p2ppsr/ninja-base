@@ -381,40 +381,40 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
-  async createActionSdk(vargs: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameString)
+  async createActionSdk(vargs: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
   : Promise<sdk.CreateActionResult> {
     await this.verifyDojoAuthenticated()
     const r = await createActionSdk(this, vargs, originator)
     return r
   }
 
-  async signActionSdk(vargs: sdk.ValidSignActionArgs, originator?: sdk.OriginatorDomainNameString)
+  async signActionSdk(vargs: sdk.ValidSignActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
   : Promise<sdk.SignActionResult> {
     await this.verifyDojoAuthenticated()
     const r = await signActionSdk(this, vargs, originator)
     return r
   }
 
-  async abortActionSdk(args: sdk.AbortActionArgs, originator?: sdk.OriginatorDomainNameString)
+  async abortActionSdk(args: sdk.AbortActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
   : Promise<sdk.AbortActionResult> {
     await this.verifyDojoAuthenticated()
     throw new ERR_NOT_IMPLEMENTED()
   }
 
-  async internalizeAction(args: sdk.InternalizeActionArgs, originator?: sdk.OriginatorDomainNameString)
+  async internalizeAction(args: sdk.InternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
   : Promise<sdk.InternalizeActionResult> {
     await this.verifyDojoAuthenticated()
     const r = await internalizeActionSdk(this, args, originator)
     return r
   }
 
-  async listActions(vargs: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListActionsResult> {
+  async listActions(vargs: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListActionsResult> {
     await this.verifyDojoAuthenticated()
     const r = await this.dojo.listActions(vargs, originator)
     return r
   }
 
-  async listOutputs(vargs: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameString) : Promise<sdk.ListOutputsResult> {
+  async listOutputs(vargs: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListOutputsResult> {
     await this.verifyDojoAuthenticated()
     const r = await this.dojo.listOutputs(vargs, originator)
     return r
