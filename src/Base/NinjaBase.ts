@@ -70,7 +70,7 @@ export class NinjaBase implements NinjaApi {
     if (clientPrivateKey) {
       const identityPublicKey = identityKeyFromPrivateKey(clientPrivateKey)
 
-      console.log(`construct NinjaBase for identityKey ${identityPublicKey} from private key`)
+      //console.log(`construct NinjaBase for identityKey ${identityPublicKey} from private key`)
 
       this._keyPair = {
         privateKey: clientPrivateKey,
@@ -131,7 +131,7 @@ export class NinjaBase implements NinjaApi {
     this.dojoIdentity = await this.dojo.getDojoIdentity()
     this._isDojoAuthenticated = true
 
-    console.log(`NinjaBase authenticated as ${identityKey} ${this.userId}`)
+    //console.log(`NinjaBase authenticated as ${identityKey} ${this.userId}`)
   }
 
   isAuthenticated() : boolean {

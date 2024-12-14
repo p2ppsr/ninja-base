@@ -52,7 +52,7 @@ export async function completeSignedTransaction(
     const input = prior.tx.inputs[vin]
     if (!createInput || !input || createInput.unlockingScript || !Number.isInteger(createInput.unlockingScriptLength))
       throw new WERR_INVALID_PARAMETER('args', `spend does not correspond to prior input with valid unlockingScriptLength.`)
-    if (spend.unlockingScript.length > createInput.unlockingScriptLength!)
+    if (spend.unlockingScript.length / 2 > createInput.unlockingScriptLength!)
       throw new WERR_INVALID_PARAMETER('args', `spend unlockingScript length ${spend.unlockingScript.length} exceeds expected length ${createInput.unlockingScriptLength}`)
     input.unlockingScript = asBsvSdkScript(spend.unlockingScript)
     if (spend.sequenceNumber !== undefined)
@@ -71,8 +71,9 @@ export async function completeSignedTransaction(
       derivationPrefix: pdi.derivationPrefix,
       derivationSuffix: pdi.derivationSuffix
     })
-    const lockerPrivKey = ninja.getClientChangeKeyPair().privateKey
-    const unlockerPubKey = pdi.unlockerPubKey
+    const keys = ninja.getClientChangeKeyPair()
+    const lockerPrivKey = keys.privateKey
+    const unlockerPubKey = pdi.unlockerPubKey || keys.publicKey
     const sourceSatoshis = pdi.sourceSatoshis
     const lockingScript = asBsvSdkScript(pdi.lockingScript)
     const unlockTemplate = sabppp.unlock(lockerPrivKey, unlockerPubKey, sourceSatoshis, lockingScript)

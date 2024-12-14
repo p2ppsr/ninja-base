@@ -3,11 +3,9 @@ import { sdk, WERR_INTERNAL } from "@babbage/sdk-ts";
 import { NinjaBase } from "../NinjaBase";
 import {
   asBsvSdkScript,
-  DojoCreateTransactionResultApi,
-  DojoCreateTxResultInputsApi,
-  DojoCreateTxResultInstructionsApi,
-  DojoCreateTxResultOutputApi,
-  DojoOutputToRedeemApi,
+  DojoCreateTransactionSdkInput,
+  DojoCreateTransactionSdkOutput,
+  DojoCreateTransactionSdkResult,
   DojoProcessActionSdkParams,
   DojoProcessActionSdkResults,
   ERR_INVALID_PARAMETER,
@@ -22,14 +20,14 @@ export interface PendingDojoInput {
   vin: number,
   derivationPrefix: string,
   derivationSuffix: string,
-  unlockerPubKey: string,
+  unlockerPubKey?: string,
   sourceSatoshis: number,
   lockingScript: string
 }
 
 export interface PendingSignAction {
   reference: string
-  dcr: DojoCreateTransactionResultApi
+  dcr: DojoCreateTransactionSdkResult
   args: sdk.ValidCreateActionArgs
   tx: Transaction
   amount: number
@@ -110,24 +108,9 @@ async function createNewTx(ninja: NinjaBase, args: sdk.ValidCreateActionArgs, or
 
   const reference = dcr.referenceNumber
 
-//  const { tx, amount, pdi } = buildSignableTransaction(dcr, args, ninja.getClientChangeKeyPair())
+  const { tx, amount, pdi } = buildSignableTransaction(dcr, args, ninja.getClientChangeKeyPair())
 
-  const prior: PendingSignAction = {
-    reference: "",
-    dcr: {
-      inputs: {},
-      outputs: [],
-      derivationPrefix: "",
-      version: 0,
-      lockTime: 0,
-      referenceNumber: "",
-      options: {}
-    },
-    args: args,
-    tx: new Transaction(),
-    amount: 0,
-    pdi: []
-  } // = { reference, dcr, args, amount, tx, pdi }
+  const prior: PendingSignAction = { reference, dcr, args, amount, tx, pdi }
 
   return prior
 }
@@ -150,7 +133,7 @@ function removeUnlockScripts(args: sdk.ValidCreateActionArgs) {
 }
 
 function buildSignableTransaction(
-  dctr: DojoCreateTransactionResultApi,
+  dctr: DojoCreateTransactionSdkResult,
   args: sdk.ValidCreateActionArgs,
   changeKeys: KeyPairApi
 )
@@ -164,16 +147,31 @@ function buildSignableTransaction(
 
   const tx = new Transaction(args.version, [], [], args.lockTime);
 
+  // The order of outputs in dojoOutputs is always:
+  // CreateActionArgs.outputs in the original order
+  // Commission output
+  // Change outputs
+  // The Vout values will be randomized if args.options.randomizeOutputs is true. Default is true.
+  const voutToIndex = Array<number>(dojoOutputs.length)
+  for (let vout = 0; vout < dojoOutputs.length; vout++) {
+    const i = dojoOutputs.findIndex(o => o.vout === vout)
+    if (i < 0)
+      throw new ERR_INVALID_PARAMETER('output.vout', `sequential. ${vout} is missing`)
+    voutToIndex[vout] = i
+  }
+
   //////////////
   // Add OUTPUTS
   /////////////
-  for (const [i, out] of dojoOutputs.entries()) {
-    if (i !== out.vout)
-      throw new ERR_INVALID_PARAMETER('output.vout', `equal to array index. ${out.vout} !== ${i}`)
+  for (let vout = 0; vout < dojoOutputs.length; vout++) {
+    const i = voutToIndex[vout]
+    const out = dojoOutputs[i]
+    if (vout !== out.vout)
+      throw new ERR_INVALID_PARAMETER('output.vout', `equal to array index. ${out.vout} !== ${vout}`)
 
     const change = out.providedBy === 'dojo' && out.purpose === 'change'
 
-    const lockingScript = change ? makeChangeLock(out, dctr, args, changeKeys) : asBsvSdkScript(out.script)
+    const lockingScript = change ? makeChangeLock(out, dctr, args, changeKeys) : asBsvSdkScript(out.lockingScript)
 
     const output = {
       satoshis: out.satoshis,
@@ -188,17 +186,13 @@ function buildSignableTransaction(
   /////////////
   const inputs: {
     argsInput: sdk.ValidCreateActionInput | undefined,
-    dojoInput: DojoCreateTxResultInputsApi,
-    otr: DojoOutputToRedeemApi,
-    instructions: DojoCreateTxResultInstructionsApi | undefined 
+    dojoInput: DojoCreateTransactionSdkInput,
   }[] = []
-  for (const [inputTXID, dojoInput] of Object.entries(dojoInputs)) {
-    for (const otr of dojoInput.outputsToRedeem) {
-      const argsInput = (otr.vin !== undefined && otr.vin < args.inputs.length) ? args.inputs[otr.vin] : undefined
-      inputs.push({ argsInput, dojoInput, otr, instructions: dojoInput.instructions[otr.index] })
-    }
+  for (const dojoInput of dojoInputs) {
+    const argsInput = (dojoInput.vin !== undefined && dojoInput.vin < args.inputs.length) ? args.inputs[dojoInput.vin] : undefined
+    inputs.push({ argsInput, dojoInput })
   }
-  inputs.sort((a, b) => a.otr.vin! < b.otr.vin! ? -1 : a.otr.vin! === b.otr.vin! ? 0 : 1)
+  inputs.sort((a, b) => a.dojoInput.vin! < b.dojoInput.vin! ? -1 : a.dojoInput.vin! === b.dojoInput.vin! ? 0 : 1)
 
   const pendingDojoInputs: PendingDojoInput[] = []
 
@@ -206,7 +200,7 @@ function buildSignableTransaction(
   // Add INPUTS
   /////////////
   let totalChangeInputs = 0
-  for (const { dojoInput, otr, instructions, argsInput } of inputs) {
+  for (const { dojoInput, argsInput } of inputs) {
     // Two types of inputs are handled: user specified wth/without unlockingScript and dojo specified using SABPPP template.
     if (argsInput) {
       // Type 1: User supplied input, with or without an explicit unlockingScript.
@@ -222,28 +216,26 @@ function buildSignableTransaction(
       tx.addInput(inputToAdd);
     } else {
       // Type2: SABPPP protocol inputs which are signed using ScriptTemplateSABPPP.
-      if (!instructions)
-        throw new ERR_INVALID_PARAMETER('instructions', `specified for dojoInput vin ${otr.vin}`);
-      if (instructions.type !== 'P2PKH')
-        throw new ERR_INVALID_PARAMETER('instructions.type', `vin ${otr.vin}, "${instructions.type}" is not a supported unlocking script type.`);
+      if (dojoInput.type !== 'P2PKH')
+        throw new ERR_INVALID_PARAMETER('type', `vin ${dojoInput.vin}, "${dojoInput.type}" is not a supported unlocking script type.`);
 
       pendingDojoInputs.push({
         vin: tx.inputs.length,
-        derivationPrefix: verifyTruthy(instructions.derivationPrefix),
-        derivationSuffix: verifyTruthy(instructions.derivationSuffix),
-        unlockerPubKey: verifyTruthy(instructions.senderIdentityKey),
-        sourceSatoshis: otr.satoshis!,
-        lockingScript: otr.lockingScript!
+        derivationPrefix: verifyTruthy(dojoInput.derivationPrefix),
+        derivationSuffix: verifyTruthy(dojoInput.derivationSuffix),
+        unlockerPubKey: dojoInput.senderIdentityKey,
+        sourceSatoshis: dojoInput.sourceSatoshis,
+        lockingScript: dojoInput.sourceLockingScript
       })
 
       const inputToAdd: TransactionInput = {
-        sourceTXID: dojoInput.txid,
-        sourceOutputIndex: otr.index,
+        sourceTXID: dojoInput.sourceTxid,
+        sourceOutputIndex: dojoInput.sourceVout,
         unlockingScript: new Script(),
         sequence: 0xffffffff
       };
       tx.addInput(inputToAdd);
-      totalChangeInputs += verifyTruthy(otr.satoshis);
+      totalChangeInputs += verifyTruthy(dojoInput.sourceSatoshis);
     }
   }
 
@@ -264,8 +256,8 @@ function buildSignableTransaction(
  * Derive a change output locking script
  */
 function makeChangeLock(
-  out: DojoCreateTxResultOutputApi,
-  dctr: DojoCreateTransactionResultApi,
+  out: DojoCreateTransactionSdkOutput,
+  dctr: DojoCreateTransactionSdkResult,
   args: sdk.ValidCreateActionArgs,
   changeKeys: KeyPairApi)
 : Script
