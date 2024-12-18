@@ -310,13 +310,11 @@ export class DojoExpressClient implements DojoClientApi {
     const r: sdk.ListActionsResult = await this.postJson('/listActions', { identityKey: this.identityKey, args, originator })
     return r
   }
-
   async listOutputs(args: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListOutputsResult> {
     this.verifyAuthenticated()
     const r: sdk.ListOutputsResult = await this.postJson('/listOutputs', { identityKey: this.identityKey, args, originator })
     return r
   }
-
   async createTransactionSdk(args: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
   : Promise<DojoCreateTransactionSdkResult>
   {
@@ -327,6 +325,11 @@ export class DojoExpressClient implements DojoClientApi {
   async processActionSdk(params: DojoProcessActionSdkParams, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<DojoProcessActionSdkResults> {
     this.verifyAuthenticated()
     const r = <DojoProcessActionSdkResults>await this.postJson('/processActionSdk', { identityKey: this.identityKey, params, originator })
+    return r
+  }
+  async abortActionSdk(vargs: sdk.ValidAbortActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.AbortActionResult> {
+    this.verifyAuthenticated()
+    const r = <sdk.AbortActionResult>await this.postJson('/abortActionSdk', { identityKey: this.identityKey, vargs, originator })
     return r
   }
 

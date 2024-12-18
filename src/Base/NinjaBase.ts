@@ -395,10 +395,11 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
-  async abortActionSdk(args: sdk.AbortActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
+  async abortActionSdk(vargs: sdk.ValidAbortActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
   : Promise<sdk.AbortActionResult> {
     await this.verifyDojoAuthenticated()
-    throw new ERR_NOT_IMPLEMENTED()
+    const r = await this.dojo.abortActionSdk(vargs, originator)
+    return r
   }
 
   async internalizeAction(args: sdk.InternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
