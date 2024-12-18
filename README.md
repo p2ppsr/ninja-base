@@ -17,15 +17,15 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [KeyPairApi](#interface-keypairapi) | [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi) | [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi) |
 | [NinjaAbortActionParams](#interface-ninjaabortactionparams) | [NinjaGetTransactionsTxApi](#interface-ninjagettransactionstxapi) | [NinjaTxInputsApi](#interface-ninjatxinputsapi) |
 | [NinjaAbortActionResultApi](#interface-ninjaabortactionresultapi) | [NinjaGetTransactionsTxInputApi](#interface-ninjagettransactionstxinputapi) | [NinjaV1Params](#interface-ninjav1params) |
-| [NinjaApi](#interface-ninjaapi) | [NinjaGetTransactionsTxOutputApi](#interface-ninjagettransactionstxoutputapi) | [ProcessIncomingTransactionApi](#interface-processincomingtransactionapi) |
-| [NinjaCompleteCreateTransactionWithOutputsParams](#interface-ninjacompletecreatetransactionwithoutputsparams) | [NinjaOutputToRedeemApi](#interface-ninjaoutputtoredeemapi) | [ProcessIncomingTransactionInputApi](#interface-processincomingtransactioninputapi) |
-| [NinjaCreateActionConfirmResult](#interface-ninjacreateactionconfirmresult) | [NinjaSignActionParams](#interface-ninjasignactionparams) | [ProcessIncomingTransactionOutputApi](#interface-processincomingtransactionoutputapi) |
-| [NinjaCreateActionParams](#interface-ninjacreateactionparams) | [NinjaSignActionResultApi](#interface-ninjasignactionresultapi) | [ProcessIncomingTransactionResultApi](#interface-processincomingtransactionresultapi) |
-| [NinjaCreateActionResult](#interface-ninjacreateactionresult) | [NinjaSignCreatedTransactionParams](#interface-ninjasigncreatedtransactionparams) | [SignActionParams](#interface-signactionparams) |
-| [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams) | [NinjaSubmitDirectTransactionApi](#interface-ninjasubmitdirecttransactionapi) | [TxOutputApi](#interface-txoutputapi) |
-| [NinjaGetPendingTransactionsInputApi](#interface-ninjagetpendingtransactionsinputapi) | [NinjaSubmitDirectTransactionOutputApi](#interface-ninjasubmitdirecttransactionoutputapi) | [TxRedeemableOutputApi](#interface-txredeemableoutputapi) |
-| [NinjaGetPendingTransactionsInstructionsApi](#interface-ninjagetpendingtransactionsinstructionsapi) | [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams) |  |
-| [NinjaGetPendingTransactionsTxApi](#interface-ninjagetpendingtransactionstxapi) | [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi) |  |
+| [NinjaApi](#interface-ninjaapi) | [NinjaGetTransactionsTxOutputApi](#interface-ninjagettransactionstxoutputapi) | [PendingDojoInput](#interface-pendingdojoinput) |
+| [NinjaCompleteCreateTransactionWithOutputsParams](#interface-ninjacompletecreatetransactionwithoutputsparams) | [NinjaOutputToRedeemApi](#interface-ninjaoutputtoredeemapi) | [PendingSignAction](#interface-pendingsignaction) |
+| [NinjaCreateActionConfirmResult](#interface-ninjacreateactionconfirmresult) | [NinjaSignActionParams](#interface-ninjasignactionparams) | [ProcessIncomingTransactionApi](#interface-processincomingtransactionapi) |
+| [NinjaCreateActionParams](#interface-ninjacreateactionparams) | [NinjaSignActionResultApi](#interface-ninjasignactionresultapi) | [ProcessIncomingTransactionInputApi](#interface-processincomingtransactioninputapi) |
+| [NinjaCreateActionResult](#interface-ninjacreateactionresult) | [NinjaSignCreatedTransactionParams](#interface-ninjasigncreatedtransactionparams) | [ProcessIncomingTransactionOutputApi](#interface-processincomingtransactionoutputapi) |
+| [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams) | [NinjaSubmitDirectTransactionApi](#interface-ninjasubmitdirecttransactionapi) | [ProcessIncomingTransactionResultApi](#interface-processincomingtransactionresultapi) |
+| [NinjaGetPendingTransactionsInputApi](#interface-ninjagetpendingtransactionsinputapi) | [NinjaSubmitDirectTransactionOutputApi](#interface-ninjasubmitdirecttransactionoutputapi) | [SignActionParams](#interface-signactionparams) |
+| [NinjaGetPendingTransactionsInstructionsApi](#interface-ninjagetpendingtransactionsinstructionsapi) | [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams) | [TxOutputApi](#interface-txoutputapi) |
+| [NinjaGetPendingTransactionsTxApi](#interface-ninjagetpendingtransactionstxapi) | [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi) | [TxRedeemableOutputApi](#interface-txredeemableoutputapi) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -2551,6 +2551,40 @@ export interface NinjaV1Params {
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+#### Interface: PendingDojoInput
+
+```ts
+export interface PendingDojoInput {
+    vin: number;
+    derivationPrefix: string;
+    derivationSuffix: string;
+    unlockerPubKey?: string;
+    sourceSatoshis: number;
+    lockingScript: string;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Interface: PendingSignAction
+
+```ts
+export interface PendingSignAction {
+    reference: string;
+    dcr: DojoCreateTransactionSdkResult;
+    args: sdk.ValidCreateActionArgs;
+    tx: Transaction;
+    amount: number;
+    pdi: PendingDojoInput[];
+}
+```
+
+See also: [PendingDojoInput](#interface-pendingdojoinput)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 #### Interface: ProcessIncomingTransactionApi
 
 ```ts
@@ -2821,8 +2855,6 @@ export class DojoExpressClient implements DojoClientApi {
     async getTotalOfAmounts(direction: "incoming" | "outgoing", options?: DojoGetTotalOfAmountsOptions): Promise<number> 
     async getNetOfAmounts(options?: DojoGetTotalOfAmountsOptions): Promise<number> 
     async updateTransactionStatus(reference: string, status: DojoTransactionStatusApi): Promise<void> 
-    async listActions(args: sdk.ListActionsArgs, originator?: sdk.OriginatorDomainNameString): Promise<sdk.ListActionsResult> 
-    async listOutputs(args: sdk.ListOutputsArgs, originator?: sdk.OriginatorDomainNameString): Promise<sdk.ListOutputsResult> 
     async getTransactions(options?: DojoGetTransactionsOptions): Promise<DojoGetTransactionsResultApi> 
     async getPendingTransactions(referenceNumber?: string): Promise<DojoPendingTxApi[]> 
     async getBeefForTransaction(txid: string, options?: DojoGetBeefOptions): Promise<Beef> 
@@ -2830,6 +2862,10 @@ export class DojoExpressClient implements DojoClientApi {
     async getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> 
     async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<DojoGetTransactionOutputsResultApi> 
     async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<DojoGetTransactionLabelsResultApi> 
+    async listActions(args: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ListActionsResult> 
+    async listOutputs(args: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ListOutputsResult> 
+    async createTransactionSdk(args: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<DojoCreateTransactionSdkResult> 
+    async processActionSdk(params: DojoProcessActionSdkParams, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<DojoProcessActionSdkResults> 
     async createTransaction(params: DojoCreateTransactionParams): Promise<DojoCreateTransactionResultApi> 
     async processTransaction(params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> 
     async submitDirectTransaction(params: DojoSubmitDirectTransactionParams): Promise<DojoSubmitDirectTransactionResultApi> 
@@ -2855,7 +2891,7 @@ export class DojoExpressClient implements DojoClientApi {
 }
 ```
 
-See also: [DojoExpressClientOptions](#interface-dojoexpressclientoptions), [submitDirectTransaction](#function-submitdirecttransaction)
+See also: [DojoExpressClientOptions](#interface-dojoexpressclientoptions), [processActionSdk](#function-processactionsdk), [submitDirectTransaction](#function-submitdirecttransaction)
 
 <details>
 
@@ -2934,6 +2970,8 @@ export class NinjaBase implements NinjaApi {
     user?: DojoClientUserApi;
     _keyPair: KeyPairApi | undefined;
     _isDojoAuthenticated: boolean;
+    dojoIdentity?: DojoIdentityApi;
+    pendingSignActions: Record<string, PendingSignAction>;
     constructor(public dojo: DojoClientApi, clientPrivateKey?: string, public authrite?: AuthriteClient) 
     getClientChangeKeyPair(): KeyPairApi 
     async authenticate(identityKey?: string, addIfNew?: boolean): Promise<void> 
@@ -2983,8 +3021,12 @@ export class NinjaBase implements NinjaApi {
     async getEnvelopeForTransaction(txid: string): Promise<EnvelopeApi | undefined> 
     async processTransaction(params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> 
     async createAction(params: NinjaCreateActionParams): Promise<NinjaCreateActionResult> 
-    async listActions(args: sdk.ListActionsArgs, originator?: sdk.OriginatorDomainNameString): Promise<sdk.ListActionsResult> 
-    async listOutputs(args: sdk.ListOutputsArgs, originator?: sdk.OriginatorDomainNameString): Promise<sdk.ListOutputsResult> 
+    async createActionSdk(vargs: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.CreateActionResult> 
+    async signActionSdk(vargs: sdk.ValidSignActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.SignActionResult> 
+    async abortActionSdk(args: sdk.AbortActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.AbortActionResult> 
+    async internalizeAction(args: sdk.InternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.InternalizeActionResult> 
+    async listActions(vargs: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ListActionsResult> 
+    async listOutputs(vargs: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ListOutputsResult> 
     async getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
     async createTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
     async processTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
@@ -3015,7 +3057,7 @@ export class NinjaBase implements NinjaApi {
 }
 ```
 
-See also: [KeyPairApi](#interface-keypairapi), [NinjaAbortActionParams](#interface-ninjaabortactionparams), [NinjaAbortActionResultApi](#interface-ninjaabortactionresultapi), [NinjaApi](#interface-ninjaapi), [NinjaCreateActionParams](#interface-ninjacreateactionparams), [NinjaCreateActionResult](#interface-ninjacreateactionresult), [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams), [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi), [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams), [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi), [NinjaSignActionParams](#interface-ninjasignactionparams), [NinjaSignActionResultApi](#interface-ninjasignactionresultapi), [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams), [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi), [NinjaTransactionFailedHandler](#type-ninjatransactionfailedhandler), [NinjaTransactionProcessedHandler](#type-ninjatransactionprocessedhandler), [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi), [abortAction](#function-abortaction), [createTransactionWithOutputs](#function-createtransactionwithoutputs), [getTransactionWithOutputs](#function-gettransactionwithoutputs), [processPendingTransactions](#function-processpendingtransactions), [processTransactionWithOutputs](#function-processtransactionwithoutputs), [signAction](#function-signaction), [submitDirectTransaction](#function-submitdirecttransaction)
+See also: [KeyPairApi](#interface-keypairapi), [NinjaAbortActionParams](#interface-ninjaabortactionparams), [NinjaAbortActionResultApi](#interface-ninjaabortactionresultapi), [NinjaApi](#interface-ninjaapi), [NinjaCreateActionParams](#interface-ninjacreateactionparams), [NinjaCreateActionResult](#interface-ninjacreateactionresult), [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams), [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi), [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams), [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi), [NinjaSignActionParams](#interface-ninjasignactionparams), [NinjaSignActionResultApi](#interface-ninjasignactionresultapi), [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams), [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi), [NinjaTransactionFailedHandler](#type-ninjatransactionfailedhandler), [NinjaTransactionProcessedHandler](#type-ninjatransactionprocessedhandler), [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi), [PendingSignAction](#interface-pendingsignaction), [abortAction](#function-abortaction), [createActionSdk](#function-createactionsdk), [createTransactionWithOutputs](#function-createtransactionwithoutputs), [getTransactionWithOutputs](#function-gettransactionwithoutputs), [processPendingTransactions](#function-processpendingtransactions), [processTransactionWithOutputs](#function-processtransactionwithoutputs), [signAction](#function-signaction), [signActionSdk](#function-signactionsdk), [submitDirectTransaction](#function-submitdirecttransaction)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -3038,18 +3080,17 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ---
 ### Functions
 
-| | |
-| --- | --- |
-| [abortAction](#function-abortaction) | [ninjaProcessTransaction](#function-ninjaprocesstransaction) |
-| [buildBsvTxFromCreateTransactionResult](#function-buildbsvtxfromcreatetransactionresult) | [processIncomingTransaction](#function-processincomingtransaction) |
-| [convertToDojoTxInputsApi](#function-converttodojotxinputsapi) | [processPendingTransactions](#function-processpendingtransactions) |
-| [createTransactionWithOutputs](#function-createtransactionwithoutputs) | [processTransactionWithOutputs](#function-processtransactionwithoutputs) |
-| [getTransactionWithOutputs](#function-gettransactionwithoutputs) | [signAction](#function-signaction) |
-| [getUnlockingScriptLength](#function-getunlockingscriptlength) | [signCreatedTransaction](#function-signcreatedtransaction) |
-| [invoice3241645161d8](#function-invoice3241645161d8) | [submitDirectTransaction](#function-submitdirecttransaction) |
-| [makeUnlockTestRawTxBabbageBsv](#function-makeunlocktestrawtxbabbagebsv) | [unpackFromCreateTransactionResult](#function-unpackfromcreatetransactionresult) |
-| [needsSignAction](#function-needssignaction) | [validateDefaultParams](#function-validatedefaultparams) |
-| [ninjaCreateAction](#function-ninjacreateaction) |  |
+| | | |
+| --- | --- | --- |
+| [abortAction](#function-abortaction) | [invoice3241645161d8](#function-invoice3241645161d8) | [processTransactionWithOutputs](#function-processtransactionwithoutputs) |
+| [buildBsvTxFromCreateTransactionResult](#function-buildbsvtxfromcreatetransactionresult) | [makeAtomicBeef](#function-makeatomicbeef) | [signAction](#function-signaction) |
+| [completeSignedTransaction](#function-completesignedtransaction) | [makeUnlockTestRawTxBabbageBsv](#function-makeunlocktestrawtxbabbagebsv) | [signActionSdk](#function-signactionsdk) |
+| [convertToDojoTxInputsApi](#function-converttodojotxinputsapi) | [needsSignAction](#function-needssignaction) | [signCreatedTransaction](#function-signcreatedtransaction) |
+| [createActionSdk](#function-createactionsdk) | [ninjaCreateAction](#function-ninjacreateaction) | [submitDirectTransaction](#function-submitdirecttransaction) |
+| [createTransactionWithOutputs](#function-createtransactionwithoutputs) | [ninjaProcessTransaction](#function-ninjaprocesstransaction) | [unpackFromCreateTransactionResult](#function-unpackfromcreatetransactionresult) |
+| [getTransactionWithOutputs](#function-gettransactionwithoutputs) | [processActionSdk](#function-processactionsdk) | [validateDefaultParams](#function-validatedefaultparams) |
+| [getUnlockingScriptLength](#function-getunlockingscriptlength) | [processIncomingTransaction](#function-processincomingtransaction) |  |
+| [internalizeActionSdk](#function-internalizeactionsdk) | [processPendingTransactions](#function-processpendingtransactions) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -3099,6 +3140,17 @@ Argument Details
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+#### Function: completeSignedTransaction
+
+```ts
+export async function completeSignedTransaction(prior: PendingSignAction, spends: Record<number, sdk.SignActionSpend>, ninja: NinjaBase): Promise<Transaction> 
+```
+
+See also: [NinjaBase](#class-ninjabase), [PendingSignAction](#interface-pendingsignaction)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 #### Function: convertToDojoTxInputsApi
 
 Convert NinjaTxInputsApi to DojoTxInputsApi to protect unlocking scripts.
@@ -3108,6 +3160,17 @@ export function convertToDojoTxInputsApi(inputs: Record<string, NinjaTxInputsApi
 ```
 
 See also: [NinjaTxInputsApi](#interface-ninjatxinputsapi)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Function: createActionSdk
+
+```ts
+export async function createActionSdk(ninja: NinjaBase, vargs: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.CreateActionResult> 
+```
+
+See also: [NinjaBase](#class-ninjabase)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -3143,6 +3206,17 @@ export function getUnlockingScriptLength(script: string | number): number
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+#### Function: internalizeActionSdk
+
+```ts
+export async function internalizeActionSdk(ninja: NinjaBase, args: sdk.InternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.InternalizeActionResult> 
+```
+
+See also: [NinjaBase](#class-ninjabase)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 #### Function: invoice3241645161d8
 
 Combine inputs per protocol 3241645161d8 to generate an 'invoice' string used for cryptographic key generation.
@@ -3165,6 +3239,15 @@ Argument Details
   + An optional paymail handle
 
 </details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Function: makeAtomicBeef
+
+```ts
+export function makeAtomicBeef(tx: Transaction, beef: number[] | Beef): number[] 
+```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -3230,6 +3313,17 @@ See also: [NinjaBase](#class-ninjabase)
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+#### Function: processActionSdk
+
+```ts
+export async function processActionSdk(prior: PendingSignAction | undefined, ninja: NinjaBase, args: sdk.ValidProcessActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.SendWithResult[] | undefined> 
+```
+
+See also: [NinjaBase](#class-ninjabase), [PendingSignAction](#interface-pendingsignaction)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 #### Function: processIncomingTransaction
 
 Verifies protocol '3241645161d8' output scripts with derivedSuffix based addresses.
@@ -3283,6 +3377,17 @@ export async function signAction(ninja: NinjaBase, params: NinjaSignActionParams
 ```
 
 See also: [NinjaBase](#class-ninjabase), [NinjaSignActionParams](#interface-ninjasignactionparams), [NinjaSignActionResultApi](#interface-ninjasignactionresultapi)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+#### Function: signActionSdk
+
+```ts
+export async function signActionSdk(ninja: NinjaBase, vargs: ValidSignActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.SignActionResult> 
+```
+
+See also: [NinjaBase](#class-ninjabase)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
