@@ -332,6 +332,11 @@ export class DojoExpressClient implements DojoClientApi {
     const r = <sdk.AbortActionResult>await this.postJson('/abortActionSdk', { identityKey: this.identityKey, vargs, originator })
     return r
   }
+  async relinquishOutputSdk(vargs: sdk.ValidRelinquishOutputArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.RelinquishOutputResult> {
+    this.verifyAuthenticated()
+    const r = <sdk.RelinquishOutputResult>await this.postJson('/relinquishOutputSdk', { identityKey: this.identityKey, vargs, originator })
+    return r
+  }
 
   async createTransaction (params: DojoCreateTransactionParams)
   : Promise<DojoCreateTransactionResultApi> {

@@ -52,9 +52,9 @@ import { ninjaProcessTransaction } from './ninjaProcessTransaction'
 import { ninjaCreateAction } from './ninjaCreateAction'
 import { createActionSdk, PendingSignAction } from './sdk/createActionSdk'
 import { signActionSdk } from './sdk/signActionSdk'
-import { internalizeActionSdk } from './sdk/internalizeAction'
+import { internalizeActionSdk } from './sdk/internalizeActionSdk'
 import { Transaction } from '@bsv/sdk'
-import { relinquishOutputSdk } from './sdk/relinquishOutput'
+import { relinquishOutputSdk } from './sdk/relinquishOutputSdk'
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain
