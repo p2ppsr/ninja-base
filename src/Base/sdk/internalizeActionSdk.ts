@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Beef, sdk, WERR_INTERNAL, WERR_INVALID_PARAMETER } from "@babbage/sdk-ts";
+import { Beef, sdk  } from "@babbage/sdk-ts";
 import { NinjaBase } from "../NinjaBase";
 import { DojoInternalizeActionArgs } from "cwi-base";
+import { P2PKH } from "@bsv/sdk";
 
 export async function internalizeActionSdk(ninja: NinjaBase, vargs: sdk.ValidInternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
 : Promise<sdk.InternalizeActionResult> {
 
   const { ab, tx, txid } = await validateAtomicBeef();
+  const brc29ProtocolID: sdk.WalletProtocol = [2, '3241645161d8']
 
   const dargs: DojoInternalizeActionArgs = {
     ...vargs,
@@ -19,7 +21,7 @@ export async function internalizeActionSdk(ninja: NinjaBase, vargs: sdk.ValidInt
     switch (o.protocol) {
       case 'basket insertion': setupBasketInsertionForOutput(o, dargs); break;
       case 'wallet payment': setupWalletPaymentForOutput(o, dargs); break;
-      default: throw new WERR_INTERNAL(`unexpected protocol ${o.protocol}`)
+      default: throw new sdk.WERR_INTERNAL(`unexpected protocol ${o.protocol}`)
     }
   }
 
@@ -29,15 +31,26 @@ export async function internalizeActionSdk(ninja: NinjaBase, vargs: sdk.ValidInt
 
   function setupWalletPaymentForOutput(o: sdk.InternalizeOutput, dargs: DojoInternalizeActionArgs) {
     const p = o.paymentRemittance
-    if (!p) throw new WERR_INVALID_PARAMETER('paymentRemitance', `valid for protocol ${o.protocol}`);
+    const output = tx.outputs[o.outputIndex]
+    if (!p) throw new sdk.WERR_INVALID_PARAMETER('paymentRemitance', `valid for protocol ${o.protocol}`);
     if (dargs.commonDerivationPrefix && dargs.commonDerivationPrefix !== p.derivationPrefix)
-      throw new WERR_INVALID_PARAMETER('paymentRemitance', `the same derivationPrefix ${dargs.commonDerivationPrefix} vs ${p.derivationPrefix}`);
+      throw new sdk.WERR_INVALID_PARAMETER('paymentRemitance', `the same derivationPrefix ${dargs.commonDerivationPrefix} vs ${p.derivationPrefix}`);
 
-    throw new Error("Function not implemented.");
+    const keyID = `${dargs.commonDerivationPrefix} ${p.derivationSuffix}`
+    const forSelf = false
+
+    const privKey = ninja.keyDeriver!.derivePrivateKey(brc29ProtocolID, keyID, p.senderIdentityKey)
+    const expectedLockScript = new P2PKH().lock(privKey.toAddress())
+    if (output.lockingScript.toHex() !== expectedLockScript.toHex())
+      throw new sdk.WERR_INVALID_PARAMETER('paymentRemitance', `locked by script conforming to BRC-29`);
+
+
   }
 
   function setupBasketInsertionForOutput(o: sdk.InternalizeOutput, dargs: DojoInternalizeActionArgs) {
-    throw new Error("Function not implemented.");
+    /*
+    No additional validations...
+    */
   }
 
   async function validateAtomicBeef() {
