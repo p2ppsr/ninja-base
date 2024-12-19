@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { AuthriteClient } from 'authrite-js'
+import { GetInfoParams, GetInfoResult, sdk } from '@babbage/sdk-ts'
 
 import {
   Chain,
@@ -18,7 +19,6 @@ import {
   DojoTxLabelApi, DojoOutputApi, DojoTransactionApi,
   DojoGetTransactionLabelsOptions, DojoProcessTransactionParams, identityKeyFromPrivateKey, EnvelopeApi,
   DojoClientUserApi,
-  ERR_NOT_IMPLEMENTED,
   DojoIdentityApi,
 } from 'cwi-base'
 
@@ -47,19 +47,18 @@ import { submitDirectTransaction } from './submitDirectTransaction'
 import { DojoExpressClient } from '../DojoExpressClient'
 import { signAction } from './signAction'
 import { abortAction } from './abortAction'
-import { GetInfoParams, GetInfoResult, sdk } from '@babbage/sdk-ts'
 import { ninjaProcessTransaction } from './ninjaProcessTransaction'
 import { ninjaCreateAction } from './ninjaCreateAction'
 import { createActionSdk, PendingSignAction } from './sdk/createActionSdk'
 import { signActionSdk } from './sdk/signActionSdk'
 import { internalizeActionSdk } from './sdk/internalizeActionSdk'
-import { Transaction } from '@bsv/sdk'
 import { relinquishOutputSdk } from './sdk/relinquishOutputSdk'
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain
   userId?: number
   user?: DojoClientUserApi
+  keyDeriver?: sdk.KeyDeriverApi
   _keyPair: KeyPairApi | undefined
   _isDojoAuthenticated: boolean
   dojoIdentity?: DojoIdentityApi

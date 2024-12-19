@@ -16,6 +16,7 @@ import {
   DojoProcessActionSdkParams,
   DojoProcessActionSdkResults,
   DojoCreateTransactionSdkResult,
+  DojoInternalizeActionArgs,
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -305,6 +306,11 @@ export class DojoExpressClient implements DojoClientApi {
     return results
   }
 
+  async isValidRootForHeight(root: string, height: number) : Promise<boolean> {
+    this.verifyAuthenticated()
+    const r: boolean = await this.postJson('/isValidRootForHeight', { identityKey: this.identityKey, root, height })
+    return r
+  }
   async listActions(args: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListActionsResult> {
     this.verifyAuthenticated()
     const r: sdk.ListActionsResult = await this.postJson('/listActions', { identityKey: this.identityKey, args, originator })
@@ -313,6 +319,13 @@ export class DojoExpressClient implements DojoClientApi {
   async listOutputs(args: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListOutputsResult> {
     this.verifyAuthenticated()
     const r: sdk.ListOutputsResult = await this.postJson('/listOutputs', { identityKey: this.identityKey, args, originator })
+    return r
+  }
+  async internalizeActionSdk(args: DojoInternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
+  : Promise<sdk.InternalizeActionResult>
+  {
+    this.verifyAuthenticated()
+    const r = <sdk.InternalizeActionResult>await this.postJson('/internalizeActionSdk', { identityKey: this.identityKey, args, originator })
     return r
   }
   async createTransactionSdk(args: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
