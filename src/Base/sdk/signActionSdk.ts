@@ -2,18 +2,17 @@
 import { Beef, Transaction, TransactionInput } from "@bsv/sdk";
 import { sdk } from "@babbage/sdk-ts";
 import { NinjaBase } from "../NinjaBase";
-import { ValidSignActionArgs, WERR_INTERNAL, WERR_INVALID_PARAMETER, WERR_NOT_IMPLEMENTED } from "@babbage/sdk-ts/src/sdk";
 import { asBsvSdkScript, ScriptTemplateSABPPP } from "cwi-base";
 import { PendingSignAction, processActionSdk } from "./createActionSdk";
 
-export async function signActionSdk(ninja: NinjaBase, vargs: ValidSignActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
+export async function signActionSdk(ninja: NinjaBase, vargs: sdk.ValidSignActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
 : Promise<sdk.SignActionResult>
 {
   const prior = ninja.pendingSignActions[vargs.reference]
   if (!prior)
-    throw new WERR_NOT_IMPLEMENTED('recovery of out-of-session signAction reference data is not yet implemented.')
+    throw new sdk.WERR_NOT_IMPLEMENTED('recovery of out-of-session signAction reference data is not yet implemented.')
   if (!prior.dcr.inputBeef)
-    throw new WERR_INTERNAL('prior.dcr.inputBeef must be valid')
+    throw new sdk.WERR_INTERNAL('prior.dcr.inputBeef must be valid')
 
   prior.tx = await completeSignedTransaction(prior, vargs.spends, ninja)
 
@@ -51,9 +50,9 @@ export async function completeSignedTransaction(
     const createInput = prior.args.inputs[vin]
     const input = prior.tx.inputs[vin]
     if (!createInput || !input || createInput.unlockingScript || !Number.isInteger(createInput.unlockingScriptLength))
-      throw new WERR_INVALID_PARAMETER('args', `spend does not correspond to prior input with valid unlockingScriptLength.`)
+      throw new sdk.WERR_INVALID_PARAMETER('args', `spend does not correspond to prior input with valid unlockingScriptLength.`)
     if (spend.unlockingScript.length / 2 > createInput.unlockingScriptLength!)
-      throw new WERR_INVALID_PARAMETER('args', `spend unlockingScript length ${spend.unlockingScript.length} exceeds expected length ${createInput.unlockingScriptLength}`)
+      throw new sdk.WERR_INVALID_PARAMETER('args', `spend unlockingScript length ${spend.unlockingScript.length} exceeds expected length ${createInput.unlockingScriptLength}`)
     input.unlockingScript = asBsvSdkScript(spend.unlockingScript)
     if (spend.sequenceNumber !== undefined)
       input.sequence = spend.sequenceNumber
