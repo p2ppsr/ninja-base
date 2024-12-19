@@ -3,7 +3,7 @@ import { sdk } from "@babbage/sdk-ts";
 import { NinjaBase } from "../NinjaBase";
 import { ERR_NOT_IMPLEMENTED } from "cwi-base";
 
-  export async function internalizeActionSdk(ninja: NinjaBase, vargs: sdk.ValidInternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
-  : Promise<sdk.InternalizeActionResult> {
+  export async function relinquishOutputSdk(ninja: NinjaBase, vargs: sdk.ValidRelinquishOutputArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
+  : Promise<sdk.RelinquishOutputResult> {
     throw new ERR_NOT_IMPLEMENTED()
   }

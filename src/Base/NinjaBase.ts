@@ -54,6 +54,7 @@ import { createActionSdk, PendingSignAction } from './sdk/createActionSdk'
 import { signActionSdk } from './sdk/signActionSdk'
 import { internalizeActionSdk } from './sdk/internalizeAction'
 import { Transaction } from '@bsv/sdk'
+import { relinquishOutputSdk } from './sdk/relinquishOutput'
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain
@@ -402,10 +403,17 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
-  async internalizeAction(args: sdk.InternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
+  async internalizeActionSdk(vargs: sdk.ValidInternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
   : Promise<sdk.InternalizeActionResult> {
     await this.verifyDojoAuthenticated()
-    const r = await internalizeActionSdk(this, args, originator)
+    const r = await internalizeActionSdk(this, vargs, originator)
+    return r
+  }
+
+  async relinquishOutputSdk(vargs: sdk.ValidRelinquishOutputArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
+  : Promise<sdk.RelinquishOutputResult> {
+    await this.verifyDojoAuthenticated()
+    const r = await relinquishOutputSdk(this, vargs, originator)
     return r
   }
 
