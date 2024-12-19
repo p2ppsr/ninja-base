@@ -2862,11 +2862,14 @@ export class DojoExpressClient implements DojoClientApi {
     async getEnvelopesOfConflictingTransactions(txid: string): Promise<EnvelopeApi[]> 
     async getTransactionOutputs(options?: DojoGetTransactionOutputsOptions): Promise<DojoGetTransactionOutputsResultApi> 
     async getTransactionLabels(options?: DojoGetTransactionLabelsOptions): Promise<DojoGetTransactionLabelsResultApi> 
+    async isValidRootForHeight(root: string, height: number): Promise<boolean> 
     async listActions(args: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ListActionsResult> 
     async listOutputs(args: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ListOutputsResult> 
+    async internalizeActionSdk(args: DojoInternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.InternalizeActionResult> 
     async createTransactionSdk(args: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<DojoCreateTransactionSdkResult> 
     async processActionSdk(params: DojoProcessActionSdkParams, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<DojoProcessActionSdkResults> 
     async abortActionSdk(vargs: sdk.ValidAbortActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.AbortActionResult> 
+    async relinquishOutputSdk(vargs: sdk.ValidRelinquishOutputArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.RelinquishOutputResult> 
     async createTransaction(params: DojoCreateTransactionParams): Promise<DojoCreateTransactionResultApi> 
     async processTransaction(params: DojoProcessTransactionParams): Promise<DojoProcessTransactionResultApi> 
     async submitDirectTransaction(params: DojoSubmitDirectTransactionParams): Promise<DojoSubmitDirectTransactionResultApi> 
@@ -2892,7 +2895,7 @@ export class DojoExpressClient implements DojoClientApi {
 }
 ```
 
-See also: [DojoExpressClientOptions](#interface-dojoexpressclientoptions), [processActionSdk](#function-processactionsdk), [submitDirectTransaction](#function-submitdirecttransaction)
+See also: [DojoExpressClientOptions](#interface-dojoexpressclientoptions), [internalizeActionSdk](#function-internalizeactionsdk), [processActionSdk](#function-processactionsdk), [relinquishOutputSdk](#function-relinquishoutputsdk), [submitDirectTransaction](#function-submitdirecttransaction)
 
 <details>
 
@@ -2969,6 +2972,7 @@ export class NinjaBase implements NinjaApi {
     chain?: Chain;
     userId?: number;
     user?: DojoClientUserApi;
+    keyDeriver?: sdk.KeyDeriverApi;
     _keyPair: KeyPairApi | undefined;
     _isDojoAuthenticated: boolean;
     dojoIdentity?: DojoIdentityApi;
