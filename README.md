@@ -3397,7 +3397,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 #### Function: signActionSdk
 
 ```ts
-export async function signActionSdk(ninja: NinjaBase, vargs: ValidSignActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.SignActionResult> 
+export async function signActionSdk(ninja: NinjaBase, vargs: sdk.ValidSignActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.SignActionResult> 
 ```
 
 See also: [NinjaBase](#class-ninjabase)
