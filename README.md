@@ -222,10 +222,18 @@ export interface NinjaApi {
     getMerkleRootForHeight(height: number): Promise<string | undefined>;
     getHeaderForHeight(height: number): Promise<number[] | undefined>;
     getInfo(params: GetInfoParams): Promise<GetInfoResult>;
+    listActions(vargs: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ListActionsResult>;
+    listOutputs(vargs: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ListOutputsResult>;
+    createActionSdk(vargs: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.CreateActionResult>;
+    signActionSdk(vargs: sdk.ValidSignActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.SignActionResult>;
+    abortActionSdk(vargs: sdk.ValidAbortActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.AbortActionResult>;
+    internalizeActionSdk(vargs: sdk.ValidInternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.InternalizeActionResult>;
+    relinquishOutputSdk(vargs: sdk.ValidRelinquishOutputArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.RelinquishOutputResult>;
+    listCertificatesSdk(vargs: sdk.ValidListCertificatesArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ListCertificatesResult>;
 }
 ```
 
-See also: [KeyPairApi](#interface-keypairapi), [NinjaAbortActionParams](#interface-ninjaabortactionparams), [NinjaAbortActionResultApi](#interface-ninjaabortactionresultapi), [NinjaCreateActionParams](#interface-ninjacreateactionparams), [NinjaCreateActionResult](#interface-ninjacreateactionresult), [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams), [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi), [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams), [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi), [NinjaSignActionParams](#interface-ninjasignactionparams), [NinjaSignActionResultApi](#interface-ninjasignactionresultapi), [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams), [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi), [NinjaTransactionFailedHandler](#type-ninjatransactionfailedhandler), [NinjaTransactionProcessedHandler](#type-ninjatransactionprocessedhandler), [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi), [abortAction](#function-abortaction), [createTransactionWithOutputs](#function-createtransactionwithoutputs), [getTransactionWithOutputs](#function-gettransactionwithoutputs), [processPendingTransactions](#function-processpendingtransactions), [processTransactionWithOutputs](#function-processtransactionwithoutputs), [signAction](#function-signaction), [submitDirectTransaction](#function-submitdirecttransaction)
+See also: [KeyPairApi](#interface-keypairapi), [NinjaAbortActionParams](#interface-ninjaabortactionparams), [NinjaAbortActionResultApi](#interface-ninjaabortactionresultapi), [NinjaCreateActionParams](#interface-ninjacreateactionparams), [NinjaCreateActionResult](#interface-ninjacreateactionresult), [NinjaCreateTransactionParams](#interface-ninjacreatetransactionparams), [NinjaGetTransactionOutputsResultApi](#interface-ninjagettransactionoutputsresultapi), [NinjaGetTransactionWithOutputsParams](#interface-ninjagettransactionwithoutputsparams), [NinjaGetTransactionsResultApi](#interface-ninjagettransactionsresultapi), [NinjaSignActionParams](#interface-ninjasignactionparams), [NinjaSignActionResultApi](#interface-ninjasignactionresultapi), [NinjaSubmitDirectTransactionParams](#interface-ninjasubmitdirecttransactionparams), [NinjaSubmitDirectTransactionResultApi](#interface-ninjasubmitdirecttransactionresultapi), [NinjaTransactionFailedHandler](#type-ninjatransactionfailedhandler), [NinjaTransactionProcessedHandler](#type-ninjatransactionprocessedhandler), [NinjaTransactionWithOutputsResultApi](#interface-ninjatransactionwithoutputsresultapi), [abortAction](#function-abortaction), [createActionSdk](#function-createactionsdk), [createTransactionWithOutputs](#function-createtransactionwithoutputs), [getTransactionWithOutputs](#function-gettransactionwithoutputs), [internalizeActionSdk](#function-internalizeactionsdk), [processPendingTransactions](#function-processpendingtransactions), [processTransactionWithOutputs](#function-processtransactionwithoutputs), [relinquishOutputSdk](#function-relinquishoutputsdk), [signAction](#function-signaction), [signActionSdk](#function-signactionsdk), [submitDirectTransaction](#function-submitdirecttransaction)
 
 <details>
 
@@ -3031,6 +3039,7 @@ export class NinjaBase implements NinjaApi {
     async abortActionSdk(vargs: sdk.ValidAbortActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.AbortActionResult> 
     async internalizeActionSdk(vargs: sdk.ValidInternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.InternalizeActionResult> 
     async relinquishOutputSdk(vargs: sdk.ValidRelinquishOutputArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.RelinquishOutputResult> 
+    async listCertificatesSdk(vargs: sdk.ValidListCertificatesArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ListCertificatesResult> 
     async listActions(vargs: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ListActionsResult> 
     async listOutputs(vargs: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ListOutputsResult> 
     async getTransactionWithOutputs(params: NinjaGetTransactionWithOutputsParams): Promise<NinjaTransactionWithOutputsResultApi> 
@@ -3213,6 +3222,31 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ---
 #### Function: internalizeActionSdk
+
+Internalize Action allows a wallet to take ownership of outputs in a pre-existing transaction.
+The transaction may, or may not already be known to both the storage and user.
+
+Two types of outputs are handled: "wallet payments" and "basket insertions".
+
+A "basket insertion" output is considered a custom output and has no effect on the wallet's "balance".
+
+A "wallet payment" adds an outputs value to the wallet's change "balance". These outputs are assigned to the "default" basket.
+
+Processing starts with simple validation and then checks for a pre-existing transaction.
+If the transaction is already known to the user, then the outputs are reviewed against the existing outputs treatment,
+and merge rules are added to the arguments passed to the storage layer.
+The existing transaction must be in the 'unproven' or 'completed' status. Any other status is an error.
+
+When the transaction already exists, the description is updated. The isOutgoing sense is not changed.
+
+"basket insertion" Merge Rules:
+1. The "default" basket may not be specified as the insertion basket.
+2. A change output in the "default" basket may not be target of an insertion into a different basket.
+3. These baskets do not affect the wallet's balance and are typed "custom".
+
+"wallet payment" Merge Rules:
+1. Targetting an existing change "default" basket output results in a no-op. No error. No alterations made.
+2. Targetting a previously "custom" non-change output converts it into a change output. This alters the transaction's `amount`, and the wallet balance.
 
 ```ts
 export async function internalizeActionSdk(ninja: NinjaBase, vargs: sdk.ValidInternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.InternalizeActionResult> 

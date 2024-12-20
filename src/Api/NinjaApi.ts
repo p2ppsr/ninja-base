@@ -6,7 +6,7 @@ import {
    GetInfoParams,
    GetInfoResult,
    GetTransactionOutputResult, ListActionsTransaction, ListActionsTransactionInput,
-   ListActionsTransactionOutput, OptionalEnvelopeEvidenceApi, OutPoint, SubmitDirectTransaction, SubmitDirectTransactionOutput,
+   ListActionsTransactionOutput, OptionalEnvelopeEvidenceApi, OutPoint, sdk, SubmitDirectTransaction, SubmitDirectTransactionOutput,
    SubmitDirectTransactionResult, TransactionStatusApi,
 } from '@babbage/sdk-ts'
 import {
@@ -450,6 +450,17 @@ export interface NinjaApi {
     * @returns {Promise<GetInfoResult>} information about the metanet-client context (version, chain, height, user...).
     */
    getInfo(params: GetInfoParams) : Promise<GetInfoResult>
+
+
+  listActions(vargs: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ListActionsResult>
+  listOutputs(vargs: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ListOutputsResult>
+  createActionSdk(vargs: sdk.ValidCreateActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.CreateActionResult>
+  signActionSdk(vargs: sdk.ValidSignActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.SignActionResult>
+  abortActionSdk(vargs: sdk.ValidAbortActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.AbortActionResult>
+  internalizeActionSdk(vargs: sdk.ValidInternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.InternalizeActionResult>
+  relinquishOutputSdk(vargs: sdk.ValidRelinquishOutputArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.RelinquishOutputResult>
+
+  listCertificatesSdk(vargs: sdk.ValidListCertificatesArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListCertificatesResult>
 }
 
 export interface NinjaCreateActionConfirmResult {

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { AuthriteClient } from 'authrite-js'
-import { GetInfoParams, GetInfoResult, sdk } from '@babbage/sdk-ts'
+import { GetInfoParams, GetInfoResult, sdk, WERR_NOT_IMPLEMENTED } from '@babbage/sdk-ts'
 
 import {
   Chain,
@@ -414,6 +414,13 @@ export class NinjaBase implements NinjaApi {
     await this.verifyDojoAuthenticated()
     const r = await relinquishOutputSdk(this, vargs, originator)
     return r
+  }
+
+  async listCertificatesSdk(vargs: sdk.ValidListCertificatesArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListCertificatesResult> {
+    await this.verifyDojoAuthenticated()
+    throw new WERR_NOT_IMPLEMENTED()
+    //const r = await this.dojo.listCertificatesSdk(vargs, originator)
+    //return r
   }
 
   async listActions(vargs: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListActionsResult> {
