@@ -4,6 +4,38 @@ import { NinjaBase } from "../NinjaBase";
 import { DojoInternalizeActionArgs } from "cwi-base";
 import { P2PKH } from "@bsv/sdk";
 
+/**
+ * Internalize Action allows a wallet to take ownership of outputs in a pre-existing transaction.
+ * The transaction may, or may not already be known to both the storage and user.
+ * 
+ * Two types of outputs are handled: "wallet payments" and "basket insertions".
+ * 
+ * A "basket insertion" output is considered a custom output and has no effect on the wallet's "balance".
+ * 
+ * A "wallet payment" adds an outputs value to the wallet's change "balance". These outputs are assigned to the "default" basket.
+ * 
+ * Processing starts with simple validation and then checks for a pre-existing transaction.
+ * If the transaction is already known to the user, then the outputs are reviewed against the existing outputs treatment,
+ * and merge rules are added to the arguments passed to the storage layer.
+ * The existing transaction must be in the 'unproven' or 'completed' status. Any other status is an error.
+ * 
+ * When the transaction already exists, the description is updated. The isOutgoing sense is not changed.
+ * 
+ * "basket insertion" Merge Rules:
+ * 1. The "default" basket may not be specified as the insertion basket.
+ * 2. A change output in the "default" basket may not be target of an insertion into a different basket.
+ * 3. These baskets do not affect the wallet's balance and are typed "custom".
+ * 
+ * "wallet payment" Merge Rules:
+ * 1. Targetting an existing change "default" basket output results in a no-op. No error. No alterations made.
+ * 2. Targetting a previously "custom" non-change output converts it into a change output. This alters the transaction's `amount`, and the wallet balance.
+ * 
+ * 
+ * @param ninja 
+ * @param vargs 
+ * @param originator 
+ * @returns 
+ */
 export async function internalizeActionSdk(ninja: NinjaBase, vargs: sdk.ValidInternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
 : Promise<sdk.InternalizeActionResult> {
 
