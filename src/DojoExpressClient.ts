@@ -306,6 +306,9 @@ export class DojoExpressClient implements DojoClientApi {
     return results
   }
 
+  async currentHeight() : Promise<number> {
+    return await this.getHeight()
+  }
   async isValidRootForHeight(root: string, height: number) : Promise<boolean> {
     this.verifyAuthenticated()
     const r: boolean = await this.postJson('/isValidRootForHeight', { identityKey: this.identityKey, root, height })
