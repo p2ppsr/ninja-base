@@ -329,6 +329,11 @@ export class DojoExpressClient implements DojoClientApi {
     const r: sdk.ListCertificatesResult = await this.postJson('/listCertificatesSdk', { identityKey: this.identityKey, args, originator })
     return r
   }
+  async acquireCertificateSdk(args: sdk.ValidAcquireCertificateArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.AcquireCertificateResult> {
+    this.verifyAuthenticated()
+    const r: sdk.AcquireCertificateResult = await this.postJson('/aquireCertificateSdk', { identityKey: this.identityKey, args, originator })
+    return r
+  }
   async internalizeActionSdk(args: DojoInternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
   : Promise<sdk.InternalizeActionResult>
   {
