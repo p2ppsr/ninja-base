@@ -418,20 +418,19 @@ export class NinjaBase implements NinjaApi {
 
   async listCertificatesSdk(vargs: sdk.ValidListCertificatesArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListCertificatesResult> {
     await this.verifyDojoAuthenticated()
-    throw new WERR_NOT_IMPLEMENTED()
-    //const r = await this.dojo.listCertificatesSdk(vargs, originator)
-    //return r
+    const r = await this.dojo.listCertificatesSdk(vargs, originator)
+    return r
   }
 
   async listActions(vargs: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListActionsResult> {
     await this.verifyDojoAuthenticated()
-    const r = await this.dojo.listActions(vargs, originator)
+    const r = await this.dojo.listActionsSdk(vargs, originator)
     return r
   }
 
   async listOutputs(vargs: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListOutputsResult> {
     await this.verifyDojoAuthenticated()
-    const r = await this.dojo.listOutputs(vargs, originator)
+    const r = await this.dojo.listOutputsSdk(vargs, originator)
     return r
   }
 

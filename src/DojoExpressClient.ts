@@ -314,14 +314,19 @@ export class DojoExpressClient implements DojoClientApi {
     const r: boolean = await this.postJson('/isValidRootForHeight', { identityKey: this.identityKey, root, height })
     return r
   }
-  async listActions(args: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListActionsResult> {
+  async listActionsSdk(args: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListActionsResult> {
     this.verifyAuthenticated()
-    const r: sdk.ListActionsResult = await this.postJson('/listActions', { identityKey: this.identityKey, args, originator })
+    const r: sdk.ListActionsResult = await this.postJson('/listActionsSdk', { identityKey: this.identityKey, args, originator })
     return r
   }
-  async listOutputs(args: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListOutputsResult> {
+  async listOutputsSdk(args: sdk.ValidListOutputsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListOutputsResult> {
     this.verifyAuthenticated()
-    const r: sdk.ListOutputsResult = await this.postJson('/listOutputs', { identityKey: this.identityKey, args, originator })
+    const r: sdk.ListOutputsResult = await this.postJson('/listOutputsSdk', { identityKey: this.identityKey, args, originator })
+    return r
+  }
+  async listCertificatesSdk(args: sdk.ValidListCertificatesArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListCertificatesResult> {
+    this.verifyAuthenticated()
+    const r: sdk.ListCertificatesResult = await this.postJson('/listCertificatesSdk', { identityKey: this.identityKey, args, originator })
     return r
   }
   async internalizeActionSdk(args: DojoInternalizeActionArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
