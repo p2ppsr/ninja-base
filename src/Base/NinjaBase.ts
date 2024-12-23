@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { AuthriteClient } from 'authrite-js'
-import { GetInfoParams, GetInfoResult, sdk, WERR_NOT_IMPLEMENTED } from '@babbage/sdk-ts'
+import { GetInfoParams, GetInfoResult, sdk, WERR_INTERNAL, WERR_INVALID_PARAMETER, WERR_NOT_IMPLEMENTED } from '@babbage/sdk-ts'
 
 import {
   Chain,
@@ -53,6 +53,7 @@ import { createActionSdk, PendingSignAction } from './sdk/createActionSdk'
 import { signActionSdk } from './sdk/signActionSdk'
 import { internalizeActionSdk } from './sdk/internalizeActionSdk'
 import { relinquishOutputSdk } from './sdk/relinquishOutputSdk'
+import { Certificate } from '@bsv/sdk'
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain
@@ -416,7 +417,7 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
-  async acquireCertificateSdk(vargs: sdk.AcquireCertificateArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
+  async acquireCertificateSdk(vargs: sdk.ValidAcquireCertificateArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
   : Promise<sdk.AcquireCertificateResult> {
     await this.verifyDojoAuthenticated()
     const r = await this.dojo.acquireCertificateSdk(vargs, originator)
