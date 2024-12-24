@@ -417,7 +417,7 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
-  async acquireCertificateSdk(vargs: sdk.ValidAcquireCertificateArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
+  async acquireCertificateSdk(vargs: sdk.ValidAcquireDirectCertificateArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
   : Promise<sdk.AcquireCertificateResult> {
     await this.verifyDojoAuthenticated()
     const r = await this.dojo.acquireCertificateSdk(vargs, originator)
