@@ -54,6 +54,7 @@ import { signActionSdk } from './sdk/signActionSdk'
 import { internalizeActionSdk } from './sdk/internalizeActionSdk'
 import { relinquishOutputSdk } from './sdk/relinquishOutputSdk'
 import { Certificate } from '@bsv/sdk'
+import { WalletCrypto } from '@babbage/sdk-ts/src/sdk'
 
 export class NinjaBase implements NinjaApi {
   chain?: Chain
@@ -417,6 +418,28 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
+
+    //////////////////
+    // Certificates
+    //////////////////
+
+  async listCertificatesSdk(vargs: sdk.ValidListCertificatesArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListCertificatesResult> {
+    await this.verifyDojoAuthenticated()
+    const r = await this.dojo.listCertificatesSdk(vargs, originator)
+    // Results are encrypted, decrypt them...
+    const wallet = new WalletCrypto(this.keyDeriver!)
+    for (const ec of r.certificates) {
+      const co = await sdk.CertOps.fromCounterparty(wallet, {
+        certificate: {...ec},
+        keyring: ec.keyring,
+        counterparty: ec.counterparty
+      })
+      ec.fields = co._decryptedFields!
+      ec.keyring = {}
+    }
+    return r
+  }
+
   async acquireCertificateSdk(vargs: sdk.ValidAcquireDirectCertificateArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes)
   : Promise<sdk.AcquireCertificateResult> {
     await this.verifyDojoAuthenticated()
@@ -424,11 +447,23 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
-  async listCertificatesSdk(vargs: sdk.ValidListCertificatesArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListCertificatesResult> {
+  async relinquishCertificateSdk(vargs: sdk.ValidRelinquishCertificateArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.RelinquishCertificateResult> {
     await this.verifyDojoAuthenticated()
-    const r = await this.dojo.listCertificatesSdk(vargs, originator)
-    return r
+    throw new WERR_NOT_IMPLEMENTED()
   }
+
+  async proveCertificateSdk(vargs: sdk.ValidProveCertificateArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ProveCertificateResult> {
+    await this.verifyDojoAuthenticated()
+    throw new WERR_NOT_IMPLEMENTED()
+  }
+
+
+
+
+
+    //////////////////
+    // Actions
+    //////////////////
 
   async listActions(vargs: sdk.ValidListActionsArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListActionsResult> {
     await this.verifyDojoAuthenticated()

@@ -17,6 +17,7 @@ import {
   DojoProcessActionSdkResults,
   DojoCreateTransactionSdkResult,
   DojoInternalizeActionArgs,
+  DojoListCertificatesResult,
 } from 'cwi-base'
 
 import { AuthriteClient } from 'authrite-js'
@@ -324,9 +325,9 @@ export class DojoExpressClient implements DojoClientApi {
     const r: sdk.ListOutputsResult = await this.postJson('/listOutputsSdk', { identityKey: this.identityKey, args, originator })
     return r
   }
-  async listCertificatesSdk(args: sdk.ValidListCertificatesArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListCertificatesResult> {
+  async listCertificatesSdk(args: sdk.ValidListCertificatesArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<DojoListCertificatesResult> {
     this.verifyAuthenticated()
-    const r: sdk.ListCertificatesResult = await this.postJson('/listCertificatesSdk', { identityKey: this.identityKey, args, originator })
+    const r: DojoListCertificatesResult = await this.postJson('/listCertificatesSdk', { identityKey: this.identityKey, args, originator })
     return r
   }
   async acquireCertificateSdk(args: sdk.ValidAcquireDirectCertificateArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.AcquireCertificateResult> {
