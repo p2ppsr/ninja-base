@@ -454,7 +454,20 @@ export class NinjaBase implements NinjaApi {
 
   async proveCertificateSdk(vargs: sdk.ValidProveCertificateArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ProveCertificateResult> {
     await this.verifyDojoAuthenticated()
-    throw new WERR_NOT_IMPLEMENTED()
+    const dojoCert = await this.dojo.proveCertificatesSdk(vargs, originator)
+    const wallet = new WalletCrypto(this.keyDeriver!)
+    const co = await sdk.CertOps.fromCounterparty(wallet, {
+      certificate: { ...dojoCert },
+      keyring: dojoCert.keyring,
+      counterparty: dojoCert.counterparty
+    })
+    const e = await co.exportForCounterparty(vargs.verifier, vargs.fieldsToReveal)
+    const r: sdk.ProveCertificateResult = {
+      certificate: e.certificate,
+      verifier: e.counterparty,
+      keyringForVerifier: e.keyring
+    }
+    return r
   }
 
 
