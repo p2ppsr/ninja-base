@@ -418,6 +418,7 @@ export class NinjaBase implements NinjaApi {
     return r
   }
 
+  listCertsDecrypt: boolean = false
 
     //////////////////
     // Certificates
@@ -426,16 +427,18 @@ export class NinjaBase implements NinjaApi {
   async listCertificatesSdk(vargs: sdk.ValidListCertificatesArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.ListCertificatesResult> {
     await this.verifyDojoAuthenticated()
     const r = await this.dojo.listCertificatesSdk(vargs, originator)
-    // Results are encrypted, decrypt them...
-    const wallet = new WalletCrypto(this.keyDeriver!)
-    for (const ec of r.certificates) {
-      const co = await sdk.CertOps.fromCounterparty(wallet, {
-        certificate: {...ec},
-        keyring: ec.keyring,
-        counterparty: ec.counterparty
-      })
-      ec.fields = co._decryptedFields!
-      ec.keyring = {}
+    if (this.listCertsDecrypt) {
+      // Results are encrypted, decrypt them...
+      const wallet = new WalletCrypto(this.keyDeriver!)
+      for (const ec of r.certificates) {
+        const co = await sdk.CertOps.fromCounterparty(wallet, {
+          certificate: { ...ec },
+          keyring: ec.keyring,
+          counterparty: ec.counterparty
+        })
+        ec.fields = co._decryptedFields!
+        ec.keyring = {}
+      }
     }
     return r
   }
