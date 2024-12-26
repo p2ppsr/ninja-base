@@ -336,6 +336,21 @@ export class DojoExpressClient implements DojoClientApi {
     const r: DojoWalletCertificate = await this.postJson('/proveCertificateSdk', { identityKey: this.identityKey, args, originator })
     return r
   }
+  async relinquishCertificateSdk(args: sdk.ValidRelinquishCertificateArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.RelinquishCertificateResult> {
+    this.verifyAuthenticated()
+    const r: sdk.RelinquishCertificateResult = await this.postJson('/relinquishCertificateSdk', { identityKey: this.identityKey, args, originator })
+    return r
+  }
+  async discoverByIdentityKeySdk(args: sdk.ValidDiscoverByIdentityKeyArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.DiscoverCertificatesResult> {
+    this.verifyAuthenticated()
+    const r: sdk.DiscoverCertificatesResult = await this.postJson('/discoverByIdentityKeySdk', { identityKey: this.identityKey, args, originator })
+    return r
+  }
+  async discoverByAttributesSdk(args: sdk.ValidDiscoverByAttributesArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.DiscoverCertificatesResult> {
+    this.verifyAuthenticated()
+    const r: sdk.DiscoverCertificatesResult = await this.postJson('/discoverByAttributesSdk', { identityKey: this.identityKey, args, originator })
+    return r
+  }
   async acquireCertificateSdk(args: sdk.ValidAcquireDirectCertificateArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes) : Promise<sdk.AcquireCertificateResult> {
     this.verifyAuthenticated()
     const r: sdk.AcquireCertificateResult = await this.postJson('/aquireCertificateSdk', { identityKey: this.identityKey, args, originator })

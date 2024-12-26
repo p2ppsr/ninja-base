@@ -452,7 +452,8 @@ export class NinjaBase implements NinjaApi {
 
   async relinquishCertificateSdk(vargs: sdk.ValidRelinquishCertificateArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.RelinquishCertificateResult> {
     await this.verifyDojoAuthenticated()
-    throw new WERR_NOT_IMPLEMENTED()
+    const r = await this.dojo.relinquishCertificateSdk(vargs, originator)
+    return r
   }
 
   async proveCertificateSdk(vargs: sdk.ValidProveCertificateArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.ProveCertificateResult> {
@@ -470,6 +471,18 @@ export class NinjaBase implements NinjaApi {
       verifier: e.counterparty,
       keyringForVerifier: e.keyring
     }
+    return r
+  }
+
+  async discoverByIdentityKeySdk(vargs: sdk.ValidDiscoverByIdentityKeyArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.DiscoverCertificatesResult> {
+    await this.verifyDojoAuthenticated()
+    const r = await this.dojo.discoverByIdentityKeySdk(vargs, originator)
+    return r
+  }
+
+  async discoverByAttributesSdk(vargs: sdk.ValidDiscoverByAttributesArgs, originator?: sdk.OriginatorDomainNameStringUnder250Bytes): Promise<sdk.DiscoverCertificatesResult> {
+    await this.verifyDojoAuthenticated()
+    const r = await this.dojo.discoverByAttributesSdk(vargs, originator)
     return r
   }
 
